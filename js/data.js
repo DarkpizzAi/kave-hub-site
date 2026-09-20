@@ -24,13 +24,16 @@ export function getToken() {
 export function setToken(token) {
   try { localStorage.setItem(TOKEN_KEY, token); } catch (e) { /* storage blocked */ }
 }
-export function clearToken() {
+export function dropCache() {
   try {
-    localStorage.removeItem(TOKEN_KEY);
-    const keys = Object.keys(sessionStorage).filter(k => k.startsWith(CACHE_PREFIX));
-    keys.forEach(k => sessionStorage.removeItem(k));
+    Object.keys(sessionStorage).filter(k => k.startsWith(CACHE_PREFIX))
+      .forEach(k => sessionStorage.removeItem(k));
   } catch (e) { /* storage blocked */ }
   memory.clear();
+}
+export function clearToken() {
+  try { localStorage.removeItem(TOKEN_KEY); } catch (e) { /* storage blocked */ }
+  dropCache();
 }
 
 export function apiUrl(path) {
