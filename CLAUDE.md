@@ -6,3 +6,5 @@
 - Desktop only. No service worker, no manifest, no responsive layout.
 - No em or en dashes. British spelling.
 - Deploy order: content repo first, then this one. Only `main` deploys.
+- `js/guard.js` lists every site file in `FILES` for the stale-module recovery.
+  Add each new module there in the same commit.
