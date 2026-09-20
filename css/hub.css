@@ -1,0 +1,266 @@
+/* kave hub styling.
+
+   The colour tokens, type ramp, spacing grid, radius and motion values are
+   NOT here: they come from design/data/household-tokens.css, linked ahead of
+   this file in index.html. The hub is served from the repo root, so unlike
+   the app repos and the published dashboards it reads that file directly
+   and cannot drift from it. Nothing to re-sync.
+
+   (It used to say its tokens were "copied from an old dashboard file so
+   the whole hub shares one look". That file no longer exists, and the copy
+   outlived it by three weeks without anyone noticing - which is most of the
+   reason the household look exists now.)
+
+   Below: only what is genuinely this page's own. */
+
+:root{
+  /* Finance colours. Data, not theme: they identify accounts and
+     spend categories, so they stay fixed the way the numbered group
+     colours do, and they do not follow the palette. */
+  --income:#2a78d6; --spend:#eb6834; --saved:#0ca30c;
+  --hucha:#1baf7a; --house:#4a3aa7; --warn:#eda100;
+  --c-log:#2a78d6; --c-voy:#eb6834; --c-loi:#4a3aa7; --c-tax:#e34948;
+  --c-ali:#1baf7a; --c-tra:#eda100; --c-div:#e87ba4; --c-san:#008300; --c-abo:#898781;
+
+  /* the sticky nav's frosted backdrop: the page ground, made translucent.
+     Derived so it follows whichever palette is active. */
+  --glass:color-mix(in srgb, var(--bg) 85%, transparent);
+}
+@media (prefers-color-scheme: dark){
+  :root:where(:not([data-theme="light"])){
+    --income:#3987e5; --spend:#d95926; --saved:#0ca30c;
+    --hucha:#199e70; --house:#9085e9; --warn:#c98500;
+    --c-log:#3987e5; --c-voy:#d95926; --c-loi:#9085e9; --c-tax:#e66767;
+    --c-ali:#199e70; --c-tra:#c98500; --c-div:#d55181; --c-san:#008300; --c-abo:#898781;
+    --glass:color-mix(in srgb, var(--bg) 80%, transparent);
+  }
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+  font-family:var(--font-ui);line-height:1.45}
+h1{font-size:22px;margin:0 0 4px;font-weight:650}
+h2{font-size:14px;font-weight:600;color:var(--text-dim);margin:28px 0 12px;
+  text-transform:uppercase;letter-spacing:.04em}
+h3{font-size:15px;font-weight:650;margin:0 0 8px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.sub{color:var(--text-dim);font-size:13px}
+.muted{color:var(--text-faint)}
+
+
+/* view transition */
+@keyframes viewin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.view-fade{animation:viewin .25s ease}
+/* Household rule: every animated rule needs a reduced-motion counterpart.
+   Only .view-fade had one; the hover lifts on cards, tiles, bills and
+   buttons, the goal-progress width transition and the growbar bar animation
+   did not. Covered wholesale rather than rule by rule, because the next
+   hover transition added here would otherwise be missed the same way. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}
+.card > h3{display:flex;align-items:baseline;gap:8px}
+.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.cards2 .card{margin-bottom:0}
+
+/* recipe cards: the whole card is the link */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:14px 0}
+a.rcard{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--border);border-radius:16px;padding:14px;color:var(--text);
+  transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+a.rcard:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--shadow-raised);border-color:var(--rule-strong)}
+.rcard .ricon{font-size:22px;line-height:1.2}
+.rcard .rname{font-weight:650;font-size:14px;margin-bottom:6px}
+.rcard .rmeta{display:flex;flex-wrap:wrap;gap:5px}
+.rcard.kind-source .ricon{opacity:.75}
+.rcard.kind-todo{opacity:.72}
+
+/* recipe page header: cuisine line, then times, then source and statut */
+.rinfo{margin:0 0 18px}
+.rinfo .sub{margin:0 0 4px}
+.rinfo .rtimes{font-size:13px;color:var(--text-dim);margin:0 0 10px}
+.rinfo .rmeta{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.rinfo .rsource{font-size:12px;color:var(--accent)}
+
+/* bill cards */
+.bills{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:14px 0}
+.bill{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;
+  transition:transform .15s ease,box-shadow .15s ease}
+.bill:hover{transform:translateY(-2px);box-shadow:var(--shadow-raised)}
+.bill .bname{font-size:13px;color:var(--text-dim);margin-bottom:6px;font-weight:600;
+  display:flex;align-items:center;gap:8px}
+.bill .bval{font-size:22px;font-weight:650;letter-spacing:-.01em}
+.bill .bnote{font-size:11px;color:var(--text-faint);margin-top:6px}
+.bill.due{border-color:var(--warn)}
+.bill.ghost{opacity:.6;border-style:dashed}
+
+/* buttons */
+a.btn{display:inline-block;background:var(--accent);color:#fff;padding:10px 18px;
+  border-radius:999px;font-size:14px;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
+a.btn:hover{text-decoration:none;transform:translateY(-2px);box-shadow:var(--shadow-raised)}
+a.btn.ghost{background:var(--surface-2);color:var(--text)}
+
+/* goal progress */
+.track{display:flex;height:18px;background:var(--surface-2);border-radius:9px;overflow:hidden;margin:10px 0 6px}
+.seg{height:100%;transition:width .6s ease}
+.seg.saved{background:var(--saved)}
+.seg.pending{background:repeating-linear-gradient(45deg,var(--accent),var(--accent) 6px,
+  color-mix(in srgb, var(--accent) 45%, transparent) 6px,
+  color-mix(in srgb, var(--accent) 45%, transparent) 12px)}
+
+/* KPI tiles */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
+.kpi.hero{background:linear-gradient(135deg,var(--accent),var(--income));border:none}
+.kpi.hero .lab,.kpi.hero .note{color:rgba(255,255,255,.85)}
+.kpi.hero .val{color:#fff;font-size:30px}
+.kpi.focus{border:2px solid var(--accent);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent)}
+.kpi.focus .val{color:var(--accent)}
+
+/* pixel icons */
+.pix{image-rendering:pixelated;display:block;flex:none}
+
+/* important topic cards */
+.impgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0}
+.imp{display:flex;gap:10px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--accent);border-radius:16px;padding:14px;font-size:13px;
+  transition:transform .15s ease,box-shadow .15s ease}
+.imp:hover{transform:translateY(-2px);box-shadow:var(--shadow-raised)}
+
+/* vault cards */
+.vlist{font-size:13px}
+.vlist li{margin:3px 0}
+.kpi .lab{font-size:12px;color:var(--text-faint);margin-bottom:6px}
+.kpi .val{font-size:24px;font-weight:650;letter-spacing:-.01em}
+.kpi .note{font-size:11px;color:var(--text-dim);margin-top:4px}
+.val.pos{color:var(--saved)}
+.val.warn{color:var(--warn)}
+.val.accent{color:var(--accent)}
+
+/* home menu grid */
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
+.menu a.tile{display:block;background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:20px 18px;color:var(--text);
+  transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.menu a.tile:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--shadow-raised);border-color:var(--accent)}
+.tile .icon{font-size:28px;margin-bottom:8px}
+.tile .name{font-weight:650;font-size:16px;text-transform:capitalize}
+.tile .desc{font-size:13px;color:var(--text-dim);margin-top:4px}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{color:var(--text-faint);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+tr:last-child td{border-bottom:none}
+.num{text-align:right}
+
+/* lists */
+ul.plain,ol.plain{margin:0;padding-left:20px}
+ul.plain li,ol.plain li{margin:4px 0}
+ul.checks{list-style:none;margin:0;padding:0}
+ul.checks li{margin:6px 0;display:flex;gap:8px;align-items:baseline}
+ul.checks .box{font-family:monospace;color:var(--text-faint)}
+ul.checks li.done{color:var(--text-faint);text-decoration:line-through}
+ul.ing{list-style:none;margin:0;padding:0}
+ul.ing li{margin:6px 0;cursor:pointer;padding:4px 8px;border-radius:6px}
+ul.ing li:hover{background:var(--surface-2)}
+ul.ing li.done{color:var(--text-faint);text-decoration:line-through}
+
+/* chips and badges */
+.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;
+  background:var(--surface-2);color:var(--text-dim);white-space:nowrap}
+.chip.due{background:var(--warn);color:#fff}
+.chip.ok{background:var(--saved);color:#fff}
+.chip.accent{background:var(--accent);color:#fff}
+.ph{color:var(--text-faint);font-style:italic}
+.ph::before{content:"("}
+.ph::after{content:")"}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;
+  text-transform:uppercase;letter-spacing:.03em;background:var(--surface-2);color:var(--text-dim)}
+.badge.must{background:var(--spend);color:#fff}
+.badge.nice{background:var(--income);color:#fff}
+.badge.dream{background:var(--house);color:#fff}
+.badge.bought,.badge.done{background:var(--saved);color:#fff}
+.badge.decided{background:var(--accent);color:#fff}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
+.controls input[type=search],.controls select{
+  background:var(--card);color:var(--text);border:1px solid var(--rule-strong);
+  border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit}
+.controls input[type=search]{min-width:200px;flex:1;max-width:340px}
+.controls label{font-size:12px;color:var(--text-faint)}
+
+/* horizontal bars */
+.hbars{display:flex;flex-direction:column;gap:9px}
+.hrow{display:grid;grid-template-columns:110px 1fr 86px;align-items:center;gap:10px}
+.hname{font-size:13px;color:var(--text-dim)}
+.htrack{background:var(--surface-2);border-radius:5px;height:16px;overflow:hidden}
+.hfill{height:100%;border-radius:5px;animation:growbar .6s ease}
+@keyframes growbar{from{width:0}}
+.hval{font-size:12px;text-align:right;color:var(--text-dim);font-variant-numeric:tabular-nums}
+
+/* board game cards: the more stars, the nicer the card */
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:14px 0}
+.game{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.game h3{margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.game .stars{font-size:13px;margin-bottom:8px;letter-spacing:1px}
+.game .gmeta{display:flex;flex-wrap:wrap;gap:6px}
+.game.s4{border-color:var(--accent);box-shadow:0 2px 10px color-mix(in srgb, var(--accent) 14%, transparent)}
+.game.s5{border:1px solid transparent;
+  background:linear-gradient(var(--card),var(--card)) padding-box,
+             linear-gradient(135deg,#e0a800,var(--accent)) border-box;
+  box-shadow:0 3px 16px rgba(224,168,0,0.20)}
+.game.s5 h3{color:var(--warn)}
+
+/* countdown */
+.count{display:flex;align-items:baseline;gap:10px}
+.count .big{font-size:44px;font-weight:700;letter-spacing:-.02em;color:var(--accent)}
+.count .unit{font-size:14px;color:var(--text-dim)}
+
+/* collapsible */
+details{margin:8px 0}
+details summary{cursor:pointer;font-size:13px;color:var(--text-dim);font-weight:600}
+
+/* iframe embed */
+.frame{width:100%;border:1px solid var(--border);border-radius:12px;background:var(--bg);min-height:900px}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);margin-top:10px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.empty{color:var(--text-faint);font-size:13px;font-style:italic}
+code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:12px}
+pre{background:var(--surface-2);padding:12px;border-radius:8px;overflow-x:auto;font-size:12px}
+.back{font-size:13px;display:inline-block;margin-bottom:10px}
+header.rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+header.rhead h1{margin:0}
+
+/* desktop shell: fixed sidebar, top bar, filling content */
+html,body{height:100%}
+body{overflow:hidden}
+.shell{display:grid;grid-template-columns:200px minmax(0,1fr);height:100vh}
+#nav{display:flex;flex-direction:column;gap:2px;padding:16px 10px;overflow-y:auto;
+  background:var(--surface-1);border-right:1px solid var(--rule)}
+#nav .brand{font-weight:700;font-size:16px;color:var(--text);padding:4px 12px 14px}
+#nav a.plug{color:var(--text-dim);font-size:13px;padding:7px 12px;border-radius:8px;text-transform:capitalize}
+#nav a.plug:hover{background:var(--surface-2);color:var(--text);text-decoration:none}
+#nav a.plug.active{background:var(--accent);color:#fff;font-weight:600}
+.main{display:flex;flex-direction:column;min-width:0;height:100vh}
+#top{display:flex;align-items:center;justify-content:space-between;height:44px;flex:none;
+  padding:0 24px;border-bottom:1px solid var(--rule);font-size:13px;text-transform:capitalize}
+#top .top-right{display:flex;align-items:center;gap:12px;text-transform:none}
+#view{flex:1;min-height:0;overflow:auto;padding:24px}
+#view:has(.bleed){padding:0;overflow:hidden}
+.view-fade.bleed{height:100%}
+.embed{display:block;width:100%;height:100%;border:0}
+.gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.gate input,.gate button{width:240px}
