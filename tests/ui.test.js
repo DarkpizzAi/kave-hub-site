@@ -47,7 +47,7 @@ test('header renders nothing', () => {
   eq(h.childNodes.length, 0);
 });
 
-test('querySelector h3 on a card finds the title (house view shim)', () => {
+test('the card title span is queryable by class', () => {
   const c = card('Care');
-  eq(c.querySelector('h3').textContent, 'Care');
+  eq(c.querySelector('.tab-section-title').textContent, 'Care');
 });

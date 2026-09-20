@@ -36,9 +36,6 @@ export function card(title, ...children) {
   wrap.append(inner);
   wrap.append = (...nodes) => inner.append(...nodes);
   wrap.appendChild = node => inner.appendChild(node);
-  // house.js asks a card for its h3 to attach a done-count chip; the title is now a span.
-  const q = wrap.querySelector.bind(wrap);
-  wrap.querySelector = sel => (sel === 'h3' ? q('.tab-section-title') : q(sel));
   for (const ch of children) if (ch != null) inner.append(ch);
   return wrap;
 }
