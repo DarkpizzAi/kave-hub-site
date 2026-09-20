@@ -19,11 +19,28 @@ export function el(tag, attrs = {}, ...children) {
   return node;
 }
 
+let sectionSeq = 0;
+
+// A section in Spoon's idiom: a title row above a white card. Views written
+// before this design build a card and then append into it, so append and
+// appendChild are delegated to the inner card. The content pass may remove this.
 export function card(title, ...children) {
-  const c = el('div', { class: 'card' });
-  if (title) c.append(el('h3', {}, title));
-  for (const ch of children) if (ch != null) c.append(ch);
-  return c;
+  const wrap = el('section', { class: 'tab-section' });
+  if (title) {
+    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    wrap.id = 'sec-' + (++sectionSeq) + '-' + slug;
+    wrap.append(el('div', { class: 'tab-section-head' },
+      el('span', { class: 'tab-section-title' }, title)));
+  }
+  const inner = el('div', { class: 'card' });
+  wrap.append(inner);
+  wrap.append = (...nodes) => inner.append(...nodes);
+  wrap.appendChild = node => inner.appendChild(node);
+  // house.js asks a card for its h3 to attach a done-count chip; the title is now a span.
+  const q = wrap.querySelector.bind(wrap);
+  wrap.querySelector = sel => (sel === 'h3' ? q('.tab-section-title') : q(sel));
+  for (const ch of children) if (ch != null) inner.append(ch);
+  return wrap;
 }
 
 export function kpi(label, value, note, cls) {
@@ -115,10 +132,10 @@ export function renderDocCards(container, doc, opts = {}) {
   }
 }
 
-export function header(title, sub) {
-  const h = el('header', {}, el('h1', {}, title));
-  if (sub) h.append(el('div', { class: 'sub' }, sub));
-  return h;
+// The design has no page title: the header chip names the page. Kept so the
+// views that call it need no change.
+export function header() {
+  return document.createDocumentFragment();
 }
 
 export function selectBox(labelTxt, options, onchange) {
