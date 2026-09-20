@@ -65,3 +65,14 @@ test('a click outside closes the switcher', () => {
   eq(bar.querySelector('.switcher').hidden, true);
   bar.remove();
 });
+
+test('opening a switcher with no tiles does nothing and does not throw', () => {
+  const bar = document.createElement('header');
+  document.body.append(bar);
+  mountSwitcher(bar);
+  const chip = bar.querySelector('#chip');
+  chip.click();
+  eq(bar.querySelector('.switcher').hidden, true);
+  eq(chip.getAttribute('aria-expanded'), 'false');
+  bar.remove();
+});

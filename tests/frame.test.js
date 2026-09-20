@@ -1,6 +1,6 @@
 import { test, eq } from './run.js';
 import { card } from '../js/ui.js';
-import { tocEntries, shouldShowToc, sideCard, figuresCard, topicsCard, linksCard } from '../js/frame.js';
+import { attachToc, detachToc, tocEntries, shouldShowToc, sideCard, figuresCard, topicsCard, linksCard } from '../js/frame.js';
 
 test('tocEntries lists titled sections in order and skips untitled ones', () => {
   const root = document.createElement('div');
@@ -42,4 +42,34 @@ test('linksCard makes external links that do not leak the referrer or opener', (
   eq(a.getAttribute('href'), 'https://example.com/');
   eq(a.getAttribute('rel'), 'noopener noreferrer');
   eq(a.getAttribute('target'), '_blank');
+});
+
+function tocFixture(cards) {
+  const sheet = document.createElement('div');
+  for (const t of cards) sheet.append(card(t));
+  const tall = document.createElement('div');
+  tall.style.height = '3000px';
+  sheet.append(tall);
+  const side = document.createElement('aside');
+  document.body.append(sheet, side);
+  return { sheet, side, done() { detachToc(); sheet.remove(); side.remove(); } };
+}
+
+test('attachToc adds one contents card, stays single on repeat, and detachToc removes it', () => {
+  const f = tocFixture(['One', 'Two']);
+  eq(attachToc(f.sheet, f.side, { innerHeight: 500 }), true);
+  eq(f.side.querySelectorAll('.toc').length, 1);
+  eq(f.side.querySelectorAll('.toc-row').length, 2);
+  attachToc(f.sheet, f.side, { innerHeight: 500 });
+  eq(f.side.querySelectorAll('.toc').length, 1);
+  detachToc();
+  eq(f.side.querySelectorAll('.toc').length, 0);
+  f.done();
+});
+
+test('attachToc adds nothing for a sheet with one section', () => {
+  const f = tocFixture(['One']);
+  eq(attachToc(f.sheet, f.side, { innerHeight: 500 }), false);
+  eq(f.side.querySelectorAll('.toc').length, 0);
+  f.done();
 });

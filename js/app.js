@@ -46,6 +46,8 @@ function buildPage() {
 
 async function route() {
   const mySeq = ++seq;
+  status.limited = false;
+  let failed = false;
   const view = document.getElementById('view');
   if (!view) return;
 
@@ -66,11 +68,14 @@ async function route() {
       if (fn) await fn(box, parts.slice(1));
       else if (plug && registry.__generic) await registry.__generic(box, name, plug.description);
       else {
-        if (await recover()) return;   // a stale module can hide a route: refresh and reload once
+        // A stale module can hide a route that should exist: refresh and reload once.
+        // A hash that names nothing just shows the note. Stale renders never spend the attempt.
+        if ((plug || name === 'settings') && mySeq === seq && await recover()) return;
         box.append(emptyNote('Page not found. '), el('a', { href: '#/' }, 'Back home'));
       }
     }
   } catch (e) {
+    failed = true;
     box.append(emptyNote('Something went wrong rendering this page: ' + e.message));
   }
 
@@ -81,13 +86,13 @@ async function route() {
   view.innerHTML = '';
   view.append(isFood ? box : frame.page);
   if (frame) attachToc(frame.sheet, frame.side);
-  status.syncedAt = Date.now();
+  if (!failed && !status.limited) status.syncedAt = Date.now();
 }
 
 window.addEventListener('data:limit', () => { status.limited = true; });
 window.addEventListener('data:auth', () => { data.clearToken(); start(); });
 window.addEventListener('hub:forget', () => start());
-window.addEventListener('hub:refresh', () => { if (document.getElementById('view')) route(); });
+window.addEventListener('hub:refresh', () => { plugins = null; if (document.getElementById('view')) route(); });
 window.addEventListener('hashchange', () => { if (document.getElementById('view')) route(); });
 
 function start() {
@@ -100,11 +105,11 @@ function start() {
   buildShell();
   // The person chosen in Settings is the default landing page.
   const who = getWho();
-  if (who && !location.hash) location.hash = '#/' + who;
+  if (who && !location.hash) { location.hash = '#/' + who; return; }   // hashchange renders once
   route();
 }
 
 export { registry };
 import('./views/index.js')
   .then(m => { m.register(); start(); })
-  .catch(async () => { if (!(await recover())) root.textContent = ''; });
+  .catch(async e => { console.error(e); if (!(await recover())) root.textContent = ''; });

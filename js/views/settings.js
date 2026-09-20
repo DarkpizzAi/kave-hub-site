@@ -54,6 +54,7 @@ function syncSection() {
     status.syncedAt = Date.now();
     paint();
     flash(btn, 'Synced');
+    window.dispatchEvent(new Event('hub:refresh'));
   });
   return card('Sync', el('div', { class: 'set-row' }, lines, btn));
 }

@@ -43,11 +43,15 @@ export function mountSwitcher(bar) {
   function tiles() { return [...menu.querySelectorAll('.app-tile')]; }
 
   function open() {
-    // CSSOM, not an inline style attribute: the CSP forbids those.
-    menu.style.left = Math.round(chip.getBoundingClientRect().left) + 'px';
+    const list = tiles();
+    if (!list.length) return;
+    // CSSOM, not an inline style attribute: the CSP forbids those. The chip's
+    // offsetParent is the sticky bar, the frame the absolute menu sits in, so
+    // offsetLeft stays right under horizontal scroll (viewport rects do not).
+    menu.style.left = chip.offsetLeft + 'px';
     menu.hidden = false;
     chip.setAttribute('aria-expanded', 'true');
-    (menu.querySelector('.app-tile.cur') || tiles()[0]).focus();
+    (menu.querySelector('.app-tile.cur') || list[0])?.focus();
   }
   function close(refocus) {
     if (menu.hidden) return;

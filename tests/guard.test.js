@@ -68,6 +68,7 @@ test('recover does not reload if the refresh fails', async () => {
   const ok = await recover(() => { reloads++; }, async () => { throw new Error('offline'); });
   eq(ok, false);
   eq(reloads, 0);
+  eq(sessionStorage.getItem('hubweb:recovered'), null);
   clean();
 });
 

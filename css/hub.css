@@ -266,7 +266,7 @@ header.rhead h1{margin:0}
 }
 /* the page never scrolls up and down: the sheet does, inside its rounded top */
 html{overflow-y:hidden;scroll-behavior:smooth}
-body{min-width:var(--block)}
+body:has(.bar){min-width:var(--block)}
 
 /* the header spans the window; its content sits inside the same centred block,
    so KAVE starts at the main column's left edge */
@@ -374,4 +374,4 @@ body{min-width:var(--block)}
 .sl.ok::before{background:var(--accent)}
 .adv-toggle{display:flex;align-items:center;gap:var(--sp-2);background:transparent;border:0;cursor:pointer;
   padding:8px;font:inherit;font-weight:var(--fw-strong);font-size:var(--fs-lede);width:100%;text-align:left;color:var(--text)}
-select{background:var(--surface);border:0;border-radius:var(--r-control);padding:8px 12px;font:inherit;color:var(--text)}
+.set-row select{background:var(--surface);border:0;border-radius:var(--r-control);padding:8px 12px;font:inherit;color:var(--text)}

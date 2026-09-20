@@ -41,9 +41,9 @@ export async function versionOf(texts) {
 export async function recover(reload = () => location.reload(), fetchImpl) {
   try {
     if (sessionStorage.getItem(RECOVERED)) return false;
-    sessionStorage.setItem(RECOVERED, '1');
   } catch (e) { return false; }
   try { await refreshFiles(fetchImpl); } catch (e) { return false; }
+  try { sessionStorage.setItem(RECOVERED, '1'); } catch (e) { return false; }
   reload();
   return true;
 }
