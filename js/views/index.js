@@ -9,6 +9,7 @@ import finance from './finance.js';
 import fun from './fun.js';
 import person from './person.js';
 import chantier from './chantier.js';
+import security from './security.js';
 import settings from './settings.js';
 
 export function register() {
@@ -22,5 +23,6 @@ export function register() {
   registry.hugo = c => person('hugo')(c);
   registry.brand = c => generic(c, 'brand', '');
   registry.chantier = c => chantier(c);
+  registry.security = c => security(c);
   registry.settings = settings;
 }

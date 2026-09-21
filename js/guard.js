@@ -11,7 +11,7 @@ export const FILES = [
   'js/routes.js', 'js/countdown.js',
   'js/views/index.js', 'js/views/food.js', 'js/views/home.js', 'js/views/our-house.js',
   'js/views/our-house-project.js', 'js/views/calendar.js', 'js/views/generic.js',
-  'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js',
+  'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js', 'js/views/security.js',
   'js/views/settings.js',
 ];
 

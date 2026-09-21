@@ -21,6 +21,8 @@ export const PAGES = [
     intro: 'Our fonts and colours, so every app looks like one family.' },
   { key: 'chantier', label: 'chantier', href: '#/chantier', section: 'pages', glyph: 'chantier',
     intro: 'How we build this hub: the delivery log, the roadmaps, the mini PC and its routines.' },
+  { key: 'security', label: 'security', href: '#/security', section: 'pages', glyph: 'security',
+    intro: 'The weekly security scan and the ranked recommendations. Everything here is masked.' },
   { key: 'settings', label: 'settings', href: '#/settings', section: 'pages', glyph: 'settings' },
   { key: 'spoon', label: 'spoon', href: '#/spoon', section: 'apps', glyph: 'spoon' },
 ];
