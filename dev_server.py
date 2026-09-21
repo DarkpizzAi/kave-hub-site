@@ -16,6 +16,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("127.0.0.1", 8790), Handler) as server:
+class Server(socketserver.ThreadingTCPServer):
+    # threaded: a held-open browser connection must not wedge every other request
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+with Server(("127.0.0.1", 8790), Handler) as server:
     server.serve_forever()
