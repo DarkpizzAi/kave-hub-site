@@ -4,8 +4,9 @@
 
 import * as data from './data.js';
 import { el, emptyNote } from './ui.js';
-import { showGate } from './gate.js';
-import { applyPalette, getWho } from './prefs.js';
+import { showGate, showSetup } from './gate.js';
+import { applyPalette, getWho, setWho, setPalette } from './prefs.js';
+import { applyToEmbeddedApps } from './embedded.js';
 import { buildTiles, currentKey, mountSwitcher } from './switcher.js';
 import { attachToc, detachToc, introLine } from './frame.js';
 import { redirectFor } from './routes.js';
@@ -107,10 +108,18 @@ function start() {
     showGate(root, start);
     return;
   }
+  if (!getWho()) {
+    // First time on this browser: who, then theme, then the same to Spoon.
+    document.title = '-';
+    showSetup(root, ({ who, palette }) => {
+      setWho(who);
+      setPalette(palette);
+      applyToEmbeddedApps({ token: data.getToken(), who, palette });
+      start();
+    });
+    return;
+  }
   buildShell();
-  // The person chosen in Settings is the default landing page.
-  const who = getWho();
-  if (who && !location.hash) { location.hash = '#/' + who; return; }   // hashchange renders once
   route();
 }
 

@@ -283,8 +283,9 @@ body:has(.bar){min-width:var(--block)}
   letter-spacing:.06em;line-height:var(--lh-title);text-transform:lowercase;
   transition:filter 120ms var(--ease-standard)}
 .page-chip:hover{filter:brightness(.94)}
-.page-chip:focus-visible,.app-tile:focus-visible,.toc-row:focus-visible,.pill:focus-visible,.btn:focus-visible,
-.gate-field:focus-within{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
+.page-chip:focus-visible,.app-tile:focus-visible,.toc-row:focus-visible,.pill:focus-visible,.btn:focus-visible{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
+/* the token field carries no border: focus is a lighter fill and the caret */
+.gate-field:focus-within{background:var(--surface-2)}
 .page-chip .glyph{transition:transform 120ms var(--ease-standard)}
 .page-chip[aria-expanded="true"] .glyph{transform:rotate(180deg)}
 
@@ -366,6 +367,20 @@ body:has(.bar){min-width:var(--block)}
   font:inherit;font-size:var(--fs-body);color:var(--text);letter-spacing:.2em}
 .gate-go{width:36px;height:36px;border-radius:var(--r-round);border:0;cursor:pointer;
   background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center}
+
+/* ---- setup screens: the token field's 48px, solid fills, no borders ---- */
+.setup-row{display:flex;gap:var(--sp-3)}
+.setup-choice{width:164px;height:48px;border:0;border-radius:var(--r-pill);background:var(--surface);color:var(--text);
+  font:inherit;font-size:var(--fs-body);font-weight:var(--fw-strong);letter-spacing:.06em;text-transform:lowercase;cursor:pointer}
+.setup-choice:hover{background:var(--accent);color:var(--accent-text)}
+.setup-swatch{width:48px;height:48px;border:0;border-radius:var(--r-round);cursor:pointer;transition:transform 120ms var(--ease-standard)}
+.setup-swatch:hover{transform:scale(1.06)}
+/* a swatch shows a palette other than the active one, so it cannot use var(--accent);
+   these are the three accents from household-tokens.css */
+.setup-swatch[data-palette="cobalt"]{background:#1a73e8}
+.setup-swatch[data-palette="amber"]{background:#f4b400}
+.setup-swatch[data-palette="chartreuse"]{background:#d7d63a}
+.setup-choice:focus-visible,.setup-swatch:focus-visible{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
 
 /* ---- settings ---- */
 .set-row{display:flex;align-items:center;gap:var(--sp-3);padding:8px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
