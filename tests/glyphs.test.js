@@ -29,7 +29,7 @@ test('an unknown key falls back to the generic glyph', () => {
 
 test('every section key has a glyph', () => {
   for (const k of ['home', 'spoon', 'our-house', 'calendar', 'finance', 'fun',
-    'hugo', 'chantier', 'brand', 'settings', 'chevron', 'arrow']) {
+    'hugo', 'chantier', 'security', 'brand', 'settings', 'chevron', 'arrow']) {
     eq(hasGlyph(k), true, k);
   }
   for (const k of ['household', 'house', 'money', 'design', 'food', 'isa', 'infrastructure']) {

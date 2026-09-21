@@ -4,7 +4,7 @@ import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js'
 
 test('pages come in the agreed order and sections', () => {
   eq(PAGES.filter(p => p.section === 'pages').map(p => p.label),
-    ['home page', 'calendar', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'settings']);
+    ['home page', 'calendar', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
   eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon']);
   eq(SECTIONS, ['pages', 'apps']);
 });
@@ -28,7 +28,7 @@ test('old routes redirect to the new ones', () => {
 
 test('new routes and the home page do not redirect', () => {
   for (const h of ['', '#/', '#/calendar', '#/our-house', '#/finance', '#/hugo', '#/fun',
-    '#/brand', '#/chantier', '#/settings', '#/spoon']) eq(redirectFor(h), null, h);
+    '#/brand', '#/chantier', '#/security', '#/settings', '#/spoon']) eq(redirectFor(h), null, h);
 });
 
 test('keyFor reads the first segment and defaults to home', () => {
@@ -47,6 +47,7 @@ test('intros: none for home page, settings and spoon, none mention the new flat,
     eq(/[\u2013\u2014]/.test(p.intro), false, p.key);
   }
   eq(introFor('our-house').length > 0, true);
+  eq(introFor('security').includes('masked'), true);
 });
 
 test('introLine builds a paragraph for a page with an intro and nothing otherwise', () => {

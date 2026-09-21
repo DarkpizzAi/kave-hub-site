@@ -5,6 +5,7 @@
 import * as data from '../data.js';
 import { findSection, firstTable, isTemplateText } from '../md.js';
 import { el, card, chip, emptyNote, renderDocCards } from '../ui.js';
+import { SECURITY_FILES } from './security.js';
 
 function rows(doc, re) {
   const s = doc && findSection(doc, re);
@@ -66,7 +67,7 @@ export default async function chantier(container) {
   await infrastructure(container);
 
   const files = (await data.listDir('chantier/data'))
-    .filter(f => f.endsWith('.md') && f !== 'infrastructure.md');
+    .filter(f => f.endsWith('.md') && f !== 'infrastructure.md' && !SECURITY_FILES.includes(f));
   for (const f of files) {
     const doc = await data.doc(`/chantier/data/${f}`);
     if (!doc) continue;
