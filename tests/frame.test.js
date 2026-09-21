@@ -1,6 +1,6 @@
 import { test, eq } from './run.js';
 import { card } from '../js/ui.js';
-import { attachToc, detachToc, tocEntries, shouldShowToc, sideCard, figuresCard, topicsCard, linksCard } from '../js/frame.js';
+import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard } from '../js/frame.js';
 
 test('tocEntries lists titled sections in order and skips untitled ones', () => {
   const root = document.createElement('div');
@@ -72,4 +72,12 @@ test('attachToc adds nothing for a sheet with one section', () => {
   eq(attachToc(f.sheet, f.side, { innerHeight: 500 }), false);
   eq(f.side.querySelectorAll('.toc').length, 0);
   f.done();
+});
+
+test('tailSpace is what the last section needs to reach the top, never negative', () => {
+  // viewport 600, content 2000, last section starts at 1900, 16px scroll padding:
+  // max scroll is 1400, the last title needs 1884, so 484 more
+  eq(tailSpace(600, 2000, 1900, 16), 484);
+  // last section already long enough to scroll to the top
+  eq(tailSpace(600, 2000, 1300, 16), 0);
 });

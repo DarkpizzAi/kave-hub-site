@@ -17,6 +17,12 @@ export function shouldShowToc(count, contentHeight, viewportHeight) {
   return count >= 2 && contentHeight > 2 * viewportHeight;
 }
 
+// Blank space to add after the content so the last titled section can scroll
+// to the top of the sheet, which is what a contents click asks for.
+export function tailSpace(clientHeight, contentHeight, lastTop, pad) {
+  return Math.max(0, lastTop - pad - (contentHeight - clientHeight));
+}
+
 export function sideCard(label, ...children) {
   return el('div', { class: 'side-card' }, el('p', { class: 'side-label' }, label), ...children);
 }
@@ -68,6 +74,20 @@ export function attachToc(sheet, side, win = window) {
     b.addEventListener('click', () => document.getElementById(e.id).scrollIntoView());
     return b;
   });
+  const spacer = el('div', { class: 'toc-tail', 'aria-hidden': 'true' });
+  const fit = () => {
+    const last = document.getElementById(entries[entries.length - 1].id);
+    const pad = parseFloat(getComputedStyle(sheet).scrollPaddingTop) || 0;
+    spacer.style.height = '0px';
+    const lastTop = last.getBoundingClientRect().top - sheet.getBoundingClientRect().top + sheet.scrollTop;
+    spacer.style.height = tailSpace(sheet.clientHeight, sheet.scrollHeight, lastTop, pad) + 'px';
+  };
+  sheet.append(spacer);
+  const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(fit) : null;
+  if (ro) { ro.observe(sheet); [...sheet.children].forEach(c => { if (c !== spacer) ro.observe(c); }); }
+  window.addEventListener('resize', fit);
+  fit();
+
   const cardEl = sideCard('On this page', ...rows);
   cardEl.classList.add('toc');
   side.prepend(cardEl);
@@ -83,6 +103,12 @@ export function attachToc(sheet, side, win = window) {
   };
   sheet.addEventListener('scroll', spy, { passive: true });
   spy();
-  detach = () => { sheet.removeEventListener('scroll', spy); cardEl.remove(); };
+  detach = () => {
+    sheet.removeEventListener('scroll', spy);
+    window.removeEventListener('resize', fit);
+    if (ro) ro.disconnect();
+    spacer.remove();
+    cardEl.remove();
+  };
   return true;
 }
