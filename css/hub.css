@@ -74,7 +74,7 @@ a:hover{text-decoration:underline}
 .tab-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-2)}
 .tab-section-title{font-weight:var(--fw-strong);font-size:var(--fs-lede);letter-spacing:var(--tracking-heading)}
 .tab-section-sub{color:var(--text-dim);font-size:var(--fs-meta)}
-.card{background:var(--panel);border-radius:14px;padding:14px 12px;min-width:0}
+.card{background:var(--panel);border-radius:var(--r-card);padding:14px 12px;min-width:0}
 .card > h3:first-child{margin-top:0}
 .cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sp-4)}
 .cards2 .tab-section{margin-bottom:0}
@@ -82,7 +82,7 @@ a:hover{text-decoration:underline}
 /* recipe cards: the whole card is the link */
 .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:14px 0}
 a.rcard{display:flex;gap:12px;align-items:flex-start;background:var(--card);
-  border:1px solid var(--border);border-radius:16px;padding:14px;color:var(--text);
+  border:1px solid var(--border);border-radius:var(--r-card);padding:14px;color:var(--text);
   transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
 a.rcard:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--shadow-raised);border-color:var(--rule-strong)}
 .rcard .ricon{font-size:22px;line-height:1.2}
@@ -100,7 +100,7 @@ a.rcard:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--s
 
 /* bill cards */
 .bills{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin:14px 0}
-.bill{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;
+.bill{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:14px 16px;
   transition:transform .15s ease,box-shadow .15s ease}
 .bill:hover{transform:translateY(-2px);box-shadow:var(--shadow-raised)}
 .bill .bname{font-size:13px;color:var(--text-dim);margin-bottom:6px;font-weight:600;
@@ -112,12 +112,12 @@ a.rcard:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--s
 
 /* buttons */
 a.btn{display:inline-block;background:var(--accent);color:#fff;padding:10px 18px;
-  border-radius:999px;font-size:14px;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
+  border-radius:var(--r-control);font-size:14px;font-weight:600;transition:transform .12s ease,box-shadow .12s ease}
 a.btn:hover{text-decoration:none;transform:translateY(-2px);box-shadow:var(--shadow-raised)}
 a.btn.ghost{background:var(--surface-2);color:var(--text)}
 
 /* goal progress */
-.track{display:flex;height:18px;background:var(--surface-2);border-radius:9px;overflow:hidden;margin:10px 0 6px}
+.track{display:flex;height:18px;background:var(--surface-2);border-radius:var(--r-square);overflow:hidden;margin:10px 0 6px}
 .seg{height:100%;transition:width .6s ease}
 .seg.saved{background:var(--saved)}
 .seg.pending{background:repeating-linear-gradient(45deg,var(--accent),var(--accent) 6px,
@@ -126,7 +126,7 @@ a.btn.ghost{background:var(--surface-2);color:var(--text)}
 
 /* KPI tiles */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
-.kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:14px 16px}
 .kpi.hero{background:linear-gradient(135deg,var(--accent),var(--income));border:none}
 .kpi.hero .lab,.kpi.hero .note{color:rgba(255,255,255,.85)}
 .kpi.hero .val{color:#fff;font-size:30px}
@@ -140,7 +140,7 @@ a.btn.ghost{background:var(--surface-2);color:var(--text)}
 /* important topic cards */
 .impgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:14px 0}
 .imp{display:flex;gap:10px;align-items:flex-start;background:var(--card);
-  border:1px solid var(--accent);border-radius:16px;padding:14px;font-size:13px;
+  border:1px solid var(--accent);border-radius:var(--r-card);padding:14px;font-size:13px;
   transition:transform .15s ease,box-shadow .15s ease}
 .imp:hover{transform:translateY(-2px);box-shadow:var(--shadow-raised)}
 
@@ -157,7 +157,7 @@ a.btn.ghost{background:var(--surface-2);color:var(--text)}
 /* home menu grid */
 .menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0}
 .menu a.tile{display:block;background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:20px 18px;color:var(--text);
+  border-radius:var(--r-card);padding:20px 18px;color:var(--text);
   transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
 .menu a.tile:hover{text-decoration:none;transform:translateY(-3px);box-shadow:var(--shadow-raised);border-color:var(--accent)}
 .tile .icon{font-size:28px;margin-bottom:8px}
@@ -179,12 +179,12 @@ ul.checks li{margin:6px 0;display:flex;gap:8px;align-items:baseline}
 ul.checks .box{font-family:monospace;color:var(--text-faint)}
 ul.checks li.done{color:var(--text-faint);text-decoration:line-through}
 ul.ing{list-style:none;margin:0;padding:0}
-ul.ing li{margin:6px 0;cursor:pointer;padding:4px 8px;border-radius:6px}
+ul.ing li{margin:6px 0;cursor:pointer;padding:4px 8px;border-radius:var(--r-control)}
 ul.ing li:hover{background:var(--surface-2)}
 ul.ing li.done{color:var(--text-faint);text-decoration:line-through}
 
 /* chips and badges */
-.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;
+.chip{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--r-pill);
   background:var(--surface-2);color:var(--text-dim);white-space:nowrap}
 .chip.due{background:var(--warn);color:#fff}
 .chip.ok{background:var(--saved);color:#fff}
@@ -192,7 +192,7 @@ ul.ing li.done{color:var(--text-faint);text-decoration:line-through}
 .ph{color:var(--text-faint);font-style:italic}
 .ph::before{content:"("}
 .ph::after{content:")"}
-.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--r-pill);
   text-transform:uppercase;letter-spacing:.03em;background:var(--surface-2);color:var(--text-dim)}
 .badge.must{background:var(--spend);color:#fff}
 .badge.nice{background:var(--income);color:#fff}
@@ -204,7 +204,7 @@ ul.ing li.done{color:var(--text-faint);text-decoration:line-through}
 .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
 .controls input[type=search],.controls select{
   background:var(--card);color:var(--text);border:1px solid var(--rule-strong);
-  border-radius:8px;padding:7px 10px;font-size:13px;font-family:inherit}
+  border-radius:var(--r-control);padding:7px 10px;font-size:13px;font-family:inherit}
 .controls input[type=search]{min-width:200px;flex:1;max-width:340px}
 .controls label{font-size:12px;color:var(--text-faint)}
 
@@ -212,14 +212,14 @@ ul.ing li.done{color:var(--text-faint);text-decoration:line-through}
 .hbars{display:flex;flex-direction:column;gap:9px}
 .hrow{display:grid;grid-template-columns:110px 1fr 86px;align-items:center;gap:10px}
 .hname{font-size:13px;color:var(--text-dim)}
-.htrack{background:var(--surface-2);border-radius:5px;height:16px;overflow:hidden}
-.hfill{height:100%;border-radius:5px;animation:growbar .6s ease}
+.htrack{background:var(--surface-2);border-radius:var(--r-square);height:16px;overflow:hidden}
+.hfill{height:100%;border-radius:var(--r-square);animation:growbar .6s ease}
 @keyframes growbar{from{width:0}}
 .hval{font-size:12px;text-align:right;color:var(--text-dim);font-variant-numeric:tabular-nums}
 
 /* board game cards: the more stars, the nicer the card */
 .games{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:14px 0}
-.game{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.game{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px}
 .game h3{margin-bottom:4px;display:flex;align-items:center;gap:10px}
 .game .stars{font-size:13px;margin-bottom:8px;letter-spacing:1px}
 .game .gmeta{display:flex;flex-wrap:wrap;gap:6px}
@@ -240,13 +240,13 @@ details{margin:8px 0}
 details summary{cursor:pointer;font-size:13px;color:var(--text-dim);font-weight:600}
 
 /* iframe embed */
-.frame{width:100%;border:1px solid var(--border);border-radius:12px;background:var(--bg);min-height:900px}
+.frame{width:100%;border:1px solid var(--border);border-radius:var(--r-card);background:var(--bg);min-height:900px}
 
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);margin-top:10px}
-.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+.dot{display:inline-block;width:10px;height:10px;border-radius:var(--r-round);margin-right:5px;vertical-align:middle}
 .empty{color:var(--text-faint);font-size:13px;font-style:italic}
-code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:12px}
-pre{background:var(--surface-2);padding:12px;border-radius:8px;overflow-x:auto;font-size:12px}
+code{background:var(--surface-2);padding:1px 5px;border-radius:var(--r-control);font-size:12px}
+pre{background:var(--surface-2);padding:12px;border-radius:var(--r-control);overflow-x:auto;font-size:12px}
 .back{font-size:13px;display:inline-block;margin-bottom:10px}
 header.rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 header.rhead h1{margin:0}
@@ -314,7 +314,7 @@ body:has(.bar){min-width:var(--block)}
 /* the sheet is fixed under the header and is the scroll container: content
    scrolls inside it and disappears up under its rounded top edge */
 .sheet{margin-top:var(--sp-2);padding:var(--sp-4);background:var(--surface);
-  border-radius:18px 18px 0 0;height:calc(100vh - var(--header-h) - var(--sp-2));
+  border-radius:var(--r-sheet);height:calc(100vh - var(--header-h) - var(--sp-2));
   overflow-y:auto;scroll-behavior:smooth;scroll-padding-top:var(--sp-4);
   scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
 .side{width:var(--side-w);flex:none;margin-top:var(--sp-2);
@@ -345,22 +345,22 @@ body:has(.bar){min-width:var(--block)}
 /* the gap below equals the gap above (header plus its padding) */
 .tablet{position:relative;width:min(var(--cluster),100%);
   height:calc(100vh - 2 * (var(--header-h) + var(--sp-2)));
-  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:28px;
+  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:28px;/* device frame, not a control */
   padding:26px 16px;box-shadow:var(--shadow-raised)}
 @media (prefers-color-scheme:dark){.tablet{background:var(--panel)}}
 .cam{position:absolute;top:9px;left:50%;width:8px;height:8px;border-radius:var(--r-round);
   background:var(--rule-strong);transform:translateX(-50%)}
 .home-btn{position:absolute;bottom:9px;left:50%;width:64px;height:8px;border-radius:var(--r-pill);
   background:var(--rule-strong);transform:translateX(-50%)}
-.screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:12px;background:var(--bg)}
+.screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:12px;background:var(--bg)}  /* device frame, not a control */
 /* wider than the screen on both sides: the iframe's own scrollbar falls in the
    clipped part, and the wheel still scrolls it */
 .screen iframe{position:absolute;top:0;left:-20px;width:calc(100% + 40px);height:100%;border:0;display:block}
 
 /* ---- gate: bare, one masked field and an arrow ---- */
 .gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-5)}
-.gate-mark{font-size:2.75rem;font-weight:var(--fw-strong);letter-spacing:.06em;line-height:var(--lh-title)}
-.gate-field{width:340px;height:48px;border-radius:var(--r-pill);background:var(--surface);
+.gate-mark{font-size:var(--fs-xl);font-weight:var(--fw-strong);letter-spacing:.06em;line-height:var(--lh-title)}
+.gate-field{width:340px;height:48px;border-radius:var(--r-control);background:var(--surface);
   display:flex;align-items:center;padding:0 6px 0 var(--sp-5);gap:var(--sp-3)}
 .gate-field input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;
   font:inherit;font-size:var(--fs-body);color:var(--text);letter-spacing:.2em}
