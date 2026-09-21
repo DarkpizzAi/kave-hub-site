@@ -325,6 +325,7 @@ body:has(.bar){min-width:var(--block)}
   color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row:hover{background:var(--surface-2)}
 .toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
+.page-intro{margin:0 0 var(--sp-3);color:var(--text-dim);font-size:var(--fs-body);line-height:1.5}
 .fig-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .fig{background:var(--panel);border-radius:var(--r-control);padding:var(--sp-3)}
 .fig-value{font-size:var(--fs-title);font-weight:var(--fw-strong);line-height:var(--lh-title);font-variant-numeric:tabular-nums}

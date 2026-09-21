@@ -7,7 +7,8 @@ import { el, emptyNote } from './ui.js';
 import { showGate } from './gate.js';
 import { applyPalette, getWho } from './prefs.js';
 import { buildTiles, currentKey, mountSwitcher } from './switcher.js';
-import { attachToc, detachToc } from './frame.js';
+import { attachToc, detachToc, introLine } from './frame.js';
+import { redirectFor } from './routes.js';
 import { recover } from './guard.js';
 import { status } from './status.js';
 
@@ -46,6 +47,8 @@ function buildPage() {
 
 async function route() {
   const mySeq = ++seq;
+  const moved = redirectFor(location.hash);
+  if (moved) { location.replace(moved); return; }
   status.limited = false;
   let failed = false;
   const view = document.getElementById('view');
@@ -53,9 +56,11 @@ async function route() {
 
   const list = await getPlugins();
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  const isFood = parts[0] === 'food';
+  const isFood = parts[0] === 'spoon';   // spoon is the embedded app, drawn as a tablet, not a sheet
   const frame = isFood ? null : buildPage();
   const box = isFood ? el('div', { class: 'view-fade' }) : frame.sheet;
+  const intro = isFood ? null : introLine(currentKey(location.hash));
+  if (intro) box.append(intro);
 
   try {
     if (!parts.length) {
@@ -81,7 +86,7 @@ async function route() {
 
   if (mySeq !== seq) return;
   if (document.getElementById('view') !== view) return;
-  switcher.setTiles(buildTiles(list), currentKey(location.hash));
+  switcher.setTiles(buildTiles(), currentKey(location.hash));
   detachToc();
   view.innerHTML = '';
   view.append(isFood ? box : frame.page);

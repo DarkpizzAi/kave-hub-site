@@ -1,4 +1,5 @@
 import { test, eq } from './run.js';
+import { introLine } from '../js/frame.js';
 import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js';
 
 test('pages come in the agreed order and sections', () => {
@@ -46,4 +47,13 @@ test('intros: none for home page, settings and spoon, none mention the new flat,
     eq(/[–—]/.test(p.intro), false, p.key);
   }
   eq(introFor('our-house').length > 0, true);
+});
+
+test('introLine builds a paragraph for a page with an intro and nothing otherwise', () => {
+  const p = introLine('finance');
+  eq(p.tagName.toLowerCase(), 'p');
+  eq(p.className, 'page-intro');
+  eq(p.textContent, 'Shared budget and bills.');
+  eq(introLine('home'), null);
+  eq(introLine('spoon'), null);
 });
