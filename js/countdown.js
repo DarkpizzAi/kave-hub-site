@@ -3,8 +3,6 @@
 // milliseconds so summer and winter time cannot skew the count.
 
 const ZONE = 'Europe/Madrid';
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
-  'August', 'September', 'October', 'November', 'December'];
 
 // "30/09/2027 09:00" or "2027-09-30 09:00" anywhere in the text; null without both a date and a time.
 export function parseMoveIn(text) {
@@ -43,10 +41,4 @@ export function remaining(nowMs, targetMs) {
     seconds: total % 60,
     done: targetMs <= nowMs,
   };
-}
-
-const pad = n => String(n).padStart(2, '0');
-
-export function formatMoveIn({ y, mo, d, h, mi }) {
-  return `${d} ${MONTHS[mo - 1]} ${y}, ${pad(h)}:${pad(mi)}`;
 }

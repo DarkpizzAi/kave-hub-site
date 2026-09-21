@@ -380,15 +380,16 @@ body:has(.bar){min-width:var(--block)}
   padding:8px;font:inherit;font-weight:var(--fw-strong);font-size:var(--fs-lede);width:100%;text-align:left;color:var(--text)}
 .set-row select{background:var(--surface);border:0;border-radius:var(--r-control);padding:8px 12px;font:inherit;color:var(--text)}
 
-/* home page countdown: a clock line inside a card */
-.clock{display:flex;align-items:flex-end;justify-content:center;gap:var(--sp-2);padding:var(--sp-4) 0 var(--sp-2)}
+/* home page countdown: a clock line that fills its card. The box is a size
+   container, so every size below is a share of the card's width. */
+.clock-box{container-type:inline-size}
+.clock{display:flex;align-items:flex-end;justify-content:center;gap:1.2cqw;padding:var(--sp-2) 0 var(--sp-1)}
 .clock[hidden]{display:none}
 .clock-unit{display:flex;flex-direction:column;align-items:center}
-.clock-num{font-size:72px;font-weight:var(--fw-strong);line-height:1;letter-spacing:-.03em;
+.clock-num{font-size:14.2cqw;font-weight:var(--fw-strong);line-height:1;letter-spacing:-.03em;
   font-variant-numeric:tabular-nums;min-width:2ch;text-align:center}
 .clock-unit:first-child .clock-num{color:var(--accent)}
-.clock-label{margin-top:6px;font-size:var(--fs-meta);letter-spacing:.06em;text-transform:lowercase;color:var(--text-dim)}
-.clock-sep{font-size:52px;font-weight:300;line-height:1;padding-bottom:28px;color:var(--text-dim)}
+.clock-label{margin-top:.6cqw;font-size:clamp(11px,1.8cqw,16px);letter-spacing:.06em;text-transform:lowercase;color:var(--text-dim)}
+.clock-sep{font-size:10cqw;font-weight:300;line-height:1;padding-bottom:3.6cqw;color:var(--text-dim)}
 .clock-done{margin:0;padding:var(--sp-4) 0 var(--sp-2);text-align:center;font-size:var(--fs-xl);font-weight:var(--fw-strong);color:var(--accent)}
 .clock-done[hidden]{display:none}
-.clock-when{margin:0 0 var(--sp-2);text-align:center;color:var(--text-dim)}

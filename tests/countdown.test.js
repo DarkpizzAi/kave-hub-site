@@ -1,5 +1,5 @@
 import { test, eq } from './run.js';
-import { parseMoveIn, madridToUtc, remaining, formatMoveIn } from '../js/countdown.js';
+import { parseMoveIn, madridToUtc, remaining } from '../js/countdown.js';
 
 test('parseMoveIn reads day-first and ISO forms with a time', () => {
   eq(parseMoveIn('Move-in date: 30/09/2027 09:00 (Madrid time)'), { y: 2027, mo: 9, d: 30, h: 9, mi: 0 });
@@ -34,9 +34,4 @@ test('remaining is done at and after the moment and never negative', () => {
   const t = Date.UTC(2027, 8, 30, 7, 0, 0);
   eq(remaining(t, t), { days: 0, hours: 0, minutes: 0, seconds: 0, done: true });
   eq(remaining(t + 5000, t), { days: 0, hours: 0, minutes: 0, seconds: 0, done: true });
-});
-
-test('formatMoveIn writes the date in words without locale help', () => {
-  eq(formatMoveIn({ y: 2027, mo: 9, d: 30, h: 9, mi: 0 }), '30 September 2027, 09:00');
-  eq(formatMoveIn({ y: 2028, mo: 1, d: 5, h: 7, mi: 5 }), '5 January 2028, 07:05');
 });

@@ -1,11 +1,12 @@
 // Home page: a live countdown to move-in day. The moment comes from the
 // "Move-in date" line under Key facts in our-house/data/plan.md, so the public
-// site holds no date of its own. No intro line and no page buttons.
+// site holds no date of its own. Only the timer shows: no date, no intro line,
+// no page buttons.
 
 import * as data from '../data.js';
 import { findSection } from '../md.js';
 import { el, card, emptyNote } from '../ui.js';
-import { parseMoveIn, madridToUtc, remaining, formatMoveIn } from '../countdown.js';
+import { parseMoveIn, madridToUtc, remaining } from '../countdown.js';
 
 const UNITS = ['days', 'hours', 'minutes', 'seconds'];
 const pad = n => String(n).padStart(2, '0');
@@ -38,7 +39,7 @@ export default async function home(container) {
   });
   const done = el('p', { class: 'clock-done', hidden: '' }, "We're in.");
   const c = card('until we move in');
-  c.append(row, done, el('p', { class: 'clock-when' }, formatMoveIn(parts)));
+  c.append(el('div', { class: 'clock-box' }, row), done);
   container.append(c);
 
   function draw() {
