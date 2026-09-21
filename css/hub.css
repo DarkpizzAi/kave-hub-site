@@ -286,8 +286,8 @@ body:has(.bar){min-width:var(--block)}
   transition:filter 120ms var(--ease-standard)}
 .page-chip:hover{filter:brightness(.94)}
 .page-chip:focus-visible,.app-tile:focus-visible,.toc-row:focus-visible,.pill:focus-visible,.btn:focus-visible{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
-/* the token field carries no border: focus is a lighter fill and the caret */
-.gate-field:focus-within{background:var(--surface-2)}
+/* a text box's focus ring is its own edge, drawn inside it (household look, Focus) */
+.gate-field:focus-within{box-shadow:inset 0 0 0 2px var(--accent)}
 .page-chip .glyph{transition:transform 120ms var(--ease-standard)}
 .page-chip[aria-expanded="true"] .glyph{transform:rotate(180deg)}
 
