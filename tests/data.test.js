@@ -155,32 +155,11 @@ test('parseDate reads ISO and day-first dates', () => {
   eq(data.parseDate('20/09/2026').getFullYear(), 2026);
 });
 
-test('fallbackPaths maps each new folder to its old ones', () => {
-  eq(data.fallbackPaths('/our-house/data/plants.md'), ['/household/data/plants.md', '/house/data/plants.md']);
-  eq(data.fallbackPaths('/finance/data/budget.md'), ['/money/data/budget.md']);
-  eq(data.fallbackPaths('brand/data'), ['design/data']);
-  eq(data.fallbackPaths('/our-house/data/interior-design.md'),
-    ['/house/data/design.md', '/household/data/interior-design.md', '/house/data/interior-design.md']);
-  eq(data.fallbackPaths('/chantier/data/infrastructure.md'), ['/household/data/infrastructure.md']);
-  eq(data.fallbackPaths('/food/data/x.md'), []);
-  eq(data.fallbackPaths('/finance-notes/x.md'), []);
-});
-
-test('a missing new path falls back to the old one', async () => {
+test('a missing path is asked for once, with no old-name retry', async () => {
   fresh();
   data.setToken('t');
-  const calls = fakeFetch(url => (url.includes('/finance/') ? res(404) : res(200, 'old body')));
-  eq(await data.text('/finance/data/budget.md'), 'old body');
-  eq(calls.length, 2);
-  eq(calls[1].url.includes('/money/data/budget.md'), true);
-  fresh();
-});
-
-test('a found new path makes no second request', async () => {
-  fresh();
-  data.setToken('t');
-  const calls = fakeFetch(() => res(200, 'new body'));
-  eq(await data.text('/finance/data/budget.md'), 'new body');
+  const calls = fakeFetch(() => res(404));
+  eq(await data.text('/finance/data/budget.md'), null);
   eq(calls.length, 1);
   fresh();
 });
