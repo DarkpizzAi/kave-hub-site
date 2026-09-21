@@ -40,8 +40,9 @@
 body{margin:0;background:var(--bg);color:var(--text);
   font-family:var(--font-ui);font-size:var(--fs-ui);line-height:var(--lh-base)}
 h1{font-size:22px;margin:0 0 4px;font-weight:650}
-h2{font-size:var(--fs-lede);font-weight:var(--fw-strong);letter-spacing:var(--tracking-heading);
-  color:var(--text);margin:32px 0 var(--sp-2)}
+/* group headings: the style guide's sheet-section role, one step above a card's section-title */
+h2{font-size:var(--fs-title);font-weight:var(--fw-strong);letter-spacing:var(--tracking-heading);
+  color:var(--text);margin:var(--sp-5) 0 var(--sp-3)}
 .sheet > h2:first-child{margin-top:0}
 h3{font-size:15px;font-weight:650;margin:0 0 8px}
 a{color:var(--accent);text-decoration:none}
@@ -323,6 +324,8 @@ body:has(.bar){min-width:var(--block)}
 .side-label{font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--text-dim);margin:0 0 var(--sp-2)}
 .toc-row{display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
   color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
+.toc-row{font-size:var(--fs-ui);font-weight:var(--fw-regular)}
+.toc-row.toc-sub{padding-left:calc(var(--sp-3) + var(--sp-4))}
 .toc-row:hover{background:var(--surface-2)}
 .toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
 .page-intro{margin:0 0 var(--sp-3);color:var(--text-dim);font-size:var(--fs-body);line-height:1.5}

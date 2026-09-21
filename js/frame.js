@@ -7,12 +7,39 @@ import { introFor } from './routes.js';
 
 let detach = null;
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// For human reading in the sidebar: "2026-09-21 - Title" becomes "21-Sep Title".
+// The page keeps the exact date; only the sidebar row is shortened.
+export function shortLabel(title) {
+  const m = title.match(/^(\d{4})-(\d{2})-(\d{2}) - (.+)$/);
+  return m ? `${m[3]}-${MONTHS[+m[2] - 1]} ${m[4]}` : title;
+}
+
+let groupSeq = 0;
+
+// The page's outline in document order: group headings (the views' h2) and the
+// section cards under them. A card after a group heading is one level down; a
+// page with no group headings stays flat.
 export function tocEntries(root) {
-  return [...root.querySelectorAll('.tab-section[id]')]
-    .filter(s => s.querySelector('.tab-section-title'))
+  const out = [];
+  let grouped = false;
+  for (const n of root.querySelectorAll('h2, .tab-section[id]')) {
     // a section folded away in a closed details block cannot be scrolled to
-    .filter(s => !s.closest('details'))
-    .map(s => ({ id: s.id, title: s.querySelector('.tab-section-title').textContent }));
+    if (n.closest('details')) continue;
+    if (n.tagName === 'H2') {
+      // only page-level group headings, not headings inside a card
+      if (n.closest('.card') || !n.textContent.trim()) continue;
+      if (!n.id) n.id = 'grp-' + (++groupSeq);
+      out.push({ id: n.id, title: n.textContent, depth: 0 });
+      grouped = true;
+      continue;
+    }
+    const t = n.querySelector('.tab-section-title');
+    if (!t) continue;
+    out.push({ id: n.id, title: t.textContent, depth: grouped ? 1 : 0 });
+  }
+  return out;
 }
 
 // Two or more titled sections and more than about two screens of content.
@@ -73,7 +100,7 @@ export function attachToc(sheet, side, win = window) {
   if (!shouldShowToc(entries.length, sheet.scrollHeight, win.innerHeight)) return false;
 
   const rows = entries.map(e => {
-    const b = el('button', { type: 'button', class: 'toc-row', title: e.title }, e.title);
+    const b = el('button', { type: 'button', class: 'toc-row' + (e.depth ? ' toc-sub' : ''), title: e.title }, shortLabel(e.title));
     b.addEventListener('click', () => document.getElementById(e.id).scrollIntoView());
     return b;
   });
