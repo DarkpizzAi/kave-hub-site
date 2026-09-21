@@ -1,9 +1,10 @@
 // The app switcher: a chip in the header naming the current page, and a popup
 // of tiles built like Spoon's bottom navigation (an icon in a pill, the name
-// below). The tile list comes from the plugin manifest at runtime.
+// below). The tile list is the explicit page list in routes.js.
 
 import { el } from './ui.js';
 import { glyph } from './glyphs.js';
+import { PAGES, SECTIONS, keyFor } from './routes.js';
 
 const COLS = 3;
 
@@ -14,23 +15,12 @@ export function nextIndex(i, key, count, cols = COLS) {
   return n < 0 || n >= count ? i : n;
 }
 
-export function buildTiles(plugins) {
-  const tiles = [{ key: 'home', label: 'home', href: '#/' }];
-  for (const p of plugins) {
-    tiles.push({ key: p.name, label: p.name, href: '#/' + p.name });
-    if (p.name === 'household') {
-      tiles.push({ key: 'infrastructure', label: 'infrastructure', href: '#/household/infrastructure' });
-    }
-  }
-  tiles.push({ key: 'settings', label: 'settings', href: '#/settings' });
-  return tiles;
+export function buildTiles() {
+  return PAGES.map(p => ({ key: p.key, label: p.label, href: p.href, section: p.section, glyph: p.glyph }));
 }
 
 export function currentKey(hash) {
-  const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  if (!parts.length) return 'home';
-  if (parts[0] === 'household' && parts[1] === 'infrastructure') return 'infrastructure';
-  return parts[0];
+  return keyFor(hash);
 }
 
 export function mountSwitcher(bar) {
@@ -80,11 +70,16 @@ export function mountSwitcher(bar) {
 
   function setTiles(list, current) {
     menu.innerHTML = '';
-    for (const t of list) {
-      const a = el('a', { class: 'app-tile' + (t.key === current ? ' cur' : ''), href: t.href, role: 'menuitem' },
-        el('span', { class: 'nav-icon' }, glyph(t.key, 24)),
-        el('span', { class: 'tile-name' }, t.label));
-      menu.append(a);
+    for (const section of SECTIONS) {
+      const group = list.filter(t => t.section === section);
+      if (!group.length) continue;
+      menu.append(el('div', { class: 'switcher-label' }, section));
+      for (const t of group) {
+        const a = el('a', { class: 'app-tile' + (t.key === current ? ' cur' : ''), href: t.href, role: 'menuitem' },
+          el('span', { class: 'nav-icon' }, glyph(t.glyph || t.key, 24)),
+          el('span', { class: 'tile-name' }, t.label));
+        menu.append(a);
+      }
     }
     const cur = list.find(t => t.key === current);
     label.textContent = cur ? cur.label : current;

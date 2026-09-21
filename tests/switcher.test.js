@@ -13,33 +13,38 @@ test('arrow keys move by one and by a row and stop at the edges', () => {
   eq(nextIndex(4, 'x', 13), 4);
 });
 
-test('buildTiles puts home first, infrastructure after household, settings last', () => {
-  const t = buildTiles([{ name: 'food' }, { name: 'household' }, { name: 'calendar' }]);
-  eq(t.map(x => x.key), ['home', 'food', 'household', 'infrastructure', 'calendar', 'settings']);
+test('buildTiles follows the route list, pages then apps', () => {
+  const t = buildTiles();
+  eq(t.map(x => x.key), ['home', 'calendar', 'our-house', 'finance', 'hugo', 'fun', 'brand',
+    'chantier', 'settings', 'spoon']);
   eq(t[0].href, '#/');
-  eq(t[3].href, '#/household/infrastructure');
-  eq(t[5].href, '#/settings');
-});
-
-test('a plugin the icon map does not know still gets a tile', () => {
-  const t = buildTiles([{ name: 'brand-new-plugin' }]);
-  eq(t.some(x => x.key === 'brand-new-plugin'), true);
+  eq(t[9].section, 'apps');
 });
 
 test('currentKey reads the hash', () => {
   eq(currentKey(''), 'home');
   eq(currentKey('#/'), 'home');
   eq(currentKey('#/calendar'), 'calendar');
-  eq(currentKey('#/household'), 'household');
-  eq(currentKey('#/household/infrastructure'), 'infrastructure');
+  eq(currentKey('#/our-house'), 'our-house');
   eq(currentKey('#/settings'), 'settings');
+});
+
+test('the switcher draws one small label per section', () => {
+  const bar = document.createElement('header');
+  document.body.append(bar);
+  const sw = mountSwitcher(bar);
+  sw.setTiles(buildTiles(), 'home');
+  const labels = [...bar.querySelectorAll('.switcher-label')].map(l => l.textContent);
+  eq(labels, ['pages', 'apps']);
+  eq(bar.querySelectorAll('.app-tile').length, 10);
+  bar.remove();
 });
 
 test('the mounted switcher opens, marks the current tile and closes on Escape', () => {
   const bar = document.createElement('header');
   document.body.append(bar);
   const sw = mountSwitcher(bar);
-  sw.setTiles(buildTiles([{ name: 'food' }, { name: 'calendar' }]), 'calendar');
+  sw.setTiles(buildTiles(), 'calendar');
   const chip = bar.querySelector('#chip');
   const menu = bar.querySelector('.switcher');
   eq(chip.textContent.includes('calendar'), true);
@@ -58,7 +63,7 @@ test('a click outside closes the switcher', () => {
   const bar = document.createElement('header');
   document.body.append(bar);
   const sw = mountSwitcher(bar);
-  sw.setTiles(buildTiles([]), 'home');
+  sw.setTiles(buildTiles(), 'home');
   const chip = bar.querySelector('#chip');
   chip.click();
   document.body.click();
