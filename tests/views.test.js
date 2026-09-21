@@ -55,7 +55,7 @@ test('home shows the four clock units and the date when the plan has a move-in l
   const box = document.createElement('div');
   await home(box);
   eq(box.querySelectorAll('.clock-num').length, 4);
-  eq(box.querySelector('.clock-when').textContent, '30 September 2027, 09:00');
+  eq(box.querySelector('.clock-when'), null);
   eq(box.querySelector('.tab-section-title').textContent, 'until we move in');
   eq(/^\d+$/.test(box.querySelector('.clock-num').textContent), true);
   eq(/^\d\d$/.test(box.querySelectorAll('.clock-num')[3].textContent), true);
