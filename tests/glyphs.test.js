@@ -2,7 +2,7 @@ import { test, eq } from './run.js';
 import { glyph, hasGlyph } from '../js/glyphs.js';
 
 test('glyph returns an svg with the outline attributes', () => {
-  const g = glyph('food');
+  const g = glyph('spoon');
   eq(g.tagName.toLowerCase(), 'svg');
   eq(g.getAttribute('viewBox'), '0 0 24 24');
   eq(g.getAttribute('stroke'), 'currentColor');
@@ -17,23 +17,22 @@ test('glyph size sets width and height', () => {
 });
 
 test('a known glyph has its paths', () => {
-  eq(glyph('food').querySelectorAll('path').length, 1);
-  eq(glyph('infrastructure').querySelectorAll('path').length, 13);
+  eq(glyph('spoon').querySelectorAll('path').length, 1);
+  eq(glyph('chantier').querySelectorAll('path').length, 6);
 });
 
 test('an unknown key falls back to the generic glyph', () => {
   eq(glyph('nonsense').outerHTML, glyph('generic').outerHTML);
   eq(hasGlyph('nonsense'), false);
-  eq(hasGlyph('food'), true);
-});
-
-test('the two people share one glyph', () => {
-  eq(glyph('hugo').outerHTML, glyph('isa').outerHTML);
+  eq(hasGlyph('spoon'), true);
 });
 
 test('every section key has a glyph', () => {
-  for (const k of ['home', 'food', 'household', 'calendar', 'money', 'house', 'fun',
-    'hugo', 'isa', 'infrastructure', 'chantier', 'design', 'settings', 'chevron', 'arrow']) {
+  for (const k of ['home', 'spoon', 'our-house', 'calendar', 'finance', 'fun',
+    'hugo', 'chantier', 'brand', 'settings', 'chevron', 'arrow']) {
     eq(hasGlyph(k), true, k);
+  }
+  for (const k of ['household', 'house', 'money', 'design', 'food', 'isa', 'infrastructure']) {
+    eq(hasGlyph(k), false, k);
   }
 });
