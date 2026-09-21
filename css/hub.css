@@ -321,7 +321,7 @@ body:has(.bar){min-width:var(--block)}
   max-height:calc(100vh - var(--header-h) - var(--sp-2));overflow-y:auto;scrollbar-width:none}
 .side-card{background:var(--surface);border-radius:var(--r-card);padding:var(--sp-3)}
 .side-label{font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--text-dim);margin:0 0 var(--sp-2)}
-.toc-row{display:block;width:100%;text-align:left;border:0;background:transparent;font:inherit;
+.toc-row{display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
   color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row:hover{background:var(--surface-2)}
 .toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}

@@ -98,9 +98,9 @@ export default async function ourHouseProject(container) {
     }
   }
 
-  // Plan (money view)
+  // Plan (finance view)
   if (plan) {
-    container.append(el('h2', {}, 'Plan (money view)'));
+    container.append(el('h2', {}, 'Plan (finance view)'));
     for (const s of plan.sections) {
       if (!s.heading || /tone rules/i.test(s.heading)) continue;
       const c = card(s.heading);

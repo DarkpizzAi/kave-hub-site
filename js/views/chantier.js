@@ -63,12 +63,33 @@ async function infrastructure(container) {
     `${links.length} interactions listed, ${open} still to confirm. Edit chantier/data/infrastructure.md.`));
 }
 
+// The delivery log is newest first and long. The latest entries show as cards;
+// the rest fold into a closed details block so the page and its sidebar stay short.
+const RECENT_LOG_ENTRIES = 10;
+
+async function deliveryLog(container) {
+  const doc = await data.doc('/chantier/data/log.md');
+  if (!doc) return;
+  container.append(el('h2', {}, doc.title || 'Delivery log'));
+  const intro = doc.sections.filter(s => s.level === 0);
+  const entries = doc.sections.filter(s => s.level !== 0);
+  const opts = { skipCode: true };
+  renderDocCards(container, { sections: [...intro, ...entries.slice(0, RECENT_LOG_ENTRIES)] }, opts);
+  const older = entries.slice(RECENT_LOG_ENTRIES);
+  if (older.length) {
+    const fold = el('details', { class: 'older' }, el('summary', {}, `Older entries (${older.length})`));
+    renderDocCards(fold, { sections: older }, opts);
+    container.append(fold);
+  }
+}
+
 export default async function chantier(container) {
   await infrastructure(container);
 
   const files = (await data.listDir('chantier/data'))
     .filter(f => f.endsWith('.md') && f !== 'infrastructure.md' && !SECURITY_FILES.includes(f));
   for (const f of files) {
+    if (f === 'log.md') { await deliveryLog(container); continue; }
     const doc = await data.doc(`/chantier/data/${f}`);
     if (!doc) continue;
     container.append(el('h2', {}, doc.title || f));

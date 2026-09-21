@@ -10,6 +10,8 @@ let detach = null;
 export function tocEntries(root) {
   return [...root.querySelectorAll('.tab-section[id]')]
     .filter(s => s.querySelector('.tab-section-title'))
+    // a section folded away in a closed details block cannot be scrolled to
+    .filter(s => !s.closest('details'))
     .map(s => ({ id: s.id, title: s.querySelector('.tab-section-title').textContent }));
 }
 
@@ -71,7 +73,7 @@ export function attachToc(sheet, side, win = window) {
   if (!shouldShowToc(entries.length, sheet.scrollHeight, win.innerHeight)) return false;
 
   const rows = entries.map(e => {
-    const b = el('button', { type: 'button', class: 'toc-row' }, e.title);
+    const b = el('button', { type: 'button', class: 'toc-row', title: e.title }, e.title);
     b.addEventListener('click', () => document.getElementById(e.id).scrollIntoView());
     return b;
   });
