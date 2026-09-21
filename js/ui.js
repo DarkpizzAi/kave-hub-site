@@ -30,7 +30,7 @@ export function card(title, ...children) {
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     wrap.id = 'sec-' + (++sectionSeq) + '-' + slug;
     wrap.append(el('div', { class: 'tab-section-head' },
-      el('span', { class: 'tab-section-title' }, title)));
+      el('span', { class: 'tab-section-title', role: 'heading', 'aria-level': '3' }, title)));
   }
   const inner = el('div', { class: 'card' });
   wrap.append(inner);
