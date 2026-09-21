@@ -6,7 +6,7 @@ const WHO_KEY = 'hubweb:who';
 
 export const PALETTES = ['cobalt', 'amber', 'chartreuse'];
 // Route keys of the two person pages. Structural only; names come from the private repo.
-export const WHO = ['hugo', 'isa'];
+export const WHO = ['isa', 'hugo'];
 
 function read(key) {
   try { return localStorage.getItem(key); } catch (e) { return null; }
