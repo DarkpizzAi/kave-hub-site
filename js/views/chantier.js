@@ -13,8 +13,18 @@ function rows(doc, re) {
   return t ? t.rows : [];
 }
 
+// A reserved spot, not a feature: the dashed box means "not built yet", as in Spoon.
+function monitorIdea(container) {
+  const c = card('Infrastructure monitor');
+  c.querySelector('.card').classList.add('idea');
+  c.append(el('p', {}, 'Not built yet. An idea for once the mini PC is set up: app versions, server status, '
+    + 'pending updates, and when each routine last ran and whether it worked.'));
+  container.append(c);
+}
+
 async function infrastructure(container) {
   container.append(el('h2', {}, 'Infrastructure'));
+  monitorIdea(container);
 
   const doc = await data.doc('/chantier/data/infrastructure.md');
   if (!doc) { container.append(emptyNote('chantier/data/infrastructure.md is missing.')); return; }

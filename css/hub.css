@@ -69,6 +69,8 @@ a:hover{text-decoration:underline}
 }
 
 /* cards: Spoon's own card, with a title row above it (see ui.card) */
+/* reserved for something not built yet: dashed border, room to grow */
+.card.idea{border:1px dashed var(--rule-strong);background:transparent;min-height:120px;color:var(--text-dim)}
 .tab-section{margin-bottom:32px}
 .tab-section:last-child{margin-bottom:0}
 .tab-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-2)}

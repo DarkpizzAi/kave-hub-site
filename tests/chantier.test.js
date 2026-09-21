@@ -51,3 +51,13 @@ test('chantier adds no fold when the log has ten entries or fewer', async () => 
   eq(box.textContent.includes('Body 8.'), true);
   done();
 });
+
+test('chantier reserves a dashed spot for the infrastructure monitor', async () => {
+  serveLog(3);
+  const box = document.createElement('div');
+  await chantier(box);
+  const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
+  eq(titles.includes('Infrastructure monitor'), true);
+  eq(box.querySelector('.card.idea').textContent.includes('Not built yet'), true);
+  done();
+});
