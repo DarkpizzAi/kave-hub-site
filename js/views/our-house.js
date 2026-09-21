@@ -1,14 +1,12 @@
-// Household: plants, home setup, hardware.
-// Calendar, bookings and trips moved to views/calendar.js on 19/09/2026,
-// when the planner became its own plugin to feed Compass.
+// Our house: the place we live in (plants, home setup, hardware), then the
+// new-place project. Calendar, bookings and trips live in views/calendar.js.
 
 import * as data from '../data.js';
-import { el, card, header, renderBlocks } from '../ui.js';
+import { el, card, renderBlocks } from '../ui.js';
+import ourHouseProject from './our-house-project.js';
 
-export default async function household(container) {
-  container.append(header('household', 'Home setup, hardware, plants and the greenhouse'));
-
-  const plants = await data.doc('/household/data/plants.md');
+export default async function ourHouse(container) {
+  const plants = await data.doc('/our-house/data/plants.md');
   if (plants) {
     container.append(el('h2', {}, 'Plants'));
     const c = card('Care');
@@ -19,11 +17,9 @@ export default async function household(container) {
     container.append(c);
   }
 
-  container.append(el('p', {}, el('a', { href: '#/household/infrastructure' }, 'Infrastructure: who talks to whom >')));
-
   container.append(el('h2', {}, 'Home'));
   for (const f of ['home-setup.md', 'hardware.md']) {
-    const d = await data.doc('/household/data/' + f);
+    const d = await data.doc('/our-house/data/' + f);
     if (!d) continue;
     const c = card(d.title || f);
     const det = el('details', {}, el('summary', {}, 'Show'));
@@ -34,4 +30,6 @@ export default async function household(container) {
     c.append(det);
     container.append(c);
   }
+
+  await ourHouseProject(container);
 }

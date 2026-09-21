@@ -1,10 +1,10 @@
-// Household sub-page (#/household/infrastructure): how the five devices talk
-// to each other and to GitHub / Drive, and the flows that cross them.
-// Reads household/data/infrastructure.md.
+// Chantier: how the hub is built. The infrastructure section (how the five
+// devices talk to each other and to GitHub and Drive) comes first, then every
+// other data file of the chantier plugin as cards.
 
 import * as data from '../data.js';
 import { findSection, firstTable, isTemplateText } from '../md.js';
-import { el, card, header, chip, emptyNote } from '../ui.js';
+import { el, card, chip, emptyNote, renderDocCards } from '../ui.js';
 
 function rows(doc, re) {
   const s = doc && findSection(doc, re);
@@ -12,12 +12,11 @@ function rows(doc, re) {
   return t ? t.rows : [];
 }
 
-export default async function infrastructure(container) {
-  container.append(el('a', { href: '#/household' }, '< household'));
-  container.append(header('infrastructure', 'How the household machines and phones talk to each other'));
+async function infrastructure(container) {
+  container.append(el('h2', {}, 'Infrastructure'));
 
-  const doc = await data.doc('/household/data/infrastructure.md');
-  if (!doc) { container.append(emptyNote('household/data/infrastructure.md is missing.')); return; }
+  const doc = await data.doc('/chantier/data/infrastructure.md');
+  if (!doc) { container.append(emptyNote('chantier/data/infrastructure.md is missing.')); return; }
 
   const devs = rows(doc, /^devices/i);
   const links = rows(doc, /^interactions/i);
@@ -60,5 +59,18 @@ export default async function infrastructure(container) {
 
   const open = links.filter(r => unknown(r[4])).length;
   container.append(el('p', { class: 'muted' },
-    `${links.length} interactions listed, ${open} still to confirm. Edit household/data/infrastructure.md.`));
+    `${links.length} interactions listed, ${open} still to confirm. Edit chantier/data/infrastructure.md.`));
+}
+
+export default async function chantier(container) {
+  await infrastructure(container);
+
+  const files = (await data.listDir('chantier/data'))
+    .filter(f => f.endsWith('.md') && f !== 'infrastructure.md');
+  for (const f of files) {
+    const doc = await data.doc(`/chantier/data/${f}`);
+    if (!doc) continue;
+    container.append(el('h2', {}, doc.title || f));
+    renderDocCards(container, doc, { skipCode: true });
+  }
 }

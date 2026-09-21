@@ -8,9 +8,11 @@ export const FILES = [
   'index.html', 'tokens.css', 'css/hub.css',
   'js/app.js', 'js/data.js', 'js/md.js', 'js/ui.js', 'js/icons.js', 'js/gate.js',
   'js/glyphs.js', 'js/prefs.js', 'js/status.js', 'js/guard.js', 'js/switcher.js', 'js/frame.js',
-  'js/views/index.js', 'js/views/food.js', 'js/views/home.js', 'js/views/household.js',
-  'js/views/calendar.js', 'js/views/generic.js', 'js/views/house.js', 'js/views/money.js',
-  'js/views/fun.js', 'js/views/person.js', 'js/views/infrastructure.js', 'js/views/settings.js',
+  'js/routes.js',
+  'js/views/index.js', 'js/views/food.js', 'js/views/home.js', 'js/views/our-house.js',
+  'js/views/our-house-project.js', 'js/views/calendar.js', 'js/views/generic.js',
+  'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js',
+  'js/views/settings.js',
 ];
 
 const RECOVERED = 'hubweb:recovered';

@@ -1,4 +1,4 @@
-// Calendar: key dates, bookings, trips. Split out of household.js on
+// Calendar: key dates, bookings, trips. Split out of our-house.js on
 // 19/09/2026 when the planner moved to its own plugin to feed Compass.
 
 import * as data from '../data.js';

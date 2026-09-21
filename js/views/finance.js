@@ -144,11 +144,11 @@ function segment(cls, pct, title) {
   return d;
 }
 
-export default async function money(container) {
-  container.append(header('money', 'Joint finances: budget and bills'));
+export default async function finance(container) {
+  container.append(header('finance', 'Joint finances: budget and bills'));
   const [budget, bills] = await Promise.all([
-    data.doc('/money/data/budget.md'),
-    data.doc('/money/data/recurring-bills.md'),
+    data.doc('/finance/data/budget.md'),
+    data.doc('/finance/data/recurring-bills.md'),
   ]);
   targetsSection(container, budget);
   billsSection(container, bills);
