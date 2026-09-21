@@ -81,3 +81,21 @@ test('tailSpace is what the last section needs to reach the top, never negative'
   // last section already long enough to scroll to the top
   eq(tailSpace(600, 2000, 1300, 16), 0);
 });
+
+test('tocEntries skips sections inside a collapsed details block', () => {
+  const root = document.createElement('div');
+  const folded = document.createElement('details');
+  folded.append(card('Hidden one'));
+  root.append(card('Shown'), folded);
+  eq(tocEntries(root).map(e => e.title), ['Shown']);
+});
+
+test('a contents row carries its full title so a shortened row can still be read', () => {
+  const long = 'A very long section title that will not fit on one line of the sidebar';
+  const f = tocFixture([long, 'Short']);
+  attachToc(f.sheet, f.side, { innerHeight: 500 });
+  const rows = [...f.side.querySelectorAll('.toc-row')];
+  eq(rows[0].title, long);
+  eq(rows[0].textContent, long);
+  f.done();
+});
