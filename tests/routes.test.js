@@ -44,7 +44,7 @@ test('intros: none for home page, settings and spoon, none mention the new flat,
   for (const p of PAGES) {
     if (!p.intro) continue;
     eq(/new flat/i.test(p.intro), false, p.key);
-    eq(/[–—]/.test(p.intro), false, p.key);
+    eq(/[\u2013\u2014]/.test(p.intro), false, p.key);
   }
   eq(introFor('our-house').length > 0, true);
 });
