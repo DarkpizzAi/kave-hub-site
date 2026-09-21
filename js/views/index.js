@@ -10,6 +10,7 @@ import money from './money.js';
 import fun from './fun.js';
 import person from './person.js';
 import infrastructure from './infrastructure.js';
+import settings from './settings.js';
 
 export function register() {
   registry.__home = home;
@@ -22,4 +23,5 @@ export function register() {
   registry.fun = (c, p) => fun(c, p);
   registry.hugo = c => person('hugo')(c);
   registry.isa = c => person('isa')(c);
+  registry.settings = settings;
 }

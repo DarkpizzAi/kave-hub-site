@@ -38,10 +38,11 @@
 
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);
-  font-family:var(--font-ui);line-height:1.45}
+  font-family:var(--font-ui);font-size:var(--fs-ui);line-height:var(--lh-base)}
 h1{font-size:22px;margin:0 0 4px;font-weight:650}
-h2{font-size:14px;font-weight:600;color:var(--text-dim);margin:28px 0 12px;
-  text-transform:uppercase;letter-spacing:.04em}
+h2{font-size:var(--fs-lede);font-weight:var(--fw-strong);letter-spacing:var(--tracking-heading);
+  color:var(--text);margin:32px 0 var(--sp-2)}
+.sheet > h2:first-child{margin-top:0}
 h3{font-size:15px;font-weight:650;margin:0 0 8px}
 a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline}
@@ -66,11 +67,16 @@ a:hover{text-decoration:underline}
   }
 }
 
-/* cards */
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:14px}
-.card > h3{display:flex;align-items:baseline;gap:8px}
-.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-.cards2 .card{margin-bottom:0}
+/* cards: Spoon's own card, with a title row above it (see ui.card) */
+.tab-section{margin-bottom:32px}
+.tab-section:last-child{margin-bottom:0}
+.tab-section-head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-2)}
+.tab-section-title{font-weight:var(--fw-strong);font-size:var(--fs-lede);letter-spacing:var(--tracking-heading)}
+.tab-section-sub{color:var(--text-dim);font-size:var(--fs-meta)}
+.card{background:var(--panel);border-radius:14px;padding:14px 12px;min-width:0}
+.card > h3:first-child{margin-top:0}
+.cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sp-4)}
+.cards2 .tab-section{margin-bottom:0}
 
 /* recipe cards: the whole card is the link */
 .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:14px 0}
@@ -244,23 +250,128 @@ pre{background:var(--surface-2);padding:12px;border-radius:8px;overflow-x:auto;f
 header.rhead{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 header.rhead h1{margin:0}
 
-/* desktop shell: fixed sidebar, top bar, filling content */
-html,body{height:100%}
-body{overflow:hidden}
-.shell{display:grid;grid-template-columns:200px minmax(0,1fr);height:100vh}
-#nav{display:flex;flex-direction:column;gap:2px;padding:16px 10px;overflow-y:auto;
-  background:var(--surface-1);border-right:1px solid var(--rule)}
-#nav .brand{font-weight:700;font-size:16px;color:var(--text);padding:4px 12px 14px}
-#nav a.plug{color:var(--text-dim);font-size:13px;padding:7px 12px;border-radius:8px;text-transform:capitalize}
-#nav a.plug:hover{background:var(--surface-2);color:var(--text);text-decoration:none}
-#nav a.plug.active{background:var(--accent);color:#fff;font-weight:600}
-.main{display:flex;flex-direction:column;min-width:0;height:100vh}
-#top{display:flex;align-items:center;justify-content:space-between;height:44px;flex:none;
-  padding:0 24px;border-bottom:1px solid var(--rule);font-size:13px;text-transform:capitalize}
-#top .top-right{display:flex;align-items:center;gap:12px;text-transform:none}
-#view{flex:1;min-height:0;overflow:auto;padding:24px}
-#view:has(.bleed){padding:0;overflow:hidden}
-.view-fade.bleed{height:100%}
-.embed{display:block;width:100%;height:100%;border:0}
-.gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-.gate input,.gate button{width:240px}
+/* ---- page shell ---- */
+:root{
+  --page-max:720px;
+  --side-w:224px;
+  --space:var(--sp-7);
+  --header-h:56px;
+  /* main, space, sidebar */
+  --cluster:calc(var(--page-max) + var(--space) + var(--side-w));
+  /* the whole block: space, main, space, sidebar, space (1088px). A narrower
+     window scrolls sideways, a wider one centres the block. */
+  --block:calc(var(--cluster) + 2 * var(--space));
+  /* what a wider window adds on each side, so the block stays centred */
+  --pad:max(0px, calc((100% - var(--block)) / 2));
+}
+/* the page never scrolls up and down: the sheet does, inside its rounded top */
+html{overflow-y:hidden;scroll-behavior:smooth}
+body:has(.bar){min-width:var(--block)}
+
+/* the header spans the window; its content sits inside the same centred block,
+   so KAVE starts at the main column's left edge */
+.bar{position:sticky;top:0;z-index:20;height:var(--header-h);background:var(--bg);
+  display:flex;align-items:center;gap:var(--sp-3);
+  padding:0 var(--pad) 0 calc(var(--pad) + var(--space))}
+.wordmark{font-size:var(--fs-xl);font-weight:var(--fw-strong);letter-spacing:.06em;
+  line-height:var(--lh-title);color:var(--text)}
+.wordmark:hover{text-decoration:none}
+.page-chip{display:flex;align-items:center;gap:var(--sp-2);border:0;cursor:pointer;
+  background:var(--accent);color:var(--accent-text);border-radius:var(--r-pill);
+  padding:6px 10px 6px 14px;font:inherit;font-size:var(--fs-body);font-weight:var(--fw-strong);
+  letter-spacing:.06em;line-height:var(--lh-title);text-transform:lowercase;
+  transition:filter 120ms var(--ease-standard)}
+.page-chip:hover{filter:brightness(.94)}
+.page-chip:focus-visible,.app-tile:focus-visible,.toc-row:focus-visible,.pill:focus-visible,.btn:focus-visible,
+.gate-field:focus-within{outline:var(--focus-ring);outline-offset:var(--focus-offset)}
+.page-chip .glyph{transition:transform 120ms var(--ease-standard)}
+.page-chip[aria-expanded="true"] .glyph{transform:rotate(180deg)}
+
+.switcher{position:absolute;top:52px;left:0;width:300px;max-height:calc(100vh - 80px);overflow:auto;
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--r-card);
+  box-shadow:var(--shadow-raised);padding:var(--sp-3);
+  display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-1)}
+.switcher[hidden]{display:none}
+.app-tile{display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);
+  padding:var(--sp-2) var(--sp-1);border-radius:var(--r-control);color:var(--text-dim)}
+.app-tile:hover{text-decoration:none}
+/* Spoon's own tab selection: a 52 by 30 pill behind the icon, ink colour when active */
+.nav-icon{display:grid;place-items:center;width:52px;height:30px;border-radius:var(--r-pill);
+  transition:background 180ms var(--ease-standard)}
+.tile-name{font-size:var(--fs-meta);font-weight:var(--fw-strong);letter-spacing:.06em;
+  line-height:1;text-transform:lowercase}
+.app-tile:hover .nav-icon{background:var(--surface)}
+.app-tile.cur{color:var(--accent-ink)}
+.app-tile.cur .nav-icon,.app-tile.cur:hover .nav-icon{background:var(--accent-soft)}
+
+/* ---- page frame: a centred column plus a reserved sidebar ---- */
+.page{display:flex;align-items:flex-start;gap:var(--space);padding-left:calc(var(--pad) + var(--space))}
+.col{width:var(--page-max);flex:none}
+/* the sheet is fixed under the header and is the scroll container: content
+   scrolls inside it and disappears up under its rounded top edge */
+.sheet{margin-top:var(--sp-2);padding:var(--sp-4);background:var(--surface);
+  border-radius:18px 18px 0 0;height:calc(100vh - var(--header-h) - var(--sp-2));
+  overflow-y:auto;scroll-behavior:smooth;scroll-padding-top:var(--sp-4);
+  scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
+.side{width:var(--side-w);flex:none;margin-top:var(--sp-2);
+  display:flex;flex-direction:column;gap:var(--sp-3);
+  max-height:calc(100vh - var(--header-h) - var(--sp-2));overflow-y:auto;scrollbar-width:none}
+.side-card{background:var(--surface);border-radius:var(--r-card);padding:var(--sp-3)}
+.side-label{font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--text-dim);margin:0 0 var(--sp-2)}
+.toc-row{display:block;width:100%;text-align:left;border:0;background:transparent;font:inherit;
+  color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
+.toc-row:hover{background:var(--surface-2)}
+.toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
+.fig-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+.fig{background:var(--panel);border-radius:var(--r-control);padding:var(--sp-3)}
+.fig-value{font-size:var(--fs-title);font-weight:var(--fw-strong);line-height:var(--lh-title);font-variant-numeric:tabular-nums}
+.fig-caption,.topic-note{font-size:var(--fs-meta);color:var(--text-dim)}
+.topic{display:flex;gap:var(--sp-2);padding:var(--sp-2) 0;border-top:1px solid var(--surface-2)}
+.topic:first-child{border-top:0}
+.topic-dot{width:6px;height:6px;border-radius:var(--r-round);background:var(--accent);margin-top:7px;flex:none}
+.side-link{display:block;background:var(--panel);border-radius:var(--r-pill);
+  padding:var(--sp-2) var(--sp-3);margin-top:var(--sp-1);color:var(--text)}
+.side-link:hover{text-decoration:none}
+
+/* ---- Food: a landscape tablet, Spoon full bleed on its screen ---- */
+.food{display:flex;justify-content:center;padding:var(--sp-2) var(--sp-4)}
+/* the gap below equals the gap above (header plus its padding) */
+.tablet{position:relative;width:min(var(--cluster),100%);
+  height:calc(100vh - 2 * (var(--header-h) + var(--sp-2)));
+  background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:28px;
+  padding:26px 16px;box-shadow:var(--shadow-raised)}
+@media (prefers-color-scheme:dark){.tablet{background:var(--panel)}}
+.cam{position:absolute;top:9px;left:50%;width:8px;height:8px;border-radius:var(--r-round);
+  background:var(--rule-strong);transform:translateX(-50%)}
+.home-btn{position:absolute;bottom:9px;left:50%;width:64px;height:8px;border-radius:var(--r-pill);
+  background:var(--rule-strong);transform:translateX(-50%)}
+.screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:12px;background:var(--bg)}
+/* wider than the screen on both sides: the iframe's own scrollbar falls in the
+   clipped part, and the wheel still scrolls it */
+.screen iframe{position:absolute;top:0;left:-20px;width:calc(100% + 40px);height:100%;border:0;display:block}
+
+/* ---- gate: bare, one masked field and an arrow ---- */
+.gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-5)}
+.gate-mark{font-size:2.75rem;font-weight:var(--fw-strong);letter-spacing:.06em;line-height:var(--lh-title)}
+.gate-field{width:340px;height:48px;border-radius:var(--r-pill);background:var(--surface);
+  display:flex;align-items:center;padding:0 6px 0 var(--sp-5);gap:var(--sp-3)}
+.gate-field input{flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;
+  font:inherit;font-size:var(--fs-body);color:var(--text);letter-spacing:.2em}
+.gate-go{width:36px;height:36px;border-radius:var(--r-round);border:0;cursor:pointer;
+  background:var(--accent);color:var(--accent-text);display:flex;align-items:center;justify-content:center}
+
+/* ---- settings ---- */
+.set-row{display:flex;align-items:center;gap:var(--sp-3);padding:8px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.set-row:last-child{border-bottom:0}
+.set-row .grow{flex:1;min-width:160px}
+.pills{display:flex;gap:var(--sp-2)}
+.pill{border:0;background:var(--surface);border-radius:var(--r-pill);padding:6px 14px;cursor:pointer;font:inherit;color:var(--text)}
+.pill.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
+.btn{border:0;background:var(--surface);border-radius:var(--r-control);padding:8px 14px;cursor:pointer;font:inherit;color:var(--text)}
+.btn:hover{background:var(--surface-2)}
+.sl{display:flex;align-items:center;gap:var(--sp-2)}
+.sl::before{content:"";width:8px;height:8px;border-radius:var(--r-round);background:var(--text-dim)}
+.sl.ok::before{background:var(--accent)}
+.adv-toggle{display:flex;align-items:center;gap:var(--sp-2);background:transparent;border:0;cursor:pointer;
+  padding:8px;font:inherit;font-weight:var(--fw-strong);font-size:var(--fs-lede);width:100%;text-align:left;color:var(--text)}
+.set-row select{background:var(--surface);border:0;border-radius:var(--r-control);padding:8px 12px;font:inherit;color:var(--text)}

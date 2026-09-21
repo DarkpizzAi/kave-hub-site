@@ -92,7 +92,7 @@ export default async function house(container) {
       const all = lists.flatMap(l => l.items).filter(it => !isTemplateText(it.text));
       const done = all.filter(it => it.checked).length;
       const c = card(s.heading);
-      if (all.length) c.querySelector('h3').append(' ', chip(`${done}/${all.length} done`, done === all.length ? 'ok' : ''));
+      if (all.length) c.querySelector('.tab-section-title').append(' ', chip(`${done}/${all.length} done`, done === all.length ? 'ok' : ''));
       if (!all.length) c.append(emptyNote('No tasks yet.'));
       else for (const l of lists) c.append(listFromBlock(l));
       container.append(c);

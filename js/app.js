@@ -5,12 +5,20 @@
 import * as data from './data.js';
 import { el, emptyNote } from './ui.js';
 import { showGate } from './gate.js';
+import { applyPalette, getWho } from './prefs.js';
+import { buildTiles, currentKey, mountSwitcher } from './switcher.js';
+import { attachToc, detachToc } from './frame.js';
+import { recover } from './guard.js';
+import { status } from './status.js';
+
+applyPalette();
 
 const registry = {};   // name -> (container, restOfPath) => Promise; filled by imports below
 const root = document.getElementById('root');
 
 let plugins = null;
 let seq = 0;
+let switcher = null;
 
 async function getPlugins() {
   if (plugins) return plugins;
@@ -21,56 +29,33 @@ async function getPlugins() {
 
 function buildShell() {
   root.innerHTML = '';
-  const shell = el('div', { class: 'shell' });
-  const nav = el('aside', { id: 'nav' });
-  const main = el('div', { class: 'main' });
-  const top = el('header', { id: 'top' });
+  const bar = el('header', { class: 'bar' }, el('a', { class: 'wordmark', href: '#/' }, 'KAVE'));
   const view = el('main', { id: 'view' });
-  main.append(top, view);
-  shell.append(nav, main);
-  root.append(shell);
+  root.append(bar, view);
   document.title = 'Hub';
+  switcher = mountSwitcher(bar);
 }
 
-function renderNav(list, active, sub) {
-  const nav = document.getElementById('nav');
-  if (!nav) return;
-  nav.innerHTML = '';
-  nav.append(el('a', { class: 'brand', href: '#/' }, 'Kave hub'));
-  const items = [{ name: '', label: 'Home', href: '#/' }];
-  for (const p of list) {
-    items.push({ name: p.name, label: p.name, href: '#/' + p.name });
-    if (p.name === 'household') {
-      items.push({ name: 'household/infrastructure', label: 'infrastructure', href: '#/household/infrastructure' });
-    }
-  }
-  for (const it of items) {
-    const on = it.name === (sub ? active + '/' + sub : active);
-    nav.append(el('a', { class: 'plug' + (on ? ' active' : ''), href: it.href }, it.label));
-  }
-}
-
-function renderTop(title, note) {
-  const top = document.getElementById('top');
-  if (!top) return;
-  top.innerHTML = '';
-  top.append(el('span', { class: 'top-title' }, title));
-  const right = el('span', { class: 'top-right' });
-  if (note) right.append(el('span', { class: 'muted' }, note));
-  const forget = el('button', { type: 'button' }, 'Forget token');
-  forget.addEventListener('click', () => { data.clearToken(); start(); });
-  right.append(forget);
-  top.append(right);
+// The centred column with its reserved sidebar. Food does not use it.
+function buildPage() {
+  const sheet = el('div', { class: 'sheet view-fade' });
+  const side = el('aside', { class: 'side' });
+  const page = el('div', { class: 'page' }, el('div', { class: 'col' }, sheet), side);
+  return { page, sheet, side };
 }
 
 async function route() {
   const mySeq = ++seq;
+  status.limited = false;
+  let failed = false;
   const view = document.getElementById('view');
   if (!view) return;
-  const box = el('div', { class: 'view-fade' });
 
   const list = await getPlugins();
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  const isFood = parts[0] === 'food';
+  const frame = isFood ? null : buildPage();
+  const box = isFood ? el('div', { class: 'view-fade' }) : frame.sheet;
 
   try {
     if (!parts.length) {
@@ -82,23 +67,32 @@ async function route() {
       const plug = list.find(p => p.name === name);
       if (fn) await fn(box, parts.slice(1));
       else if (plug && registry.__generic) await registry.__generic(box, name, plug.description);
-      else box.append(emptyNote('Page not found. '), el('a', { href: '#/' }, 'Back home'));
+      else {
+        // A stale module can hide a route that should exist: refresh and reload once.
+        // A hash that names nothing just shows the note. Stale renders never spend the attempt.
+        if ((plug || name === 'settings') && mySeq === seq && await recover()) return;
+        box.append(emptyNote('Page not found. '), el('a', { href: '#/' }, 'Back home'));
+      }
     }
   } catch (e) {
+    failed = true;
     box.append(emptyNote('Something went wrong rendering this page: ' + e.message));
   }
 
   if (mySeq !== seq) return;
   if (document.getElementById('view') !== view) return;
-  renderNav(list, parts[0] || '', parts[0] === 'household' ? parts[1] : '');
-  renderTop(parts.join('/') || 'home');
+  switcher.setTiles(buildTiles(list), currentKey(location.hash));
+  detachToc();
   view.innerHTML = '';
-  view.append(box);
-  view.scrollTo(0, 0);
+  view.append(isFood ? box : frame.page);
+  if (frame) attachToc(frame.sheet, frame.side);
+  if (!failed && !status.limited) status.syncedAt = Date.now();
 }
 
-window.addEventListener('data:limit', () => renderTop(location.hash.replace(/^#\/?/, '') || 'home', 'Rate limited, try again later'));
+window.addEventListener('data:limit', () => { status.limited = true; });
 window.addEventListener('data:auth', () => { data.clearToken(); start(); });
+window.addEventListener('hub:forget', () => start());
+window.addEventListener('hub:refresh', () => { plugins = null; if (document.getElementById('view')) route(); });
 window.addEventListener('hashchange', () => { if (document.getElementById('view')) route(); });
 
 function start() {
@@ -109,8 +103,13 @@ function start() {
     return;
   }
   buildShell();
+  // The person chosen in Settings is the default landing page.
+  const who = getWho();
+  if (who && !location.hash) { location.hash = '#/' + who; return; }   // hashchange renders once
   route();
 }
 
 export { registry };
-import('./views/index.js').then(m => { m.register(); start(); });
+import('./views/index.js')
+  .then(m => { m.register(); start(); })
+  .catch(async e => { console.error(e); if (!(await recover())) root.textContent = ''; });
