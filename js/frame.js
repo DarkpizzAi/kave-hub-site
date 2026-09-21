@@ -3,6 +3,7 @@
 // these cards fill it when a page has something for it.
 
 import { el } from './ui.js';
+import { introFor } from './routes.js';
 
 let detach = null;
 
@@ -111,4 +112,10 @@ export function attachToc(sheet, side, win = window) {
     cardEl.remove();
   };
   return true;
+}
+
+// The one line under a page's title area. None for pages without an intro.
+export function introLine(key) {
+  const text = introFor(key);
+  return text ? el('p', { class: 'page-intro' }, text) : null;
 }

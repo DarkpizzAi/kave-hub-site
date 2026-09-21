@@ -292,6 +292,9 @@ body:has(.bar){min-width:var(--block)}
   box-shadow:var(--shadow-raised);padding:var(--sp-3);
   display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-1)}
 .switcher[hidden]{display:none}
+.switcher-label{grid-column:1/-1;font-size:var(--fs-meta);font-weight:var(--fw-medium);
+  letter-spacing:.06em;text-transform:lowercase;color:var(--text-dim);padding:var(--sp-1) var(--sp-1) 0}
+.switcher-label:not(:first-child){margin-top:var(--sp-2)}
 .app-tile{display:flex;flex-direction:column;align-items:center;gap:var(--sp-1);
   padding:var(--sp-2) var(--sp-1);border-radius:var(--r-control);color:var(--text-dim)}
 .app-tile:hover{text-decoration:none}
@@ -322,6 +325,7 @@ body:has(.bar){min-width:var(--block)}
   color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row:hover{background:var(--surface-2)}
 .toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
+.page-intro{margin:0 0 var(--sp-3);color:var(--text-dim);font-size:var(--fs-body);line-height:1.5}
 .fig-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .fig{background:var(--panel);border-radius:var(--r-control);padding:var(--sp-3)}
 .fig-value{font-size:var(--fs-title);font-weight:var(--fw-strong);line-height:var(--lh-title);font-variant-numeric:tabular-nums}

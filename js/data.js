@@ -68,13 +68,47 @@ async function request(path, accept) {
   return { status: 200, body };
 }
 
-export async function text(path) {
+async function textOnce(path) {
   if (memory.has(path)) return memory.get(path);
   const r = await request(path, RAW);
   const out = r.status === 200 ? r.body : null;
   // A missing file is a stable answer; a transient failure is not.
   if (r.status === 200 || r.status === 404) memory.set(path, out);
   return out;
+}
+
+// Transition support: the private repo's folders are being renamed. A path that
+// is missing under its new name is retried under the old ones. Remove this whole
+// block, and the two loops below, once both repos are on the new names.
+const MOVED_FILES = [
+  ['our-house/data/interior-design.md', ['house/data/design.md']],
+  ['chantier/data/infrastructure.md', ['household/data/infrastructure.md']],
+];
+const RENAMED_FOLDERS = [
+  ['our-house', ['household', 'house']],
+  ['finance', ['money']],
+  ['brand', ['design']],
+];
+
+export function fallbackPaths(path) {
+  const lead = path.startsWith('/') ? '/' : '';
+  const bare = path.replace(/^\/+/, '');
+  const out = [];
+  for (const [from, alts] of MOVED_FILES) if (bare === from) out.push(...alts);
+  for (const [name, olds] of RENAMED_FOLDERS) {
+    if (bare === name || bare.startsWith(name + '/')) {
+      for (const o of olds) out.push(o + bare.slice(name.length));
+    }
+  }
+  return out.map(p => lead + p);
+}
+
+export async function text(path) {
+  for (const p of [path, ...fallbackPaths(path)]) {
+    const t = await textOnce(p);
+    if (t != null) return t;
+  }
+  return null;
 }
 
 export async function json(path) {
@@ -89,11 +123,14 @@ export async function doc(path) {
 }
 
 export async function listDir(dir) {
-  const r = await request(dir, LISTING);
-  if (r.status !== 200) return [];
-  try {
-    return JSON.parse(r.body).filter(e => e.type === 'file').map(e => e.name);
-  } catch (e) { return []; }
+  for (const d of [dir, ...fallbackPaths(dir)]) {
+    const r = await request(d, LISTING);
+    if (r.status !== 200) continue;
+    try {
+      return JSON.parse(r.body).filter(e => e.type === 'file').map(e => e.name);
+    } catch (e) { /* try the next */ }
+  }
+  return [];
 }
 
 // Checks a candidate token against one small file. Stores nothing.

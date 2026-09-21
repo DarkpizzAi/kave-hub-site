@@ -1,9 +1,9 @@
-// House: delivery countdown, to-do progress, plan totals, and item lists
+// Our house, new-place project: delivery countdown, to-do progress, plan totals, and item lists
 // (equipment / wishes / design) with priority and status badges.
 
 import * as data from '../data.js';
 import { findSection, isTemplateText, inline } from '../md.js';
-import { el, card, header, chip, tableFromBlock, listFromBlock, emptyNote } from '../ui.js';
+import { el, card, chip, tableFromBlock, listFromBlock, emptyNote } from '../ui.js';
 
 // Parse "### Item" blocks with "- Field: value" lists and optional
 // Candidates/Pieces tables. Fenced templates are opaque code blocks so they
@@ -58,11 +58,10 @@ async function itemsSection(container, title, path) {
   for (const it of items) container.append(itemCard(it));
 }
 
-export default async function house(container) {
-  container.append(header('house', 'New house project'));
+export default async function ourHouseProject(container) {
 
   // Countdown
-  const plan = await data.doc('/house/data/plan.md');
+  const plan = await data.doc('/our-house/data/plan.md');
   let delivery = null;
   if (plan) {
     const facts = findSection(plan, /key facts/i);
@@ -83,7 +82,7 @@ export default async function house(container) {
   }
 
   // To-do with progress per phase
-  const todo = await data.doc('/house/data/todo.md');
+  const todo = await data.doc('/our-house/data/todo.md');
   if (todo) {
     container.append(el('h2', {}, 'To-do'));
     for (const s of todo.sections) {
@@ -114,7 +113,7 @@ export default async function house(container) {
     }
   }
 
-  await itemsSection(container, 'Equipment', '/house/data/equipment.md');
-  await itemsSection(container, 'Wishes', '/house/data/wishes.md');
-  await itemsSection(container, 'Design ideas', '/house/data/design.md');
+  await itemsSection(container, 'Equipment', '/our-house/data/equipment.md');
+  await itemsSection(container, 'Wishes', '/our-house/data/wishes.md');
+  await itemsSection(container, 'Interior design', '/our-house/data/interior-design.md');
 }
