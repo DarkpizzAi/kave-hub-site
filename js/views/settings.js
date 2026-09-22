@@ -52,9 +52,10 @@ function syncSection() {
   btn.addEventListener('click', () => {
     data.dropCache();
     status.limited = false;
-    status.syncedAt = Date.now();
-    paint();
-    flash(btn, 'Synced');
+    // status.syncedAt is stamped by route() once the refresh it triggers has
+    // actually finished rendering, not here - otherwise "synced" would be a
+    // lie for however long the refresh takes.
+    window.addEventListener('hub:refreshed', () => { paint(); flash(btn, 'Synced'); }, { once: true });
     window.dispatchEvent(new Event('hub:refresh'));
   });
   return card('Sync', el('div', { class: 'set-row' }, lines, btn));
