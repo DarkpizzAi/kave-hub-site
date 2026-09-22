@@ -8,6 +8,12 @@ import { PAGES, SECTIONS, keyFor } from './routes.js';
 
 const COLS = 3;
 
+// mountSwitcher is called again on every shell rebuild (re-auth, first-run
+// setup), each time on a fresh bar/menu. The two listeners below go on
+// document, which outlives the bar, so without this they'd pile up one pair
+// per rebuild. Track and remove the previous pair before adding the new one.
+let docListeners = null;
+
 export function nextIndex(i, key, count, cols = COLS) {
   const step = { ArrowRight: 1, ArrowLeft: -1, ArrowDown: cols, ArrowUp: -cols }[key];
   if (!step) return i;
@@ -52,21 +58,30 @@ export function mountSwitcher(bar) {
 
   chip.addEventListener('click', () => (menu.hidden ? open() : close()));
   menu.addEventListener('click', () => close());
-  document.addEventListener('click', e => {
-    if (!menu.hidden && !menu.contains(e.target) && !chip.contains(e.target)) close();
-  });
-  document.addEventListener('keydown', e => {
-    if (menu.hidden) return;
-    if (e.key === 'Escape') { close(true); return; }
-    const list = tiles();
-    const i = list.indexOf(document.activeElement);
-    if (i < 0) return;
-    const n = nextIndex(i, e.key, list.length);
-    if (n !== i || ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
-      e.preventDefault();
-      list[n].focus();
-    }
-  });
+
+  if (docListeners) {
+    document.removeEventListener('click', docListeners.click);
+    document.removeEventListener('keydown', docListeners.keydown);
+  }
+  docListeners = {
+    click: e => {
+      if (!menu.hidden && !menu.contains(e.target) && !chip.contains(e.target)) close();
+    },
+    keydown: e => {
+      if (menu.hidden) return;
+      if (e.key === 'Escape') { close(true); return; }
+      const list = tiles();
+      const i = list.indexOf(document.activeElement);
+      if (i < 0) return;
+      const n = nextIndex(i, e.key, list.length);
+      if (n !== i || ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
+        e.preventDefault();
+        list[n].focus();
+      }
+    },
+  };
+  document.addEventListener('click', docListeners.click);
+  document.addEventListener('keydown', docListeners.keydown);
 
   function setTiles(list, current) {
     menu.innerHTML = '';

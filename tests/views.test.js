@@ -32,6 +32,41 @@ test('our house renders without its files', async () => {
   done();
 });
 
+function withFiles(files) {
+  localStorage.setItem('ak', 't');
+  data.resetMemory();
+  data.setFetch(async url => {
+    for (const [needle, text] of Object.entries(files)) {
+      if (url.includes(needle)) return { status: 200, headers: { get: () => null }, text: async () => text };
+    }
+    return { status: 404, headers: { get: () => null }, text: async () => '' };
+  });
+}
+
+test('finance shows the safe-to-spend figure and a bill from real files', async () => {
+  const budget = ['# Budget', '', '## Monthly targets',
+    '| Line | EUR |', '|---|---|', '| Income | 3000 |', '| Savings | 500 |', '| Rent | 1200 |'].join('\n') + '\n';
+  const bills = ['# Recurring bills', '', '## Bills',
+    '| Name | Day | Amount | Notes |', '|---|---|---|---|', '| Internet | 5 | 40 | fibre |'].join('\n') + '\n';
+  withFiles({ 'finance/data/budget.md': budget, 'finance/data/recurring-bills.md': bills });
+  const box = document.createElement('div');
+  await finance(box);
+  eq(box.textContent.includes('Safe to spend'), true);
+  eq(box.textContent.includes('Internet'), true);
+  done();
+});
+
+test('our house shows a plant and a home-setup section from real files', async () => {
+  const plants = ['# Plants', '', '## Ficus', 'Water weekly.'].join('\n') + '\n';
+  const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
+  withFiles({ 'our-house/data/plants.md': plants, 'our-house/data/home-setup.md': setup });
+  const box = document.createElement('div');
+  await ourHouse(box);
+  eq(box.textContent.includes('Ficus'), true);
+  eq(box.textContent.includes('Router'), true);
+  done();
+});
+
 test('chantier renders and says infrastructure is missing when it is', async () => {
   allMissing();
   const box = document.createElement('div');

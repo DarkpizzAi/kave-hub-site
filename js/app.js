@@ -93,6 +93,7 @@ async function route() {
   view.append(isFood ? box : frame.page);
   if (frame) attachToc(frame.sheet, frame.side);
   if (!failed && !status.limited) status.syncedAt = Date.now();
+  window.dispatchEvent(new Event('hub:refreshed'));
 }
 
 window.addEventListener('data:limit', () => { status.limited = true; });
