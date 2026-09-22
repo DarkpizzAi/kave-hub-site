@@ -15,9 +15,10 @@ test('arrow keys move by one and by a row and stop at the edges', () => {
 
 test('buildTiles follows the route list, pages then apps', () => {
   const t = buildTiles();
-  eq(t.map(x => x.key), ['home', 'calendar', 'our-house', 'finance', 'hugo', 'fun', 'brand',
-    'chantier', 'security', 'settings', 'spoon']);
+  eq(t.map(x => x.key), ['home', 'our-house', 'finance', 'hugo', 'fun', 'brand',
+    'chantier', 'security', 'settings', 'spoon', 'calendar']);
   eq(t[0].href, '#/');
+  eq(t[9].section, 'apps');
   eq(t[10].section, 'apps');
 });
 

@@ -146,6 +146,7 @@ function segment(cls, pct, title) {
 
 export default async function finance(container) {
   container.append(header('finance', 'Joint finances: budget and bills'));
+  container.append(el('p', { class: 'tab-section-sub' }, 'Compass (finance app): coming soon.'));
   const [budget, bills] = await Promise.all([
     data.doc('/finance/data/budget.md'),
     data.doc('/finance/data/recurring-bills.md'),

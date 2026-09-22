@@ -7,7 +7,7 @@ import { el } from '../ui.js';
 const SPOON_URL = 'https://darkpizzai.github.io/kave-food-app/';
 
 export default async function food(container) {
-  container.classList.add('food');
+  container.classList.add('tablet-page');
   const frame = el('iframe', { title: 'Spoon', src: SPOON_URL });
   container.append(el('div', { class: 'tablet' },
     el('span', { class: 'cam' }),

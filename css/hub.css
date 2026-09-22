@@ -343,11 +343,24 @@ body:has(.bar){min-width:var(--block)}
   padding:var(--sp-2) var(--sp-3);margin-top:var(--sp-1);color:var(--text)}
 .side-link:hover{text-decoration:none}
 
-/* ---- Food: a landscape tablet, Spoon full bleed on its screen ---- */
-.food{display:flex;justify-content:center;padding:var(--sp-2) var(--sp-4)}
-/* the gap below equals the gap above (header plus its padding) */
-.tablet{position:relative;width:min(var(--cluster),100%);
-  height:calc(100vh - 2 * (var(--header-h) + var(--sp-2)));
+/* ---- interior design: style placeholders and colour palettes ---- */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--sp-2)}
+.style-card{background:var(--panel);border-radius:var(--r-control);padding:var(--sp-3);text-align:center}
+.style-name{font-weight:var(--fw-strong)}
+.style-soon{margin-top:var(--sp-1);font-size:var(--fs-meta);color:var(--text-dim)}
+.palette{padding:var(--sp-2) 0}
+.palette-row{display:flex;gap:var(--sp-2)}
+.palette-swatch{width:32px;height:32px;border-radius:var(--r-round);border:1px solid var(--rule)}
+
+/* ---- tablet-framed apps: Spoon full bleed, Compass a blank placeholder ---- */
+.tablet-page{display:flex;justify-content:center;align-items:center;padding:var(--sp-2) var(--sp-4)}
+/* the gap below equals the gap above (header plus its padding). Fixed 4:3:
+   only width is set (as the smallest of the column width and the width a
+   4:3 box would need to fit the viewport height), and aspect-ratio derives
+   the height from it - setting both dimensions independently would let one
+   constraint win and silently break the ratio. */
+.tablet{position:relative;aspect-ratio:4/3;
+  width:min(var(--cluster),100%,calc((100vh - 2 * (var(--header-h) + var(--sp-2))) * 4 / 3));
   background:var(--surface-2);border:1px solid var(--rule-strong);border-radius:28px;/* device frame, not a control */
   padding:26px 16px;box-shadow:var(--shadow-raised)}
 @media (prefers-color-scheme:dark){.tablet{background:var(--panel)}}
@@ -359,6 +372,8 @@ body:has(.bar){min-width:var(--block)}
 /* wider than the screen on both sides: the iframe's own scrollbar falls in the
    clipped part, and the wheel still scrolls it */
 .screen iframe{position:absolute;top:0;left:-20px;width:calc(100% + 40px);height:100%;border:0;display:block}
+.blank-screen{display:flex;align-items:center;justify-content:center;text-align:center;
+  padding:var(--sp-4);color:var(--text-dim);font-size:var(--fs-body)}
 
 /* ---- gate: bare, one masked field and an arrow ---- */
 .gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-5)}
