@@ -24,11 +24,19 @@ function row(label, hint, control) {
     control);
 }
 
+// Same conic-gradient swatch as Spoon's Settings tab (Home > Settings > Themes).
+const PALETTE_SWATCH = {
+  cobalt: 'conic-gradient(#0f1013 0 90deg, #1a73e8 90deg 180deg, #dbe3f2 180deg 270deg, #ffffff 270deg 360deg)',
+  amber: 'conic-gradient(#100f0c 0 90deg, #f4b400 90deg 180deg, #e6e2d4 180deg 270deg, #ffffff 270deg 360deg)',
+  chartreuse: 'conic-gradient(#0f1012 0 90deg, #d7d63a 90deg 180deg, #dde0ea 180deg 270deg, #ffffff 270deg 360deg)',
+};
+
 function themeSection() {
-  const pills = el('div', { class: 'pills' });
+  const pills = el('div', { class: 'who-buttons' });
   const buttons = PALETTES.map(p => {
     const b = el('button', { type: 'button', class: 'pill' + (p === getPalette() ? ' on' : '') },
-      p.charAt(0).toUpperCase() + p.slice(1));
+      el('span', { class: 'pal-swatch', style: `background:${PALETTE_SWATCH[p]}` }),
+      el('span', {}, p.charAt(0).toUpperCase() + p.slice(1)));
     b.addEventListener('click', () => {
       setPalette(p);
       buttons.forEach((x, i) => x.classList.toggle('on', PALETTES[i] === p));

@@ -19,6 +19,16 @@ const GLYPHS = {
   generic: ['M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M14 7l6 0', 'M17 4l0 6'],
   chevron: ['M6 9l6 6l6 -6'],
   arrow: ['M5 12l14 0', 'M13 18l6 -6', 'M13 6l6 6'],
+
+  // Plants: generic line-art stand-ins, not real illustrations of the
+  // specific varieties (see the "Plants" section note in our-house.js).
+  cactus: ['M7 21h10', 'M10 21v-11a2 2 0 0 1 4 0v11', 'M10 14h-2a2 2 0 0 1 -2 -2v-3', 'M14 11h2a2 2 0 0 0 2 -2v-2'],
+  dracaena: ['M8 21h8', 'M12 21v-10', 'M12 11v-8', 'M12 11l-4 -6', 'M12 11l4 -6', 'M12 11l-2 -7', 'M12 11l2 -7'],
+  alocasia: ['M8 21h8', 'M12 21v-8', 'M12 13c-4 -1 -6 -5 -3 -8c2 -2 4 0 3 3c-1 -3 1 -5 3 -3c3 3 1 7 -3 8z'],
+  pothos: ['M6 8h12', 'M8 8c0 4 -2 6 -1 10', 'M16 8c0 3 2 5 1 9', 'M7.5 12c1 -1 2 -1 2 0c0 1 -1 1 -2 0', 'M15.5 15c1 -1 2 -1 2 0c0 1 -1 1 -2 0'],
+  pachira: ['M12 21v-7', 'M12 14v-6', 'M12 14l-3 -5', 'M12 14l3 -5', 'M12 14l-1.5 -6', 'M12 14l1.5 -6'],
+  'olive-tree': ['M8 21h8', 'M12 21v-6', 'M12 15m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0'],
+  'lemon-tree': ['M8 21h8', 'M12 21v-6', 'M12 15m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0', 'M15 12m-1.2 0a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0 -2.4 0'],
 };
 
 const NS = 'http://www.w3.org/2000/svg';
