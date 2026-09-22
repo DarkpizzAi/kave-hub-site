@@ -37,7 +37,7 @@ export async function renderMoveInClock(container) {
     row.append(el('div', { class: 'clock-unit' }, nums[i], el('div', { class: 'clock-label' }, u)));
   });
   const done = el('p', { class: 'clock-done', hidden: '' }, "We're in.");
-  const c = card('until we move in');
+  const c = card('Countdown until we move in');
   c.append(el('div', { class: 'clock-box' }, row), done);
   container.append(c);
 

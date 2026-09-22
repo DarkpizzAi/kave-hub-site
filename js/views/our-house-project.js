@@ -25,15 +25,7 @@ export default async function ourHouseProject(container) {
   // Countdown: identical to the home page's, not just similar to it.
   await renderMoveInClock(container);
 
-  // The numbers live in their own card further down - this is a pointer to
-  // them, not the numbers themselves up top.
   const budgetCard = card('Move-in budget');
-  const budgetLink = el('a', { href: '#', class: 'side-link' }, 'Move-in budget →');
-  budgetLink.addEventListener('click', e => {
-    e.preventDefault();
-    budgetCard.scrollIntoView({ behavior: 'smooth' });
-  });
-  container.append(el('div', {}, budgetLink));
 
   const todo = await data.doc('/our-house/data/todo.md');
   if (todo) {
@@ -49,7 +41,7 @@ export default async function ourHouseProject(container) {
   const plan = await data.doc('/our-house/data/plan.md');
   if (plan) {
     for (const s of plan.sections) {
-      if (!/envelope|totals/i.test(s.heading)) continue;
+      if (!/envelope|totals|budget by room|financing/i.test(s.heading)) continue;
       budgetCard.append(el('h3', {}, s.heading));
       for (const b of s.blocks) {
         if (b.kind === 'table') budgetCard.append(tableFromBlock(b));

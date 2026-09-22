@@ -72,15 +72,15 @@ test('brand renders household-look.md live, themes included', async () => {
   done();
 });
 
-test('our house shows plant care and a home-setup section from real files', async () => {
-  const plants = ['# Plants', '', '## Conditions', 'Bright room.', '', '## Care', 'Water weekly.',
-    '', '## Wishlist', '- A ficus'].join('\n') + '\n';
+test('our house shows plant cards and a home-setup section from real files', async () => {
+  const plants = ['# Plants', '', '| Plant | Where | Count |', '|---|---|---|',
+    '| Cactus | Indoor | 2 |', '| Olive tree | Outside | 1 |'].join('\n') + '\n';
   const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
   withFiles({ 'our-house/data/plants.md': plants, 'our-house/data/home-setup.md': setup });
   const box = document.createElement('div');
   await ourHouse(box);
-  eq(box.textContent.includes('Water weekly'), true);
-  eq(box.textContent.includes('A ficus'), true);
+  eq(box.textContent.includes('Cactus'), true);
+  eq(box.textContent.includes('Olive tree'), true);
   eq(box.textContent.includes('Router'), true);
   done();
 });
@@ -149,7 +149,7 @@ test('home shows the four clock units and the date when the plan has a move-in l
   await home(box);
   eq(box.querySelectorAll('.clock-num').length, 4);
   eq(box.querySelector('.clock-when'), null);
-  eq(box.querySelector('.tab-section-title').textContent, 'until we move in');
+  eq(box.querySelector('.tab-section-title').textContent, 'Countdown until we move in');
   eq(/^\d+$/.test(box.querySelector('.clock-num').textContent), true);
   eq(/^\d\d$/.test(box.querySelectorAll('.clock-num')[3].textContent), true);
   eq(box.querySelector('.clock').hidden, false);
