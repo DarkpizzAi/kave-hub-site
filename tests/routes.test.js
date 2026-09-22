@@ -4,8 +4,8 @@ import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js'
 
 test('pages come in the agreed order and sections', () => {
   eq(PAGES.filter(p => p.section === 'pages').map(p => p.label),
-    ['home page', 'calendar', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
-  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon']);
+    ['home page', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
+  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'calendar']);
   eq(SECTIONS, ['pages', 'apps']);
 });
 
@@ -41,6 +41,7 @@ test('intros: none for home page, settings and spoon, none mention the new flat,
   eq(introFor('home'), null);
   eq(introFor('settings'), null);
   eq(introFor('spoon'), null);
+  eq(introFor('calendar'), null);
   for (const p of PAGES) {
     if (!p.intro) continue;
     eq(/new flat/i.test(p.intro), false, p.key);
@@ -57,4 +58,5 @@ test('introLine builds a paragraph for a page with an intro and nothing otherwis
   eq(p.textContent, 'Shared budget and bills.');
   eq(introLine('home'), null);
   eq(introLine('spoon'), null);
+  eq(introLine('calendar'), null);
 });

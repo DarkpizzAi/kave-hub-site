@@ -4,6 +4,8 @@ import finance from '../js/views/finance.js';
 import ourHouse from '../js/views/our-house.js';
 import chantier from '../js/views/chantier.js';
 import home from '../js/views/home.js';
+import calendar from '../js/views/calendar.js';
+import brand from '../js/views/brand.js';
 
 function allMissing() {
   localStorage.setItem('ak', 't');
@@ -53,18 +55,74 @@ test('finance shows the safe-to-spend figure and a bill from real files', async 
   await finance(box);
   eq(box.textContent.includes('Safe to spend'), true);
   eq(box.textContent.includes('Internet'), true);
+  eq(box.textContent.includes('Compass (finance app): coming soon'), true);
   done();
 });
 
-test('our house shows a plant and a home-setup section from real files', async () => {
-  const plants = ['# Plants', '', '## Ficus', 'Water weekly.'].join('\n') + '\n';
+test('brand renders household-look.md live, themes included', async () => {
+  const look = ['# The household look', '', 'One look, everywhere.', '', '## Type',
+    'Rubik, eight steps.', '', '## Colour', 'Shared neutrals, then themes.',
+    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |'].join('\n') + '\n';
+  withFiles({ 'brand/data/household-look.md': look });
+  const box = document.createElement('div');
+  await brand(box);
+  eq(box.textContent.includes('Cobalt, Amber, Chartreuse'), true);
+  eq(box.textContent.includes('Rubik, eight steps'), true);
+  eq(box.textContent.includes('Shared neutrals, then themes'), true);
+  done();
+});
+
+test('our house shows plant care and a home-setup section from real files', async () => {
+  const plants = ['# Plants', '', '## Conditions', 'Bright room.', '', '## Care', 'Water weekly.',
+    '', '## Wishlist', '- A ficus'].join('\n') + '\n';
   const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
   withFiles({ 'our-house/data/plants.md': plants, 'our-house/data/home-setup.md': setup });
   const box = document.createElement('div');
   await ourHouse(box);
-  eq(box.textContent.includes('Ficus'), true);
+  eq(box.textContent.includes('Water weekly'), true);
+  eq(box.textContent.includes('A ficus'), true);
   eq(box.textContent.includes('Router'), true);
   done();
+});
+
+test('our house new-flat section links to the move-in budget and lists to-dos', async () => {
+  const plan = ['# House plan', '', '## Key facts', '- Delivery date: 27/09/2027.',
+    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR'].join('\n') + '\n';
+  const todo = ['# Our house to-do', '', '## Before', '- [ ] 2026-01-01 added: make the budget',
+    '', '## Upon move-in', '- [ ] 2026-01-01 added: hire an inspector'].join('\n') + '\n';
+  withFiles({ 'our-house/data/plan.md': plan, 'our-house/data/todo.md': todo });
+  const box = document.createElement('div');
+  await ourHouse(box);
+  eq(box.textContent.includes('until we move in'), true);
+  eq(box.textContent.includes('Move-in budget'), true);
+  eq(box.textContent.includes('make the budget'), true);
+  eq(box.textContent.includes('hire an inspector'), true);
+  eq(box.textContent.includes('Compass (finance app): coming soon'), true);
+  eq(box.textContent.includes('20000 EUR'), true);
+  done();
+});
+
+test('our house interior design shows styles and colour swatches', async () => {
+  const interior = ['# Interior design ideas', '', '## Styles', '- Mid-century', '- Art pop',
+    '', '## Palettes', '', '### Blue, orange, cream and yellow', '- #2f5d8a', '- #e8792f'].join('\n') + '\n';
+  withFiles({ 'our-house/data/interior-design.md': interior });
+  const box = document.createElement('div');
+  await ourHouse(box);
+  eq(box.textContent.includes('Mid-century'), true);
+  eq(box.textContent.includes('Art pop'), true);
+  eq(box.textContent.includes('mood board coming soon'), true);
+  eq(box.textContent.includes('Blue, orange, cream and yellow'), true);
+  eq(box.querySelectorAll('.palette-swatch').length, 2);
+  done();
+});
+
+test('calendar is a blank tablet saying Compass is coming', async () => {
+  const box = document.createElement('div');
+  await calendar(box);
+  eq(box.classList.contains('tablet-page'), true);
+  eq(box.querySelector('.tablet') !== null, true);
+  eq(box.querySelector('iframe'), null);
+  eq(box.textContent.includes('Compass app coming soon'), true);
 });
 
 test('chantier renders and says infrastructure is missing when it is', async () => {
