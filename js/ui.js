@@ -135,6 +135,37 @@ export function header() {
   return document.createDocumentFragment();
 }
 
+// A fixed-position overlay: backdrop plus a panel with a header (title + close)
+// and a scrollable body. Not appended or shown by itself - call .open() when
+// wanted, .close() (or Esc, or a backdrop click, or the close button) to hide
+// it again. Built once per call; safe to keep around and re-open.
+export function popup(title, ...children) {
+  const body = el('div', { class: 'popup-body' }, ...children);
+  const closeBtn = el('button', { type: 'button', class: 'popup-close', 'aria-label': 'Close' }, '✕');
+  const panel = el('div', { class: 'popup-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+    el('div', { class: 'popup-head' }, el('span', { class: 'popup-title' }, title), closeBtn),
+    body);
+  const backdrop = el('div', { class: 'popup-backdrop', hidden: '' }, panel);
+
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  function open() {
+    document.body.append(backdrop);
+    backdrop.hidden = false;
+    document.addEventListener('keydown', onKey);
+  }
+  function close() {
+    backdrop.hidden = true;
+    document.removeEventListener('keydown', onKey);
+    backdrop.remove();
+  }
+  closeBtn.addEventListener('click', close);
+  backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
+
+  backdrop.open = open;
+  backdrop.close = close;
+  return backdrop;
+}
+
 export function selectBox(labelTxt, options, onchange) {
   const sel = el('select', { onchange: e => onchange(e.target.value) },
     ...options.map(o => el('option', { value: o.value }, o.label)));

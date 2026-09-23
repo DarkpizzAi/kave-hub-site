@@ -1,11 +1,26 @@
-// Chantier: how the hub is built. The infrastructure section (how the five
-// devices talk to each other and to GitHub and Drive) comes first, then every
-// other data file of the chantier plugin as cards.
+// Chantier: how the hub is built. The infrastructure section (device cards,
+// interactions, flows, routines) comes first, then every other data file of
+// the chantier plugin as cards - except roadmap.md (the roadmap skill still
+// reads/writes it, the site just doesn't render it), the security files
+// (rendered on the security page, see security.js), and data-locations.md
+// (also moved to the security page).
 
 import * as data from '../data.js';
 import { findSection, firstTable, isTemplateText } from '../md.js';
-import { el, card, chip, emptyNote, renderDocCards } from '../ui.js';
+import { el, card, chip, emptyNote, popup, renderDocCards } from '../ui.js';
+import { glyph } from '../glyphs.js';
 import { SECURITY_FILES } from './security.js';
+
+// Files that live in chantier/data but never render on this generic loop.
+const SKIP_FILES = ['infrastructure.md', 'roadmap.md', 'data-locations.md', ...SECURITY_FILES];
+
+// A device's kind maps to one of the outline glyphs added for this page.
+const DEVICE_GLYPH = { pc: 'pc', 'android phone': 'phone' };
+function deviceGlyph(name, kind) {
+  if (/mini pc|server/i.test(name)) return 'server';
+  if (/surface/i.test(name)) return 'tablet';
+  return DEVICE_GLYPH[kind.toLowerCase()] || 'generic';
+}
 
 function rows(doc, re) {
   const s = doc && findSection(doc, re);
@@ -13,18 +28,30 @@ function rows(doc, re) {
   return t ? t.rows : [];
 }
 
-// A reserved spot, not a feature: the dashed box means "not built yet", as in Spoon.
-function monitorIdea(container) {
-  const c = card('Infrastructure monitor');
-  c.querySelector('.card').classList.add('idea');
-  c.append(el('p', {}, 'Not built yet. An idea for once the mini PC is set up: app versions, server status, '
-    + 'pending updates, and when each routine last ran and whether it worked.'));
-  container.append(c);
+async function routinesSection(container) {
+  const doc = await data.doc('/chantier/data/routines.md');
+  if (!doc) return;
+  container.append(el('p', { class: 'tab-section-sub' }, 'Routines'));
+  const list = el('div', { class: 'grid' });
+  for (const s of doc.sections) {
+    if (s.level === 0 || !s.heading) continue;
+    const summaryBlock = s.blocks.find(b => b.kind === 'p' && /^Summary:/.test(b.text));
+    const summary = summaryBlock ? summaryBlock.text.replace(/^Summary:\s*/, '') : '';
+    const rest = s.blocks.filter(b => b !== summaryBlock);
+    const d = el('details', {},
+      el('summary', {}, s.heading + (summary ? ' - ' + summary : '')));
+    const inner = el('div', { class: 'card' });
+    for (const b of rest) {
+      if (b.kind === 'p') inner.append(el('p', {}, b.text));
+    }
+    d.append(inner);
+    list.append(d);
+  }
+  container.append(list);
 }
 
 async function infrastructure(container) {
   container.append(el('h2', {}, 'Infrastructure'));
-  monitorIdea(container);
 
   const doc = await data.doc('/chantier/data/infrastructure.md');
   if (!doc) { container.append(emptyNote('chantier/data/infrastructure.md is missing.')); return; }
@@ -33,18 +60,23 @@ async function infrastructure(container) {
   const links = rows(doc, /^interactions/i);
   const unknown = c => isTemplateText(c) || /to confirm/i.test(c);
 
-  const grid = el('div', { class: 'grid' });
+  const grid = el('div', { class: 'device-grid' });
   for (const [name, owner, kind, notes] of devs) {
     const mine = links.filter(r => r[0] === name || r[1] === name);
     const c = card(name);
-    c.append(el('p', { class: 'muted' }, `${owner} - ${kind}`));
-    if (notes) c.append(el('p', {}, notes));
+    const body = el('div', { class: 'device-card' },
+      el('div', { class: 'device-icon' }, glyph(deviceGlyph(name, kind), 28)),
+      el('div', {}));
+    const text = body.children[1];
+    text.append(el('p', { class: 'muted' }, `${owner} - ${kind}`));
+    if (notes) text.append(el('p', {}, notes));
     for (const [from, to, channel, what, status] of mine) {
       const other = from === name ? to : from;
-      c.append(el('p', {},
+      text.append(el('p', {},
         chip(unknown(status) ? 'to confirm' : status),
         ' ', other, ' via ', channel, unknown(what) ? '' : ' - ' + what));
     }
+    c.append(body);
     grid.append(c);
   }
   container.append(grid);
@@ -71,10 +103,13 @@ async function infrastructure(container) {
   const open = links.filter(r => unknown(r[4])).length;
   container.append(el('p', { class: 'muted' },
     `${links.length} interactions listed, ${open} still to confirm. Edit chantier/data/infrastructure.md.`));
+
+  await routinesSection(container);
 }
 
-// The delivery log is newest first and long. The latest entries show as cards;
-// the rest fold into a closed details block so the page and its sidebar stay short.
+// The delivery log is newest first and long. The latest entries show as cards
+// on the page; "Older entries" opens a popup with the complete log (not just
+// the folded tail) via renderDocCards.
 const RECENT_LOG_ENTRIES = 10;
 
 async function deliveryLog(container) {
@@ -87,9 +122,13 @@ async function deliveryLog(container) {
   renderDocCards(container, { sections: [...intro, ...entries.slice(0, RECENT_LOG_ENTRIES)] }, opts);
   const older = entries.slice(RECENT_LOG_ENTRIES);
   if (older.length) {
-    const fold = el('details', { class: 'older' }, el('summary', {}, `Older entries (${older.length})`));
-    renderDocCards(fold, { sections: older }, opts);
-    container.append(fold);
+    const body = el('div');
+    renderDocCards(body, { sections: older }, opts);
+    const pop = popup(`Older entries (${older.length})`, body);
+    for (const sec of pop.querySelectorAll('.tab-section')) sec.classList.add('no-toc');
+    const btn = el('button', { type: 'button', class: 'btn' }, `Older entries (${older.length})`);
+    btn.addEventListener('click', () => pop.open());
+    container.append(btn);
   }
 }
 
@@ -97,7 +136,7 @@ export default async function chantier(container) {
   await infrastructure(container);
 
   const files = (await data.listDir('chantier/data'))
-    .filter(f => f.endsWith('.md') && f !== 'infrastructure.md' && !SECURITY_FILES.includes(f));
+    .filter(f => f.endsWith('.md') && !SKIP_FILES.includes(f));
   for (const f of files) {
     if (f === 'log.md') { await deliveryLog(container); continue; }
     const doc = await data.doc(`/chantier/data/${f}`);

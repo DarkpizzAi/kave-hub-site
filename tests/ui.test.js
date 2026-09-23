@@ -1,5 +1,5 @@
 import { test, eq } from './run.js';
-import { card, header } from '../js/ui.js';
+import { card, header, popup } from '../js/ui.js';
 
 test('card renders a titled section with the white card inside', () => {
   const c = card('Care');
@@ -50,4 +50,46 @@ test('header renders nothing', () => {
 test('the card title span is queryable by class', () => {
   const c = card('Care');
   eq(c.querySelector('.tab-section-title').textContent, 'Care');
+});
+
+test('popup opens into the document with its title and children, closed by default', () => {
+  const p = popup('My title', document.createElement('p'));
+  eq(document.body.contains(p), false);
+  p.open();
+  eq(document.body.contains(p), true);
+  eq(p.hidden, false);
+  eq(p.querySelector('.popup-title').textContent, 'My title');
+  eq(p.querySelectorAll('.popup-body > p').length, 1);
+  p.close();
+});
+
+test('popup.close removes it from the document', () => {
+  const p = popup('T', document.createElement('p'));
+  p.open();
+  p.close();
+  eq(document.body.contains(p), false);
+  eq(p.hidden, true);
+});
+
+test('the close button closes the popup', () => {
+  const p = popup('T', document.createElement('p'));
+  p.open();
+  p.querySelector('.popup-close').click();
+  eq(document.body.contains(p), false);
+});
+
+test('clicking the backdrop closes the popup, clicking the panel does not', () => {
+  const p = popup('T', document.createElement('p'));
+  p.open();
+  p.querySelector('.popup-panel').click();
+  eq(document.body.contains(p), true);
+  p.click();
+  eq(document.body.contains(p), false);
+});
+
+test('Escape closes the popup', () => {
+  const p = popup('T', document.createElement('p'));
+  p.open();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+  eq(document.body.contains(p), false);
 });

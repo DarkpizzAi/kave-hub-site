@@ -322,15 +322,25 @@ body:has(.bar){min-width:var(--block)}
   scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
 .side{width:var(--side-w);flex:none;margin-top:var(--sp-2);
   display:flex;flex-direction:column;gap:var(--sp-3);
-  max-height:calc(100vh - var(--header-h) - var(--sp-2));overflow-y:auto;scrollbar-width:none}
+  max-height:calc(100vh - var(--header-h) - var(--sp-2));overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
 .side-card{background:var(--surface);border-radius:var(--r-card);padding:var(--sp-3)}
 .side-label{font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--text-dim);margin:0 0 var(--sp-2)}
-.toc-row{display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
-  color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
+/* right padding so the pill/rows never sit under the sidebar's own scrollbar thumb */
+.toc .side-card,.toc.side-card{padding-right:calc(var(--sp-3) + 6px)}
+.toc-rows{position:relative}
+/* the pill: a separate element behind the row text, inset like .nav-icon
+   rather than a full-row block fill - it floats, the row doesn't. Its top
+   and height are set from JS every scroll tick, no transition (the scroll
+   itself, smooth on a click, is what animates it). */
+.toc-pill{position:absolute;left:2px;right:2px;top:0;height:0;border-radius:var(--r-pill);
+  background:var(--accent);z-index:0;pointer-events:none}
+.toc-row{position:relative;z-index:1;display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
+  color:var(--text-dim);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row{font-size:var(--fs-ui);font-weight:var(--fw-regular)}
 .toc-row.toc-sub{padding-left:calc(var(--sp-3) + var(--sp-4))}
 .toc-row:hover{background:var(--surface-2)}
-.toc-row.on{background:var(--accent);color:var(--accent-text);font-weight:var(--fw-strong)}
+.toc-row.on{color:var(--accent-text);font-weight:var(--fw-strong)}
 .page-intro{margin:0 0 var(--sp-3);color:var(--text-dim);font-size:var(--fs-body);line-height:1.5}
 .fig-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
 .fig{background:var(--panel);border-radius:var(--r-control);padding:var(--sp-3)}
@@ -353,6 +363,32 @@ body:has(.bar){min-width:var(--block)}
 .palette-swatch{width:32px;height:32px;border-radius:var(--r-round);border:1px solid var(--rule)}
 .plant-card{display:flex;align-items:center;gap:var(--sp-3)}
 .plant-icon{color:var(--text-dim);flex:none}
+/* denser grid for the plants section: several small cards per row */
+.plant-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--sp-3)}
+.plant-grid .plant-card{flex-direction:column;text-align:center;gap:var(--sp-2)}
+
+/* ---- device cards (infrastructure page) ---- */
+.device-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:var(--sp-3)}
+.device-card{display:flex;gap:var(--sp-3);align-items:flex-start}
+.device-icon{color:var(--text-dim);flex:none}
+
+/* ---- popup: backdrop plus a panel, header row and scrollable body ---- */
+.popup-backdrop{position:fixed;inset:0;z-index:50;background:color-mix(in srgb, black 45%, transparent);
+  display:flex;align-items:center;justify-content:center;padding:var(--sp-4);
+  animation:popupfade .15s ease}
+.popup-backdrop[hidden]{display:none}
+@keyframes popupfade{from{opacity:0}to{opacity:1}}
+.popup-panel{background:var(--surface);border-radius:var(--r-sheet);width:min(600px,100%);
+  max-height:calc(100vh - 2 * var(--sp-6));display:flex;flex-direction:column;
+  box-shadow:var(--shadow-raised);animation:popupin .15s ease}
+@keyframes popupin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.popup-head{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+  padding:var(--sp-3) var(--sp-4);border-bottom:1px solid var(--rule)}
+.popup-title{font-weight:var(--fw-strong);font-size:var(--fs-lede)}
+.popup-close{border:0;background:transparent;color:var(--text-dim);cursor:pointer;
+  font-size:16px;line-height:1;padding:var(--sp-1) var(--sp-2);border-radius:var(--r-control)}
+.popup-close:hover{background:var(--surface-2);color:var(--text)}
+.popup-body{overflow-y:auto;padding:var(--sp-4);scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
 
 /* ---- tablet-framed apps: Spoon full bleed, Compass a blank placeholder ---- */
 .tablet-page{display:flex;justify-content:center;align-items:center;padding:var(--sp-2) var(--sp-4)}

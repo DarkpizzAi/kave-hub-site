@@ -72,7 +72,7 @@ test('brand renders household-look.md live, themes included', async () => {
   done();
 });
 
-test('our house shows plant cards and a home-setup section from real files', async () => {
+test('our house shows plant cards in a dense grid, and no setup section', async () => {
   const plants = ['# Plants', '', '| Plant | Where | Count |', '|---|---|---|',
     '| Cactus | Indoor | 2 |', '| Olive tree | Outside | 1 |'].join('\n') + '\n';
   const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
@@ -81,7 +81,10 @@ test('our house shows plant cards and a home-setup section from real files', asy
   await ourHouse(box);
   eq(box.textContent.includes('Cactus'), true);
   eq(box.textContent.includes('Olive tree'), true);
-  eq(box.textContent.includes('Router'), true);
+  eq(box.querySelector('.plant-grid') !== null, true);
+  // home-setup.md is left as a data file, not rendered here any more
+  eq(box.textContent.includes('Router'), false);
+  eq([...box.querySelectorAll('h2')].some(h => h.textContent === 'Setup'), false);
   done();
 });
 

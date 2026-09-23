@@ -35,12 +35,31 @@ export function tocEntries(root) {
       grouped = true;
       continue;
     }
+    // an explicit per-section opt-out from the sidebar (see chantier/security)
+    if (n.classList.contains('no-toc')) continue;
     const t = n.querySelector('.tab-section-title');
     if (!t) continue;
     out.push({ id: n.id, title: t.textContent, depth: grouped ? 1 : 0 });
   }
   return out;
 }
+
+// Which section is "current" for a given scroll line: the last one whose top
+// has passed the line, and how far (0..1) the scroll has gone from that
+// section's top toward the next one's - the fraction the pill interpolates
+// on. The last section always has frac 0 (nothing to interpolate toward).
+export function pillState(sectionTops, line) {
+  let index = 0;
+  for (let i = 0; i < sectionTops.length; i++) {
+    if (sectionTops[i] < line) index = i;
+  }
+  if (index >= sectionTops.length - 1) return { index, frac: 0 };
+  const span = sectionTops[index + 1] - sectionTops[index];
+  const frac = span > 0 ? Math.min(1, Math.max(0, (line - sectionTops[index]) / span)) : 0;
+  return { index, frac };
+}
+
+export function lerp(a, b, t) { return a + (b - a) * t; }
 
 // Two or more titled sections and more than about two screens of content.
 export function shouldShowToc(count, contentHeight, viewportHeight) {
@@ -118,18 +137,33 @@ export function attachToc(sheet, side, win = window) {
   window.addEventListener('resize', fit);
   fit();
 
-  const cardEl = sideCard('On this page', ...rows);
+  const pill = el('div', { class: 'toc-pill', 'aria-hidden': 'true' });
+  const rowsWrap = el('div', { class: 'toc-rows' }, pill, ...rows);
+  const cardEl = sideCard('On this page', rowsWrap);
   cardEl.classList.add('toc');
   side.prepend(cardEl);
+
+  const reduced = !!(win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let lastIndex = -1;
 
   const spy = () => {
     // a section is current once its top has passed 60px below the sheet's top edge
     const line = sheet.getBoundingClientRect().top + 60;
-    let cur = entries[0].id;
-    for (const e of entries) {
-      if (document.getElementById(e.id).getBoundingClientRect().top < line) cur = e.id;
+    const tops = entries.map(e => document.getElementById(e.id).getBoundingClientRect().top);
+    const { index, frac } = pillState(tops, line);
+
+    rows.forEach((r, i) => r.classList.toggle('on', i === index));
+
+    const cur = rows[index];
+    const next = rows[index + 1];
+    const useFrac = reduced ? 0 : frac;
+    pill.style.top = lerp(cur.offsetTop, next ? next.offsetTop : cur.offsetTop, useFrac) + 'px';
+    pill.style.height = lerp(cur.offsetHeight, next ? next.offsetHeight : cur.offsetHeight, useFrac) + 'px';
+
+    if (index !== lastIndex) {
+      lastIndex = index;
+      cur.scrollIntoView({ block: 'nearest' });
     }
-    rows.forEach((r, i) => r.classList.toggle('on', entries[i].id === cur));
   };
   sheet.addEventListener('scroll', spy, { passive: true });
   spy();

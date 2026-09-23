@@ -29,35 +29,90 @@ function done() {
 
 const titles = nodes => [...nodes].map(t => t.textContent);
 
-test('chantier shows the latest ten log entries and folds the older ones away', async () => {
+test('chantier shows the latest ten log entries inline, and a button opens a popup with the rest', async () => {
   serveLog(12);
   const box = document.createElement('div');
   await chantier(box);
-  const shown = titles([...box.querySelectorAll('.tab-section-title')].filter(t => !t.closest('details')));
+  const shown = titles([...box.querySelectorAll('.tab-section-title')]);
   eq(shown.includes('Entry 1'), true);
   eq(shown.includes('Entry 10'), true);
   eq(shown.includes('Entry 11'), false);
-  const older = box.querySelector('details.older');
-  eq(older.querySelector('summary').textContent, 'Older entries (2)');
-  eq(titles(older.querySelectorAll('.tab-section-title')), ['Entry 11', 'Entry 12']);
+  eq(box.querySelector('details.older'), null);
+  const btns = [...box.querySelectorAll('button')].filter(b => b.textContent === 'Older entries (2)');
+  eq(btns.length, 1);
+  btns[0].click();
+  const pop = document.querySelector('.popup-backdrop');
+  eq(pop.hidden, false);
+  eq(titles(pop.querySelectorAll('.tab-section-title')), ['Entry 11', 'Entry 12']);
+  pop.close();
   done();
 });
 
-test('chantier adds no fold when the log has ten entries or fewer', async () => {
+test('chantier adds no older-entries button when the log has ten entries or fewer', async () => {
   serveLog(8);
   const box = document.createElement('div');
   await chantier(box);
-  eq(box.querySelector('details.older'), null);
+  eq([...box.querySelectorAll('button')].some(b => /Older entries/.test(b.textContent)), false);
   eq(box.textContent.includes('Body 8.'), true);
   done();
 });
 
-test('chantier reserves a dashed spot for the infrastructure monitor', async () => {
+test('chantier no longer reserves a spot for the infrastructure monitor', async () => {
   serveLog(3);
   const box = document.createElement('div');
   await chantier(box);
   const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
-  eq(titles.includes('Infrastructure monitor'), true);
-  eq(box.querySelector('.card.idea').textContent.includes('Not built yet'), true);
+  eq(titles.includes('Infrastructure monitor'), false);
+  eq(box.textContent.includes('Not built yet'), false);
+  done();
+});
+
+function serveInfra(devicesTable, routinesBody) {
+  localStorage.setItem('ak', 't');
+  data.resetMemory();
+  data.setFetch(async url => {
+    if (url.includes('contents/chantier/data?ref')) {
+      return ok(JSON.stringify([{ type: 'file', name: 'log.md' }, { type: 'file', name: 'roadmap.md' },
+        { type: 'file', name: 'data-locations.md' }]));
+    }
+    if (url.includes('chantier/data/infrastructure.md')) return ok(devicesTable);
+    if (url.includes('chantier/data/routines.md')) return ok(routinesBody);
+    if (url.includes('chantier/data/log.md')) return ok(logWith(1));
+    return missing();
+  });
+}
+
+const INFRA = ['# Infrastructure', '', '## Devices', '| Device | Owner | Kind | Notes |', '|--|--|--|--|',
+  "| Hugo's Pixel 7a | Hugo | Android phone |  |",
+  "| Isa's Surface | Isa | PC |  |",
+  "| The house mini PC | Household | PC |  |",
+  "| Hugo's gaming PC | Hugo | PC |  |",
+  '', '## Interactions', '| From | To | Channel | What moves | Status |', '|--|--|--|--|--|'].join('\n');
+
+const ROUTINES = ['# Routines', '', '### Daily sweep', 'Summary: Runs every morning.', '',
+  'The full detail goes here.'].join('\n');
+
+test('chantier renders one device card per row, with an icon, and drops roadmap.md and data-locations.md', async () => {
+  serveInfra(INFRA, ROUTINES);
+  const box = document.createElement('div');
+  await chantier(box);
+  const cardTitles = [...box.querySelectorAll('.device-grid .tab-section-title')].map(t => t.textContent);
+  eq(cardTitles, ["Hugo's Pixel 7a", "Isa's Surface", 'The house mini PC', "Hugo's gaming PC"]);
+  eq(box.querySelectorAll('.device-grid .glyph').length, 4);
+  const allTitles = [...box.querySelectorAll('h2')].map(h => h.textContent);
+  eq(allTitles.includes('Roadmap'), false);
+  eq(allTitles.includes('Data locations: the two-zone rule, and the register'), false);
+  done();
+});
+
+test('chantier renders a routines subsection with one expandable entry per routine', async () => {
+  serveInfra(INFRA, ROUTINES);
+  const box = document.createElement('div');
+  await chantier(box);
+  eq(box.textContent.includes('Routines'), true);
+  const d = box.querySelector('details');
+  eq(d.querySelector('summary').textContent.includes('Daily sweep'), true);
+  eq(d.querySelector('summary').textContent.includes('Runs every morning.'), true);
+  eq(d.textContent.includes('The full detail goes here.'), true);
   done();
 });
