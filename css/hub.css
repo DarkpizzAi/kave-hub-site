@@ -345,9 +345,9 @@ body:has(.bar){min-width:var(--block)}
 /* titles sit flush (only the row's own minimal padding); only a subtitle
    row gets the extra indent that marks it as one level down. */
 .toc-row{position:relative;z-index:1;display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
-  color:var(--text-dim);padding:var(--sp-1) var(--sp-2);border-radius:var(--r-pill);cursor:pointer}
+  color:var(--text-dim);padding:var(--sp-2) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row{font-size:var(--fs-ui);font-weight:var(--fw-regular)}
-.toc-row.toc-sub{padding-left:calc(var(--sp-2) + var(--sp-4))}
+.toc-row.toc-sub{padding-left:calc(var(--sp-3) + var(--sp-4))}
 .toc-row:hover{background:var(--surface-2)}
 .toc-row.on{color:var(--accent-text);font-weight:var(--fw-strong)}
 .page-intro{margin:0 0 var(--sp-3);color:var(--text-dim);font-size:var(--fs-body);line-height:1.5}
