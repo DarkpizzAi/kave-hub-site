@@ -35,11 +35,25 @@ export function tocEntries(root) {
       grouped = true;
       continue;
     }
+    // an explicit per-section opt-out from the sidebar (see chantier/security)
+    if (n.classList.contains('no-toc')) continue;
     const t = n.querySelector('.tab-section-title');
     if (!t) continue;
     out.push({ id: n.id, title: t.textContent, depth: grouped ? 1 : 0 });
   }
   return out;
+}
+
+// Which section is "current" for a given scroll line: the last one whose top
+// has passed the line. Always snaps to exactly one section, never a point
+// between two - the pill has one well-defined target at any moment, and the
+// CSS transition on .toc-pill is what makes moving to it look smooth.
+export function currentIndex(sectionTops, line) {
+  let index = 0;
+  for (let i = 0; i < sectionTops.length; i++) {
+    if (sectionTops[i] < line) index = i;
+  }
+  return index;
 }
 
 // Two or more titled sections and more than about two screens of content.
@@ -54,7 +68,7 @@ export function tailSpace(clientHeight, contentHeight, lastTop, pad) {
 }
 
 export function sideCard(label, ...children) {
-  return el('div', { class: 'side-card' }, el('p', { class: 'side-label' }, label), ...children);
+  return el('div', { class: 'side-card' }, label ? el('p', { class: 'side-label' }, label) : null, ...children);
 }
 
 export function figuresCard(label, items) {
@@ -118,18 +132,32 @@ export function attachToc(sheet, side, win = window) {
   window.addEventListener('resize', fit);
   fit();
 
-  const cardEl = sideCard('On this page', ...rows);
+  const pill = el('div', { class: 'toc-pill', 'aria-hidden': 'true' });
+  const rowsWrap = el('div', { class: 'toc-rows' }, pill, ...rows);
+  const cardEl = sideCard(null, rowsWrap);
   cardEl.classList.add('toc');
   side.prepend(cardEl);
+
+  let lastIndex = -1;
 
   const spy = () => {
     // a section is current once its top has passed 60px below the sheet's top edge
     const line = sheet.getBoundingClientRect().top + 60;
-    let cur = entries[0].id;
-    for (const e of entries) {
-      if (document.getElementById(e.id).getBoundingClientRect().top < line) cur = e.id;
-    }
-    rows.forEach((r, i) => r.classList.toggle('on', entries[i].id === cur));
+    const tops = entries.map(e => document.getElementById(e.id).getBoundingClientRect().top);
+    const index = currentIndex(tops, line);
+    if (index === lastIndex) return;
+    lastIndex = index;
+
+    rows.forEach((r, i) => r.classList.toggle('on', i === index));
+
+    // Snap straight to the current row - a small scroll never leaves the
+    // pill part-way between two rows. The CSS transition on .toc-pill
+    // animates this move; a click that jumps several rows covers more
+    // distance in the same transition, reading as a bigger swoosh.
+    const cur = rows[index];
+    pill.style.top = cur.offsetTop + 'px';
+    pill.style.height = cur.offsetHeight + 'px';
+    cur.scrollIntoView({ block: 'nearest' });
   };
   sheet.addEventListener('scroll', spy, { passive: true });
   spy();

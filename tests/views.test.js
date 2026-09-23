@@ -62,17 +62,38 @@ test('finance shows the safe-to-spend figure and a bill from real files', async 
 test('brand renders household-look.md live, themes included', async () => {
   const look = ['# The household look', '', 'One look, everywhere.', '', '## Type',
     'Rubik, eight steps.', '', '## Colour', 'Shared neutrals, then themes.',
-    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |'].join('\n') + '\n';
+    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |',
+    '', '## History', 'Old news.'].join('\n') + '\n';
   withFiles({ 'brand/data/household-look.md': look });
   const box = document.createElement('div');
   await brand(box);
   eq(box.textContent.includes('Cobalt, Amber, Chartreuse'), true);
   eq(box.textContent.includes('Rubik, eight steps'), true);
   eq(box.textContent.includes('Shared neutrals, then themes'), true);
+  // History is dropped entirely
+  eq(box.textContent.includes('Old news'), false);
+  // "At a glance" then "Rules" - two top-level groups, not one per section
+  eq([...box.querySelectorAll('h2')].map(h => h.textContent), ['At a glance', 'Rules']);
+  // exactly one real "Type" and one real "Colour" section (the at-a-glance
+  // preview cards carry the same title text but opt out of the sidebar)
+  const titledSections = title => [...box.querySelectorAll('.tab-section-title')]
+    .filter(t => t.textContent === title).map(t => t.closest('.tab-section'));
+  const typeSections = titledSections('Type');
+  const colourSections = titledSections('Colour');
+  eq(typeSections.length, 2);
+  eq(colourSections.length, 2);
+  eq(typeSections.filter(s => !s.classList.contains('no-toc')).length, 1);
+  eq(colourSections.filter(s => !s.classList.contains('no-toc')).length, 1);
+  // the at-a-glance cards' jump buttons point at the real sections' ids
+  const realType = typeSections.find(s => !s.classList.contains('no-toc'));
+  const realColour = colourSections.find(s => !s.classList.contains('no-toc'));
+  const jumpLinks = [...box.querySelectorAll('.cards2 a.btn')];
+  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realType.id), true);
+  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realColour.id), true);
   done();
 });
 
-test('our house shows plant cards and a home-setup section from real files', async () => {
+test('our house shows plant cards in a dense grid, and no setup section', async () => {
   const plants = ['# Plants', '', '| Plant | Where | Count |', '|---|---|---|',
     '| Cactus | Indoor | 2 |', '| Olive tree | Outside | 1 |'].join('\n') + '\n';
   const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
@@ -81,13 +102,25 @@ test('our house shows plant cards and a home-setup section from real files', asy
   await ourHouse(box);
   eq(box.textContent.includes('Cactus'), true);
   eq(box.textContent.includes('Olive tree'), true);
-  eq(box.textContent.includes('Router'), true);
+  eq(box.querySelector('.plant-grid') !== null, true);
+  // home-setup.md is left as a data file, not rendered here any more
+  eq(box.textContent.includes('Router'), false);
+  eq([...box.querySelectorAll('h2')].some(h => h.textContent === 'Setup'), false);
+  // no "no real photos" intro line, every plant gets the same house glyph,
+  // and a plant card is not sidebar-worthy on its own
+  eq(box.textContent.includes('No real photos'), false);
+  const plantCards = [...box.querySelectorAll('.plant-grid .tab-section')];
+  eq(plantCards.length, 2);
+  eq(plantCards.every(c => c.classList.contains('no-toc')), true);
+  eq(plantCards.every(c => c.querySelector('.glyph')), true);
   done();
 });
 
 test('our house new-flat section links to the move-in budget and lists to-dos', async () => {
   const plan = ['# House plan', '', '## Key facts', '- Delivery date: 27/09/2027.',
-    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR'].join('\n') + '\n';
+    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR',
+    '', '## Totals (kept up to date by the skills)', '| List | Budgets (EUR) | Estimates (EUR) |',
+    '|--|--|--|', '| Equipment | 0 | 0 |'].join('\n') + '\n';
   const todo = ['# Our house to-do', '', '## Before', '- [ ] 2026-01-01 added: make the budget',
     '', '## Upon move-in', '- [ ] 2026-01-01 added: hire an inspector'].join('\n') + '\n';
   withFiles({ 'our-house/data/plan.md': plan, 'our-house/data/todo.md': todo });
@@ -99,6 +132,14 @@ test('our house new-flat section links to the move-in budget and lists to-dos', 
   eq(box.textContent.includes('hire an inspector'), true);
   eq(box.textContent.includes('Compass (finance app): coming soon'), true);
   eq(box.textContent.includes('20000 EUR'), true);
+  // the all-zeros Totals table is never shown
+  eq(box.textContent.includes('Totals'), false);
+  // Upon move-in comes after the budget, not before it
+  const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
+  eq(titles.indexOf('Move-in budget') < titles.findIndex(t => t.startsWith('Upon move-in')), true);
+  // none of these subtitle-level cards are sidebar-worthy on their own
+  eq([...box.querySelectorAll('.tab-section')].filter(s => s.querySelector('.tab-section-title'))
+    .every(s => s.classList.contains('no-toc')), true);
   done();
 });
 

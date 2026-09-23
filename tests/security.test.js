@@ -9,7 +9,10 @@ const missing = () => ({ status: 404, headers: { get: () => null }, text: async 
 const REPORT = ['# Security report', '', 'Generated today.', '', '**Result: CLEAN**', '',
   '## Zone 2 scan', '', 'All quiet.'].join('\n');
 const RECS = ['# Security recommendations', '', 'Ranked.', '', '## Where things stand', '', 'Fine.',
-  '', '### 1. Apply the history rewrite (high)', '', 'One force-push.'].join('\n');
+  '', '### 1. Apply the history rewrite (high)', '', 'One force-push.',
+  '', '### 2. Rotate the token (medium)', '', 'Also one force-push.'].join('\n');
+const LOCATIONS = ['# Data locations: the two-zone rule, and the register', '', 'Where, not what.', '',
+  '## The rule', '', 'Zone 1 and zone 2.'].join('\n');
 
 function serve(routes) {
   localStorage.setItem('ak', 't');
@@ -25,18 +28,37 @@ function done() {
   data.setFetch((...a) => fetch(...a));
 }
 
-test('security shows the scan first, then the recommendations, as cards', async () => {
+test('security shows the scan first, then the recommendations, then data locations, as cards', async () => {
   serve([
     ['chantier/data/security-report.md', () => ok(REPORT)],
     ['chantier/data/security-recommendations.md', () => ok(RECS)],
+    ['chantier/data/data-locations.md', () => ok(LOCATIONS)],
   ]);
   const box = document.createElement('div');
   await security(box);
   const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
   eq(titles, ['Security report', 'Zone 2 scan', 'Security recommendations', 'Where things stand',
-    '1. Apply the history rewrite (high)']);
+    '1. Apply the history rewrite (high)', '2. Rotate the token (medium)', 'The rule']);
   eq(box.textContent.includes('Result: CLEAN'), true);
   eq(box.textContent.indexOf('All quiet.') < box.textContent.indexOf('One force-push.'), true);
+  eq(box.textContent.includes('Zone 1 and zone 2.'), true);
+  done();
+});
+
+test('the numbered recommendation headings are flagged no-toc, other cards are not', async () => {
+  serve([
+    ['chantier/data/security-report.md', () => ok(REPORT)],
+    ['chantier/data/security-recommendations.md', () => ok(RECS)],
+    ['chantier/data/data-locations.md', () => ok(LOCATIONS)],
+  ]);
+  const box = document.createElement('div');
+  await security(box);
+  const byTitle = t => [...box.querySelectorAll('.tab-section')]
+    .find(s => s.querySelector('.tab-section-title')?.textContent === t);
+  eq(byTitle('1. Apply the history rewrite (high)').classList.contains('no-toc'), true);
+  eq(byTitle('2. Rotate the token (medium)').classList.contains('no-toc'), true);
+  eq(byTitle('Where things stand').classList.contains('no-toc'), false);
+  eq(byTitle('The rule').classList.contains('no-toc'), false);
   done();
 });
 

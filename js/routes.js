@@ -8,7 +8,7 @@ export const SECTIONS = ['pages', 'apps'];
 export const PAGES = [
   { key: 'home', label: 'home page', href: '#/', section: 'pages', glyph: 'home' },
   { key: 'our-house', label: 'our house', href: '#/our-house', section: 'pages', glyph: 'our-house',
-    intro: 'Where we live: setup, hardware, plants, to-dos, wishes and interior ideas.' },
+    intro: 'Where we live: plants, the move, and interior design ideas.' },
   { key: 'finance', label: 'finance', href: '#/finance', section: 'pages', glyph: 'finance',
     intro: 'Shared budget and bills.' },
   { key: 'hugo', label: 'hugo', href: '#/hugo', section: 'pages', glyph: 'hugo',
@@ -18,7 +18,7 @@ export const PAGES = [
   { key: 'brand', label: 'brand', href: '#/brand', section: 'pages', glyph: 'brand',
     intro: 'Our fonts and colours, so every app looks like one family.' },
   { key: 'chantier', label: 'chantier', href: '#/chantier', section: 'pages', glyph: 'chantier',
-    intro: 'How we build this hub: the delivery log, the roadmaps, the mini PC and its routines.' },
+    intro: 'How we build this hub: infrastructure, local layout, and the delivery log.' },
   { key: 'security', label: 'security', href: '#/security', section: 'pages', glyph: 'security',
     intro: 'The weekly security scan and the ranked recommendations. Everything here is masked.' },
   { key: 'settings', label: 'settings', href: '#/settings', section: 'pages', glyph: 'settings' },

@@ -29,6 +29,26 @@ const GLYPHS = {
   pachira: ['M12 21v-7', 'M12 14v-6', 'M12 14l-3 -5', 'M12 14l3 -5', 'M12 14l-1.5 -6', 'M12 14l1.5 -6'],
   'olive-tree': ['M8 21h8', 'M12 21v-6', 'M12 15m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0'],
   'lemon-tree': ['M8 21h8', 'M12 21v-6', 'M12 15m-6 0a6 6 0 1 0 12 0a6 6 0 1 0 -12 0', 'M15 12m-1.2 0a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0 -2.4 0'],
+
+  // Devices, for the infrastructure page's device cards.
+  phone: ['M6 5a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2v-14z', 'M11 4h2'],
+  pc: ['M3 5a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1v-10z', 'M7 20h10', 'M9 16v4', 'M15 16v4'],
+  tablet: ['M6 4m0 2a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-8a2 2 0 0 1 -2 -2z', 'M11 17l.01 0'],
+  server: ['M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z',
+    'M3 15m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z',
+    'M7 8l.01 0', 'M7 19l.01 0'],
+
+  // Routine-card corner icons (infrastructure page). Hand-approximated in the
+  // same outline style as the rest of this file - not verified against the
+  // literal Tabler source the way the others were, since adding them here
+  // was offline. Worth a glance against the real icon set at some point.
+  paper: ['M14 3v4a1 1 0 0 0 1 1h4', 'M5 3h9l5 5v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-13a2 2 0 0 1 2 -2z',
+    'M9 9h1', 'M9 13h6', 'M9 17h6'],
+  gauge: ['M12 12l3 -2', 'M3.6 15a9 9 0 1 1 16.8 0'],
+  brain: ['M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8',
+    'M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8',
+    'M17.5 16a3.5 3.5 0 0 0 0 -7h-.5', 'M6.5 16a3.5 3.5 0 0 1 0 -7h.5',
+    'M15.5 6.5a3.5 3.5 0 0 0 -3.5 3.5a3.5 3.5 0 0 0 -3.5 -3.5', 'M12 10v6'],
 };
 
 const NS = 'http://www.w3.org/2000/svg';

@@ -1,6 +1,6 @@
 import { test, eq } from './run.js';
 import { card } from '../js/ui.js';
-import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard } from '../js/frame.js';
+import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard, currentIndex } from '../js/frame.js';
 
 test('tocEntries lists titled sections in order and skips untitled ones', () => {
   const root = document.createElement('div');
@@ -60,6 +60,8 @@ test('attachToc adds one contents card, stays single on repeat, and detachToc re
   eq(attachToc(f.sheet, f.side, { innerHeight: 500 }), true);
   eq(f.side.querySelectorAll('.toc').length, 1);
   eq(f.side.querySelectorAll('.toc-row').length, 2);
+  // no "On this page" (or any) label above the rows
+  eq(f.side.querySelector('.toc .side-label'), null);
   attachToc(f.sheet, f.side, { innerHeight: 500 });
   eq(f.side.querySelectorAll('.toc').length, 1);
   detachToc();
@@ -88,6 +90,33 @@ test('tocEntries skips sections inside a collapsed details block', () => {
   folded.append(card('Hidden one'));
   root.append(card('Shown'), folded);
   eq(tocEntries(root).map(e => e.title), ['Shown']);
+});
+
+test('tocEntries skips a section flagged no-toc', () => {
+  const root = document.createElement('div');
+  const skip = card('Skip me');
+  skip.classList.add('no-toc');
+  root.append(card('Shown'), skip);
+  eq(tocEntries(root).map(e => e.title), ['Shown']);
+});
+
+test('attachToc adds a pill element behind the rows', () => {
+  const f = tocFixture(['One', 'Two']);
+  attachToc(f.sheet, f.side, { innerHeight: 500 });
+  eq(f.side.querySelectorAll('.toc-pill').length, 1);
+  f.done();
+});
+
+test('currentIndex always snaps to exactly one section, never a point between two', () => {
+  // three section tops at 0, 100, 200
+  eq(currentIndex([0, 100, 200], 150), 1);
+  // before the first section: index 0
+  eq(currentIndex([0, 100, 200], -10), 0);
+  // past the last section: stays on it
+  eq(currentIndex([0, 100, 200], 500), 2);
+  // exactly on a section's top counts as "not yet passed" (strict <)
+  eq(currentIndex([0, 100, 200], 100), 0);
+  eq(currentIndex([0, 100, 200], 101), 1);
 });
 
 test('a contents row carries its full title so a shortened row can still be read', () => {

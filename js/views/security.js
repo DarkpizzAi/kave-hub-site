@@ -19,6 +19,22 @@ export default async function security(container) {
       renderBlocks(c, intro.blocks, { skipCode: true });
       container.append(c);
     }
+    const before = container.children.length;
     renderDocCards(container, doc, { skipCode: true, skipIntro: true });
+    // The numbered recommendation headings are legitimate subtitles but too
+    // many and too repetitive a set to want in the sidebar.
+    if (f === 'security-recommendations.md') {
+      for (let i = before; i < container.children.length; i++) {
+        const sec = container.children[i];
+        if (/^\d+\./.test(sec.querySelector('.tab-section-title')?.textContent || '')) {
+          sec.classList.add('no-toc');
+        }
+      }
+    }
   }
+
+  // data-locations.md: the two-zone rule and the register, after the scan
+  // and recommendations.
+  const locDoc = await data.doc('/chantier/data/data-locations.md');
+  if (locDoc) renderDocCards(container, locDoc, { skipCode: true });
 }
