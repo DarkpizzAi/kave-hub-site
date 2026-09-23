@@ -9,25 +9,14 @@ import { findSection, firstList, firstTable } from '../md.js';
 import { glyph } from '../glyphs.js';
 import ourHouseProject from './our-house-project.js';
 
-// No real photos or drawings yet, so every plant gets a generic line-art
-// icon in a dashed card (the household look's "idea" placeholder style) -
-// per the plan, real ones would sort first and only the rest would look
-// like this. Species map to the closest shape, not a botanically exact one.
-const PLANT_ICON = {
-  cactus: 'cactus',
-  'dragon plant': 'dracaena',
-  alocasia: 'alocasia',
-  pothos: 'pothos',
-  pachira: 'pachira',
-  'olive tree': 'olive-tree',
-  'lemon tree': 'lemon-tree',
-};
-
+// No real photos or drawings yet, so every plant gets the same generic
+// house glyph in a dashed card (the household look's "idea" placeholder
+// style) - real ones would replace it once they exist.
 function plantCard(name, where, count) {
-  const key = name.toLowerCase().replace(/\s*\(.*\)/, '');
   const c = card(name);
+  c.classList.add('no-toc');
   c.querySelector('.card').classList.add('idea');
-  const icon = el('div', { class: 'plant-icon' }, glyph(PLANT_ICON[key] || 'generic', 40));
+  const icon = el('div', { class: 'plant-icon' }, glyph('our-house', 40));
   const meta = el('p', { class: 'tab-section-sub' }, where);
   if (count && count !== '1') meta.append(' ', chip('x' + count));
   const inner = el('div', { class: 'plant-card' }, icon, el('div', {}, meta));
@@ -41,8 +30,6 @@ async function plantsSection(container) {
   const t = firstTable(doc.sections[0]);
   if (!t || !t.rows.length) return;
   container.append(el('h2', {}, 'Plants'));
-  container.append(el('p', { class: 'tab-section-sub' },
-    'No real photos or drawings yet, so every plant shows a generic icon - real ones would replace it here.'));
   const grid = el('div', { class: 'plant-grid' });
   for (const [name, where, count] of t.rows) grid.append(plantCard(name, where, count));
   container.append(grid);
@@ -53,6 +40,7 @@ function stylesCard(doc) {
   const list = s && firstList(s);
   if (!list || !list.items.length) return null;
   const c = card('Styles');
+  c.classList.add('no-toc');
   const grid = el('div', { class: 'style-grid' });
   for (const it of list.items) {
     grid.append(el('div', { class: 'style-card' },
@@ -69,6 +57,7 @@ function palettesCard(doc) {
   const palettes = doc ? doc.sections.filter(s => s.level === 3) : [];
   if (!palettes.length) return null;
   const c = card('Colour palettes');
+  c.classList.add('no-toc');
   for (const p of palettes) {
     const list = firstList(p);
     if (!list || !list.items.length) continue;

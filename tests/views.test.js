@@ -85,12 +85,21 @@ test('our house shows plant cards in a dense grid, and no setup section', async 
   // home-setup.md is left as a data file, not rendered here any more
   eq(box.textContent.includes('Router'), false);
   eq([...box.querySelectorAll('h2')].some(h => h.textContent === 'Setup'), false);
+  // no "no real photos" intro line, every plant gets the same house glyph,
+  // and a plant card is not sidebar-worthy on its own
+  eq(box.textContent.includes('No real photos'), false);
+  const plantCards = [...box.querySelectorAll('.plant-grid .tab-section')];
+  eq(plantCards.length, 2);
+  eq(plantCards.every(c => c.classList.contains('no-toc')), true);
+  eq(plantCards.every(c => c.querySelector('.glyph')), true);
   done();
 });
 
 test('our house new-flat section links to the move-in budget and lists to-dos', async () => {
   const plan = ['# House plan', '', '## Key facts', '- Delivery date: 27/09/2027.',
-    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR'].join('\n') + '\n';
+    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR',
+    '', '## Totals (kept up to date by the skills)', '| List | Budgets (EUR) | Estimates (EUR) |',
+    '|--|--|--|', '| Equipment | 0 | 0 |'].join('\n') + '\n';
   const todo = ['# Our house to-do', '', '## Before', '- [ ] 2026-01-01 added: make the budget',
     '', '## Upon move-in', '- [ ] 2026-01-01 added: hire an inspector'].join('\n') + '\n';
   withFiles({ 'our-house/data/plan.md': plan, 'our-house/data/todo.md': todo });
@@ -102,6 +111,14 @@ test('our house new-flat section links to the move-in budget and lists to-dos', 
   eq(box.textContent.includes('hire an inspector'), true);
   eq(box.textContent.includes('Compass (finance app): coming soon'), true);
   eq(box.textContent.includes('20000 EUR'), true);
+  // the all-zeros Totals table is never shown
+  eq(box.textContent.includes('Totals'), false);
+  // Upon move-in comes after the budget, not before it
+  const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
+  eq(titles.indexOf('Move-in budget') < titles.findIndex(t => t.startsWith('Upon move-in')), true);
+  // none of these subtitle-level cards are sidebar-worthy on their own
+  eq([...box.querySelectorAll('.tab-section')].filter(s => s.querySelector('.tab-section-title'))
+    .every(s => s.classList.contains('no-toc')), true);
   done();
 });
 

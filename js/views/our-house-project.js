@@ -12,6 +12,7 @@ function todoCard(section, extra) {
   const all = lists.flatMap(l => l.items).filter(it => !isTemplateText(it.text));
   const done = all.filter(it => it.checked).length;
   const c = card(section.heading);
+  c.classList.add('no-toc');
   if (all.length) c.querySelector('.tab-section-title').append(' ', chip(`${done}/${all.length} done`, done === all.length ? 'ok' : ''));
   if (!all.length) c.append(emptyNote('No tasks yet.'));
   else for (const l of lists) c.append(listFromBlock(l));
@@ -26,22 +27,22 @@ export default async function ourHouseProject(container) {
   await renderMoveInClock(container);
 
   const budgetCard = card('Move-in budget');
+  budgetCard.classList.add('no-toc');
 
   const todo = await data.doc('/our-house/data/todo.md');
-  if (todo) {
-    const before = findSection(todo, /^before$/i);
-    const upon = findSection(todo, /upon move-in/i);
-    // Compass (the finance app) isn't built yet: a quiet placeholder here
-    // reserves its spot rather than a dead link.
-    const compassNote = el('p', { class: 'tab-section-sub' }, 'Compass (finance app): coming soon');
-    if (before) container.append(todoCard(before, compassNote));
-    if (upon) container.append(todoCard(upon));
-  }
+  const before = todo && findSection(todo, /^before$/i);
+  const upon = todo && findSection(todo, /upon move-in/i);
+  // Compass (the finance app) isn't built yet: a quiet placeholder here
+  // reserves its spot rather than a dead link.
+  const compassNote = el('p', { class: 'tab-section-sub' }, 'Compass (finance app): coming soon');
+  if (before) container.append(todoCard(before, compassNote));
 
   const plan = await data.doc('/our-house/data/plan.md');
   if (plan) {
     for (const s of plan.sections) {
-      if (!/envelope|totals|budget by room|financing/i.test(s.heading)) continue;
+      // "Totals" is a zeros-only table (kept up to date by skills that
+      // don't run yet) - not shown until it has real numbers.
+      if (!/envelope|budget by room|financing/i.test(s.heading)) continue;
       budgetCard.append(el('h3', {}, s.heading));
       for (const b of s.blocks) {
         if (b.kind === 'table') budgetCard.append(tableFromBlock(b));
@@ -51,4 +52,6 @@ export default async function ourHouseProject(container) {
     }
   }
   container.append(budgetCard);
+
+  if (upon) container.append(todoCard(upon));
 }

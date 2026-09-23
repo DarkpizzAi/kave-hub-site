@@ -48,6 +48,17 @@ test('chantier shows the latest ten log entries inline, and a button opens a pop
   done();
 });
 
+test('no delivery-log entry, recent or archived, opts into the sidebar', async () => {
+  serveLog(12);
+  const box = document.createElement('div');
+  await chantier(box);
+  const recentSections = [...box.querySelectorAll('.tab-section')]
+    .filter(s => titles([s.querySelector('.tab-section-title')].filter(Boolean)).some(t => /^Entry \d+$/.test(t)));
+  eq(recentSections.length > 0, true);
+  eq(recentSections.every(s => s.classList.contains('no-toc')), true);
+  done();
+});
+
 test('chantier adds no older-entries button when the log has ten entries or fewer', async () => {
   serveLog(8);
   const box = document.createElement('div');
@@ -92,27 +103,46 @@ const INFRA = ['# Infrastructure', '', '## Devices', '| Device | Owner | Kind | 
 const ROUTINES = ['# Routines', '', '### Daily sweep', 'Summary: Runs every morning.', '',
   'The full detail goes here.'].join('\n');
 
-test('chantier renders one device card per row, with an icon, and drops roadmap.md and data-locations.md', async () => {
+test('chantier renders one device card per row, icon plus small plain name, no subtitle styling, and drops roadmap.md and data-locations.md', async () => {
   serveInfra(INFRA, ROUTINES);
   const box = document.createElement('div');
   await chantier(box);
-  const cardTitles = [...box.querySelectorAll('.device-grid .tab-section-title')].map(t => t.textContent);
-  eq(cardTitles, ["Hugo's Pixel 7a", "Isa's Surface", 'The house mini PC', "Hugo's gaming PC"]);
+  // No card title (no .tab-section-title) - the name is plain text under the icon.
+  eq(box.querySelectorAll('.device-grid .tab-section-title').length, 0);
+  const names = titles(box.querySelectorAll('.device-grid .device-name'));
+  eq(names, ["Hugo's Pixel 7a", "Isa's Surface", 'The house mini PC', "Hugo's gaming PC"]);
   eq(box.querySelectorAll('.device-grid .glyph').length, 4);
+  // Device cards aren't sidebar-worthy "pages" on their own.
+  eq([...box.querySelectorAll('.device-grid .tab-section')].every(s => s.classList.contains('no-toc')), true);
   const allTitles = [...box.querySelectorAll('h2')].map(h => h.textContent);
   eq(allTitles.includes('Roadmap'), false);
   eq(allTitles.includes('Data locations: the two-zone rule, and the register'), false);
   done();
 });
 
-test('chantier renders a routines subsection with one expandable entry per routine', async () => {
+test('chantier renders a routines subsection, one row per routine with name, summary, and a "readme" disclosure for the full text', async () => {
   serveInfra(INFRA, ROUTINES);
   const box = document.createElement('div');
   await chantier(box);
-  eq(box.textContent.includes('Routines'), true);
-  const d = box.querySelector('details');
-  eq(d.querySelector('summary').textContent.includes('Daily sweep'), true);
-  eq(d.querySelector('summary').textContent.includes('Runs every morning.'), true);
+  // "Routines" itself is a real subtitle (sidebar-worthy); the routine names
+  // inside it are not, and never appear as their own .tab-section entries.
+  const routinesTitle = [...box.querySelectorAll('.tab-section-title')].find(t => t.textContent === 'Routines');
+  eq(!!routinesTitle, true);
+  const row = box.querySelector('.routine');
+  eq(row.querySelector('.routine-name').textContent, 'Daily sweep');
+  eq(row.querySelector('.tab-section-sub').textContent, 'Runs every morning.');
+  const d = row.querySelector('details.routine-readme');
+  eq(d.querySelector('summary').textContent, 'readme');
   eq(d.textContent.includes('The full detail goes here.'), true);
+  done();
+});
+
+test('chantier still renders the routines subsection when the infrastructure data has no Flows section', async () => {
+  const noFlows = ['# Infrastructure', '', '## Devices', '| Device | Owner | Kind | Notes |', '|--|--|--|--|',
+    "| Hugo's Pixel 7a | Hugo | Android phone |  |"].join('\n');
+  serveInfra(noFlows, ROUTINES);
+  const box = document.createElement('div');
+  await chantier(box);
+  eq(box.textContent.includes('Daily sweep'), true);
   done();
 });

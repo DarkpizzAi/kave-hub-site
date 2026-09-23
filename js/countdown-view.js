@@ -38,6 +38,7 @@ export async function renderMoveInClock(container) {
   });
   const done = el('p', { class: 'clock-done', hidden: '' }, "We're in.");
   const c = card('Countdown until we move in');
+  c.classList.add('no-toc');
   c.append(el('div', { class: 'clock-box' }, row), done);
   container.append(c);
 
