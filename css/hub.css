@@ -43,7 +43,7 @@ h1{font-size:22px;margin:0 0 4px;font-weight:650}
 /* group headings: the style guide's sheet-section role, one step above a card's section-title */
 h2{font-size:var(--fs-title);font-weight:var(--fw-strong);letter-spacing:var(--tracking-heading);
   color:var(--text);margin:var(--sp-5) 0 var(--sp-3)}
-.sheet-group > h2:first-child{margin-top:0}
+.sheet > h2:first-child{margin-top:0}
 h3{font-size:15px;font-weight:650;margin:0 0 8px}
 a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline}
@@ -315,16 +315,11 @@ body:has(.bar){min-width:var(--block)}
 .page{display:flex;align-items:flex-start;gap:var(--space);padding-left:calc(var(--pad) + var(--space))}
 .col{width:var(--page-max);flex:none}
 /* the sheet is fixed under the header and is the scroll container: content
-   scrolls inside it and disappears up under its rounded top edge. It carries
-   no background of its own any more - each .sheet-group is its own rounded
-   card, and the page background shows through as a gap between them. */
-.sheet{margin-top:var(--sp-2);height:calc(100vh - var(--header-h) - var(--sp-2));
+   scrolls inside it and disappears up under its rounded top edge */
+.sheet{margin-top:var(--sp-2);padding:var(--sp-4);background:var(--surface);
+  border-radius:var(--r-sheet);height:calc(100vh - var(--header-h) - var(--sp-2));
   overflow-y:auto;scroll-behavior:smooth;scroll-padding-top:var(--sp-4);
   scrollbar-width:thin;scrollbar-color:var(--rule-strong) transparent}
-/* one card per h2 group; the top corners of the first one are what used to
-   be the sheet's own top corners, unaffected by this split. */
-.sheet-group{background:var(--surface);border-radius:var(--r-sheet);padding:var(--sp-4)}
-.sheet-group + .sheet-group{margin-top:var(--space)}
 .side{width:var(--side-w);flex:none;margin-top:var(--sp-2);
   display:flex;flex-direction:column;gap:var(--sp-3);
   max-height:calc(100vh - var(--header-h) - var(--sp-2));overflow-y:auto;
@@ -335,11 +330,14 @@ body:has(.bar){min-width:var(--block)}
 .toc .side-card,.toc.side-card{padding-right:calc(var(--sp-3) + 6px)}
 .toc-rows{position:relative}
 /* the pill: a separate element behind the row text, inset like .nav-icon
-   rather than a full-row block fill - it floats, the row doesn't. Its top
-   and height are set from JS every scroll tick, no transition (the scroll
-   itself, smooth on a click, is what animates it). */
+   rather than a full-row block fill - it floats, the row doesn't. JS only
+   ever sets it to snap onto the current row (never a point between two);
+   this transition is what makes that snap read as a smooth move rather
+   than a jump, on a small scroll past a boundary or a click several rows
+   away alike (the covered distance is what makes the second feel bigger). */
 .toc-pill{position:absolute;left:2px;right:2px;top:0;height:0;border-radius:var(--r-pill);
-  background:var(--accent);z-index:0;pointer-events:none}
+  background:var(--accent);z-index:0;pointer-events:none;
+  transition:top 280ms var(--ease-standard),height 280ms var(--ease-standard)}
 .toc-row{position:relative;z-index:1;display:block;width:100%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;background:transparent;font:inherit;
   color:var(--text-dim);padding:var(--sp-1) var(--sp-3);border-radius:var(--r-pill);cursor:pointer}
 .toc-row{font-size:var(--fs-ui);font-weight:var(--fw-regular)}
@@ -378,28 +376,23 @@ body:has(.bar){min-width:var(--block)}
 .device-icon{color:var(--text-dim);flex:none}
 .device-name{font-size:var(--fs-meta);color:var(--text-dim)}
 
-/* ---- flow diagram (infrastructure > flows): icon nodes, arrow + caption between ---- */
-.flow-diagram{display:flex;flex-wrap:wrap;align-items:flex-start;gap:var(--sp-2) 0}
-.flow-node{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--sp-1);width:96px}
-.flow-node .flow-icon{color:var(--accent)}
-.flow-name{font-size:var(--fs-meta);color:var(--text-dim)}
-.flow-arrow{display:flex;flex-direction:column;align-items:center;text-align:center;gap:var(--sp-1);
-  width:96px;color:var(--text-faint);padding-top:5px}
-.flow-caption{font-size:var(--fs-meta);color:var(--text-dim);max-width:96px}
-
-/* ---- routines (infrastructure > flows): name, one-liner, a readme disclosure ---- */
-.routine{padding:var(--sp-2) 0;border-top:1px solid var(--surface-2)}
-.routine:first-child{border-top:0;padding-top:0}
+/* ---- routines (infrastructure > flows): one raised black card per routine,
+   name, one-liner, and a readme disclosure - a sideways arrow that points
+   down once open, not a pill ---- */
+.routine-card{background:var(--card);border-radius:var(--r-card);padding:var(--sp-3);margin-bottom:var(--sp-3)}
+.routine-card:last-child{margin-bottom:0}
 .routine-name{font-weight:var(--fw-strong)}
-.routine-readme{margin-top:var(--sp-1)}
-.routine-readme summary{display:inline-block;cursor:pointer;font-size:var(--fs-meta);font-weight:var(--fw-medium);
-  color:var(--text-dim);background:var(--panel);border-radius:var(--r-pill);padding:4px 12px;list-style:none}
+.routine-readme{margin-top:var(--sp-2)}
+.routine-readme summary{display:inline-flex;align-items:center;gap:var(--sp-1);cursor:pointer;
+  font-size:var(--fs-meta);font-weight:var(--fw-medium);color:var(--text-dim);list-style:none}
 .routine-readme summary::-webkit-details-marker{display:none}
-.routine-readme summary:hover{background:var(--surface-2);color:var(--text)}
+.routine-readme summary:hover{color:var(--text)}
 .routine-readme[open] summary{color:var(--text)}
-.routine-readme .card{margin-top:var(--sp-2);padding:var(--sp-3)}
-.routine-readme .card p{margin:0 0 var(--sp-2)}
-.routine-readme .card p:last-child{margin-bottom:0}
+.routine-arrow{display:inline-flex;transition:transform 150ms var(--ease-standard);transform:rotate(-90deg)}
+.routine-readme[open] .routine-arrow{transform:rotate(0)}
+.routine-body{margin-top:var(--sp-2)}
+.routine-body p{margin:0 0 var(--sp-2)}
+.routine-body p:last-child{margin-bottom:0}
 
 /* ---- popup: backdrop plus a panel, header row and scrollable body ----
    The panel's top sits one spacing unit below the site header, not centred

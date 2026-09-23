@@ -46,33 +46,6 @@ function buildPage() {
   return { page, sheet, side };
 }
 
-// Splits the sheet's flat child list into one visual "card" (.sheet-group)
-// per h2 group heading, so the page background shows through as a gap
-// between titled groups instead of one continuous surface. Content before
-// the first h2 (e.g. the intro line) joins the first group. A page with no
-// h2 at all becomes a single group, unchanged from today's look.
-function groupSheet(sheet) {
-  const kids = [...sheet.children];
-  if (!kids.length) return;
-  let group = el('div', { class: 'sheet-group' });
-  let groupHasH2 = false;
-  const groups = [group];
-  for (const node of kids) {
-    if (node.tagName === 'H2') {
-      // The first h2 doesn't split anything - it just starts counting; any
-      // pre-heading content (e.g. the page intro line) stays in this same
-      // first group instead of becoming its own orphan box.
-      if (groupHasH2) {
-        group = el('div', { class: 'sheet-group' });
-        groups.push(group);
-      }
-      groupHasH2 = true;
-    }
-    group.append(node);
-  }
-  sheet.append(...groups);
-}
-
 async function route() {
   const mySeq = ++seq;
   const moved = redirectFor(location.hash);
@@ -116,7 +89,6 @@ async function route() {
   if (document.getElementById('view') !== view) return;
   switcher.setTiles(buildTiles(), currentKey(location.hash));
   detachToc();
-  if (frame) groupSheet(frame.sheet);
   view.innerHTML = '';
   view.append(isTablet ? box : frame.page);
   if (frame) attachToc(frame.sheet, frame.side);

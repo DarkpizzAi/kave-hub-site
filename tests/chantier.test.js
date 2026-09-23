@@ -128,7 +128,7 @@ test('chantier renders a routines subsection, one row per routine with name, sum
   // inside it are not, and never appear as their own .tab-section entries.
   const routinesTitle = [...box.querySelectorAll('.tab-section-title')].find(t => t.textContent === 'Routines');
   eq(!!routinesTitle, true);
-  const row = box.querySelector('.routine');
+  const row = box.querySelector('.routine-card');
   eq(row.querySelector('.routine-name').textContent, 'Daily sweep');
   eq(row.querySelector('.tab-section-sub').textContent, 'Runs every morning.');
   const d = row.querySelector('details.routine-readme');
@@ -144,5 +144,19 @@ test('chantier still renders the routines subsection when the infrastructure dat
   const box = document.createElement('div');
   await chantier(box);
   eq(box.textContent.includes('Daily sweep'), true);
+  done();
+});
+
+test('a flow renders as a plain Step / Device(s) / What happens table', async () => {
+  const withFlow = [INFRA, '', '## Flows', '', '### Receipts to prices',
+    '| Step | From | To | What happens |', '|--|--|--|--|',
+    "| 1 | Hugo's Pixel 7a | Google Drive | A photo is added |"].join('\n');
+  serveInfra(withFlow, ROUTINES);
+  const box = document.createElement('div');
+  await chantier(box);
+  const headers = [...box.querySelectorAll('table thead th')].map(h => h.textContent);
+  eq(headers, ['Step', 'Device(s)', 'What happens']);
+  const cells = [...box.querySelectorAll('table tbody tr')[0].children].map(c => c.textContent);
+  eq(cells, ['1', "Hugo's Pixel 7a -> Google Drive", 'A photo is added']);
   done();
 });

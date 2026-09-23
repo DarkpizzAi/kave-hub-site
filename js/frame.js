@@ -45,21 +45,16 @@ export function tocEntries(root) {
 }
 
 // Which section is "current" for a given scroll line: the last one whose top
-// has passed the line, and how far (0..1) the scroll has gone from that
-// section's top toward the next one's - the fraction the pill interpolates
-// on. The last section always has frac 0 (nothing to interpolate toward).
-export function pillState(sectionTops, line) {
+// has passed the line. Always snaps to exactly one section, never a point
+// between two - the pill has one well-defined target at any moment, and the
+// CSS transition on .toc-pill is what makes moving to it look smooth.
+export function currentIndex(sectionTops, line) {
   let index = 0;
   for (let i = 0; i < sectionTops.length; i++) {
     if (sectionTops[i] < line) index = i;
   }
-  if (index >= sectionTops.length - 1) return { index, frac: 0 };
-  const span = sectionTops[index + 1] - sectionTops[index];
-  const frac = span > 0 ? Math.min(1, Math.max(0, (line - sectionTops[index]) / span)) : 0;
-  return { index, frac };
+  return index;
 }
-
-export function lerp(a, b, t) { return a + (b - a) * t; }
 
 // Two or more titled sections and more than about two screens of content.
 export function shouldShowToc(count, contentHeight, viewportHeight) {
@@ -143,27 +138,26 @@ export function attachToc(sheet, side, win = window) {
   cardEl.classList.add('toc');
   side.prepend(cardEl);
 
-  const reduced = !!(win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches);
   let lastIndex = -1;
 
   const spy = () => {
     // a section is current once its top has passed 60px below the sheet's top edge
     const line = sheet.getBoundingClientRect().top + 60;
     const tops = entries.map(e => document.getElementById(e.id).getBoundingClientRect().top);
-    const { index, frac } = pillState(tops, line);
+    const index = currentIndex(tops, line);
+    if (index === lastIndex) return;
+    lastIndex = index;
 
     rows.forEach((r, i) => r.classList.toggle('on', i === index));
 
+    // Snap straight to the current row - a small scroll never leaves the
+    // pill part-way between two rows. The CSS transition on .toc-pill
+    // animates this move; a click that jumps several rows covers more
+    // distance in the same transition, reading as a bigger swoosh.
     const cur = rows[index];
-    const next = rows[index + 1];
-    const useFrac = reduced ? 0 : frac;
-    pill.style.top = lerp(cur.offsetTop, next ? next.offsetTop : cur.offsetTop, useFrac) + 'px';
-    pill.style.height = lerp(cur.offsetHeight, next ? next.offsetHeight : cur.offsetHeight, useFrac) + 'px';
-
-    if (index !== lastIndex) {
-      lastIndex = index;
-      cur.scrollIntoView({ block: 'nearest' });
-    }
+    pill.style.top = cur.offsetTop + 'px';
+    pill.style.height = cur.offsetHeight + 'px';
+    cur.scrollIntoView({ block: 'nearest' });
   };
   sheet.addEventListener('scroll', spy, { passive: true });
   spy();

@@ -1,6 +1,6 @@
 import { test, eq } from './run.js';
 import { card } from '../js/ui.js';
-import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard, pillState, lerp } from '../js/frame.js';
+import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard, currentIndex } from '../js/frame.js';
 
 test('tocEntries lists titled sections in order and skips untitled ones', () => {
   const root = document.createElement('div');
@@ -105,24 +105,16 @@ test('attachToc adds a pill element behind the rows', () => {
   f.done();
 });
 
-test('pillState finds the current section and how far toward the next', () => {
-  // three section tops at 0, 100, 200; line at 150 is 50% between the 2nd and 3rd
-  eq(pillState([0, 100, 200], 150), { index: 1, frac: 0.5 });
-  // before the first section: index 0, frac 0 (nothing to interpolate toward yet)
-  eq(pillState([0, 100, 200], -10), { index: 0, frac: 0 });
-  // past the last section: stays on it, frac 0 (nothing after it)
-  eq(pillState([0, 100, 200], 500), { index: 2, frac: 0 });
-  // exactly on a section's top: still counts as "not yet passed" (strict <,
-  // matching the old spy's tie-break), so it lands as index 0 fully
-  // interpolated (frac 1) rather than index 1 at frac 0 - the same pixel
-  // position either way.
-  eq(pillState([0, 100, 200], 100), { index: 0, frac: 1 });
-});
-
-test('lerp interpolates linearly', () => {
-  eq(lerp(10, 20, 0), 10);
-  eq(lerp(10, 20, 1), 20);
-  eq(lerp(10, 20, 0.5), 15);
+test('currentIndex always snaps to exactly one section, never a point between two', () => {
+  // three section tops at 0, 100, 200
+  eq(currentIndex([0, 100, 200], 150), 1);
+  // before the first section: index 0
+  eq(currentIndex([0, 100, 200], -10), 0);
+  // past the last section: stays on it
+  eq(currentIndex([0, 100, 200], 500), 2);
+  // exactly on a section's top counts as "not yet passed" (strict <)
+  eq(currentIndex([0, 100, 200], 100), 0);
+  eq(currentIndex([0, 100, 200], 101), 1);
 });
 
 test('a contents row carries its full title so a shortened row can still be read', () => {

@@ -23,56 +23,37 @@ function deviceGlyph(name, kind) {
   return DEVICE_GLYPH[kind.toLowerCase()] || 'generic';
 }
 
-// Same lookup as deviceGlyph, for a flow step's free-text From/To entity
-// (a device name, or something else like "Google Drive" or "The repo").
-function stepGlyph(name) {
-  if (/mini pc|server/i.test(name)) return 'server';
-  if (/surface/i.test(name)) return 'tablet';
-  if (/phone/i.test(name)) return 'phone';
-  if (/gaming pc/i.test(name)) return 'pc';
-  return 'generic';
-}
-
 function rows(doc, re) {
   const s = doc && findSection(doc, re);
   const t = s && firstTable(s);
   return t ? t.rows : [];
 }
 
-// One node per distinct From/To entity in step order, icon plus name, with
-// an arrow and the step's "what happens" caption between consecutive nodes.
-function flowDiagram(stepRows) {
-  const nodes = [];
-  for (const [, from, to] of stepRows) {
-    if (!nodes.length || nodes[nodes.length - 1] !== from) nodes.push(from);
-    nodes.push(to);
+// Step | Device(s) | What happens - the device(s) column combines the step's
+// From and To into one string.
+function flowTable(stepRows) {
+  const t = el('table');
+  t.append(el('thead', {}, el('tr', {},
+    el('th', {}, 'Step'), el('th', {}, 'Device(s)'), el('th', {}, 'What happens'))));
+  const tb = el('tbody');
+  for (const [step, from, to, what] of stepRows) {
+    tb.append(el('tr', {},
+      el('td', {}, step), el('td', {}, from + ' -> ' + to), el('td', {}, what)));
   }
-  // collapse immediate repeats (a step whose To is the next step's From)
-  const path = nodes.filter((n, i) => i === 0 || n !== nodes[i - 1]);
-  const wrap = el('div', { class: 'flow-diagram' });
-  path.forEach((name, i) => {
-    wrap.append(el('div', { class: 'flow-node' },
-      el('div', { class: 'flow-icon' }, glyph(stepGlyph(name), 26)),
-      el('div', { class: 'flow-name' }, name)));
-    if (i < path.length - 1) {
-      const step = stepRows[i];
-      wrap.append(el('div', { class: 'flow-arrow' },
-        glyph('arrow', 18),
-        step ? el('div', { class: 'flow-caption' }, step[3]) : null));
-    }
-  });
-  return wrap;
+  t.append(tb);
+  return t;
 }
 
-// Name + one-line summary always visible; a "readme" button reveals the
-// full text as it stands in the repo right now (never baked/stale - fetched
-// at render time exactly like everything else on this page).
-function routineRow(heading, summary, rest) {
-  const body = el('div', { class: 'card' });
+// One black card per routine: name, one-line summary, and a "readme"
+// disclosure (sideways arrow that points down when open) revealing the full
+// text as it stands in the repo right now (never baked/stale - fetched at
+// render time exactly like everything else on this page).
+function routineCard(heading, summary, rest) {
+  const body = el('div', { class: 'routine-body' });
   for (const b of rest) if (b.kind === 'p') body.append(el('p', {}, b.text));
   const details = el('details', { class: 'routine-readme' },
-    el('summary', {}, 'readme'), body);
-  return el('div', { class: 'routine' },
+    el('summary', {}, el('span', { class: 'routine-arrow' }, glyph('chevron', 14)), 'readme'), body);
+  return el('div', { class: 'routine-card' },
     el('div', { class: 'routine-name' }, heading),
     summary ? el('div', { class: 'tab-section-sub' }, summary) : null,
     details);
@@ -85,7 +66,7 @@ function routinesCard(container, doc) {
     const summaryBlock = s.blocks.find(b => b.kind === 'p' && /^Summary:/.test(b.text));
     const summary = summaryBlock ? summaryBlock.text.replace(/^Summary:\s*/, '') : '';
     const rest = s.blocks.filter(b => b !== summaryBlock);
-    c.append(routineRow(s.heading, summary, rest));
+    c.append(routineCard(s.heading, summary, rest));
   }
   container.append(c);
 }
@@ -112,9 +93,9 @@ async function infrastructure(container) {
   container.append(grid);
 
   // Sections are flat, so a flow is every deeper heading after `## Flows`,
-  // up to the next heading at that level or above. One card per flow, drawn
-  // as an icon-and-arrow diagram rather than a numbered step list. Routines
-  // renders in this same "Flows" group whether or not the data has flows of
+  // up to the next heading at that level or above. One card per flow, a
+  // step/device(s)/what-happens table. Routines renders in this same "Flows"
+  // group whether or not the data has flows of
   // its own - it's still about how the household's machinery works.
   const flowCards = [];
   const at = doc.sections.findIndex(s => /^flows/i.test(s.heading));
@@ -124,7 +105,7 @@ async function infrastructure(container) {
       if (f.level <= doc.sections[at].level) break;
       const t = firstTable(f);
       if (!t) continue;
-      flowCards.push(card(f.heading, flowDiagram(t.rows)));
+      flowCards.push(card(f.heading, flowTable(t.rows)));
     }
   }
   const routinesDoc = await data.doc('/chantier/data/routines.md');
