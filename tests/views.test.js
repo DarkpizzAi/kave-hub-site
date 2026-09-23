@@ -62,13 +62,34 @@ test('finance shows the safe-to-spend figure and a bill from real files', async 
 test('brand renders household-look.md live, themes included', async () => {
   const look = ['# The household look', '', 'One look, everywhere.', '', '## Type',
     'Rubik, eight steps.', '', '## Colour', 'Shared neutrals, then themes.',
-    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |'].join('\n') + '\n';
+    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |',
+    '', '## History', 'Old news.'].join('\n') + '\n';
   withFiles({ 'brand/data/household-look.md': look });
   const box = document.createElement('div');
   await brand(box);
   eq(box.textContent.includes('Cobalt, Amber, Chartreuse'), true);
   eq(box.textContent.includes('Rubik, eight steps'), true);
   eq(box.textContent.includes('Shared neutrals, then themes'), true);
+  // History is dropped entirely
+  eq(box.textContent.includes('Old news'), false);
+  // "At a glance" then "Rules" - two top-level groups, not one per section
+  eq([...box.querySelectorAll('h2')].map(h => h.textContent), ['At a glance', 'Rules']);
+  // exactly one real "Type" and one real "Colour" section (the at-a-glance
+  // preview cards carry the same title text but opt out of the sidebar)
+  const titledSections = title => [...box.querySelectorAll('.tab-section-title')]
+    .filter(t => t.textContent === title).map(t => t.closest('.tab-section'));
+  const typeSections = titledSections('Type');
+  const colourSections = titledSections('Colour');
+  eq(typeSections.length, 2);
+  eq(colourSections.length, 2);
+  eq(typeSections.filter(s => !s.classList.contains('no-toc')).length, 1);
+  eq(colourSections.filter(s => !s.classList.contains('no-toc')).length, 1);
+  // the at-a-glance cards' jump buttons point at the real sections' ids
+  const realType = typeSections.find(s => !s.classList.contains('no-toc'));
+  const realColour = colourSections.find(s => !s.classList.contains('no-toc'));
+  const jumpLinks = [...box.querySelectorAll('.cards2 a.btn')];
+  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realType.id), true);
+  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realColour.id), true);
   done();
 });
 

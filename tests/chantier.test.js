@@ -29,27 +29,27 @@ function done() {
 
 const titles = nodes => [...nodes].map(t => t.textContent);
 
-test('chantier shows the latest ten log entries inline, and a button opens a popup with the rest', async () => {
-  serveLog(12);
+test('chantier shows only the latest two log entries inline, and "See all" opens a popup with the complete log', async () => {
+  serveLog(5);
   const box = document.createElement('div');
   await chantier(box);
   const shown = titles([...box.querySelectorAll('.tab-section-title')]);
   eq(shown.includes('Entry 1'), true);
-  eq(shown.includes('Entry 10'), true);
-  eq(shown.includes('Entry 11'), false);
-  eq(box.querySelector('details.older'), null);
-  const btns = [...box.querySelectorAll('button')].filter(b => b.textContent === 'Older entries (2)');
+  eq(shown.includes('Entry 2'), true);
+  eq(shown.includes('Entry 3'), false);
+  const btns = [...box.querySelectorAll('button')].filter(b => b.textContent === 'See all');
   eq(btns.length, 1);
   btns[0].click();
   const pop = document.querySelector('.popup-backdrop');
   eq(pop.hidden, false);
-  eq(titles(pop.querySelectorAll('.tab-section-title')), ['Entry 11', 'Entry 12']);
+  // the popup carries the whole log, not just the tail
+  eq(titles(pop.querySelectorAll('.tab-section-title')), ['Entry 1', 'Entry 2', 'Entry 3', 'Entry 4', 'Entry 5']);
   pop.close();
   done();
 });
 
 test('no delivery-log entry, recent or archived, opts into the sidebar', async () => {
-  serveLog(12);
+  serveLog(5);
   const box = document.createElement('div');
   await chantier(box);
   const recentSections = [...box.querySelectorAll('.tab-section')]
@@ -59,17 +59,17 @@ test('no delivery-log entry, recent or archived, opts into the sidebar', async (
   done();
 });
 
-test('chantier adds no older-entries button when the log has ten entries or fewer', async () => {
-  serveLog(8);
+test('chantier adds no "See all" button when the log has two entries or fewer', async () => {
+  serveLog(2);
   const box = document.createElement('div');
   await chantier(box);
-  eq([...box.querySelectorAll('button')].some(b => /Older entries/.test(b.textContent)), false);
-  eq(box.textContent.includes('Body 8.'), true);
+  eq([...box.querySelectorAll('button')].some(b => b.textContent === 'See all'), false);
+  eq(box.textContent.includes('Body 2.'), true);
   done();
 });
 
 test('chantier no longer reserves a spot for the infrastructure monitor', async () => {
-  serveLog(3);
+  serveLog(1);
   const box = document.createElement('div');
   await chantier(box);
   const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
@@ -120,7 +120,7 @@ test('chantier renders one device card per row, icon plus small plain name, no s
   done();
 });
 
-test('chantier renders a routines subsection, one row per routine with name, summary, and a "readme" disclosure for the full text', async () => {
+test('chantier renders a routine block with name, icon, summary, a "readme" disclosure, and an empty "performance" disclosure', async () => {
   serveInfra(INFRA, ROUTINES);
   const box = document.createElement('div');
   await chantier(box);
@@ -128,12 +128,60 @@ test('chantier renders a routines subsection, one row per routine with name, sum
   // inside it are not, and never appear as their own .tab-section entries.
   const routinesTitle = [...box.querySelectorAll('.tab-section-title')].find(t => t.textContent === 'Routines');
   eq(!!routinesTitle, true);
-  const row = box.querySelector('.routine-card');
-  eq(row.querySelector('.routine-name').textContent, 'Daily sweep');
-  eq(row.querySelector('.tab-section-sub').textContent, 'Runs every morning.');
-  const d = row.querySelector('details.routine-readme');
-  eq(d.querySelector('summary').textContent, 'readme');
-  eq(d.textContent.includes('The full detail goes here.'), true);
+  const block = box.querySelector('.routine-block');
+  eq(block.querySelector('.routine-name').textContent, 'Daily sweep');
+  eq(!!block.querySelector('.routine-icon .glyph'), true);
+  eq(block.querySelector('.tab-section-sub').textContent, 'Runs every morning.');
+  const [readme, perf] = block.querySelectorAll('details.routine-readme');
+  eq(readme.querySelector('summary').textContent, 'readme');
+  eq(readme.textContent.includes('The full detail goes here.'), true);
+  eq(perf.querySelector('summary').textContent, 'performance');
+  eq(perf.textContent.includes('No runs logged yet.'), true);
+  done();
+});
+
+test('session-start and session-end routines share one card as two repeated blocks', async () => {
+  const routines = ['# Routines', '', '### Session-start repo sync', 'Summary: Fetches on start.', '',
+    'Full start detail.', '', '### Session-end memory push', 'Summary: Pushes on end.', '',
+    'Full end detail.'].join('\n');
+  serveInfra(INFRA, routines);
+  const box = document.createElement('div');
+  await chantier(box);
+  const cards = [...box.querySelectorAll('.routine-card')];
+  const combined = cards.find(c => c.querySelectorAll('.routine-block').length === 2);
+  eq(!!combined, true);
+  const names = [...combined.querySelectorAll('.routine-name')].map(n => n.textContent);
+  eq(names, ['Session-start repo sync', 'Session-end memory push']);
+  done();
+});
+
+test('a routine with logged runs shows the latest figures and a "See all" popup with every run', async () => {
+  const metrics = [
+    { routine: 'daily-sweep', started_at: '2026-09-20T05:00:00Z', duration_seconds: 100, tokens_used: 1000, stages: [{ name: 'a', result: 'ok' }] },
+    { routine: 'daily-sweep', started_at: '2026-09-22T05:00:00Z', duration_seconds: 120, tokens_used: 2000, stages: [{ name: 'a', result: 'failed' }] },
+  ].map(r => JSON.stringify(r)).join('\n');
+  localStorage.setItem('ak', 't');
+  data.resetMemory();
+  data.setFetch(async url => {
+    if (url.includes('contents/chantier/data?ref')) return ok(JSON.stringify([{ type: 'file', name: 'log.md' }]));
+    if (url.includes('chantier/data/infrastructure.md')) return ok(INFRA);
+    if (url.includes('chantier/data/routines.md')) return ok(ROUTINES);
+    if (url.includes('chantier/data/routine-metrics.jsonl')) return ok(metrics);
+    if (url.includes('chantier/data/log.md')) return ok(logWith(1));
+    return missing();
+  });
+  const box = document.createElement('div');
+  await chantier(box);
+  const perf = box.querySelectorAll('details.routine-readme')[1];
+  // shows the more recent (22nd) run's figures, not the older one
+  eq(perf.textContent.includes('120s'), true);
+  eq(perf.textContent.includes('2,000 tokens'), true);
+  eq(perf.textContent.includes('failed'), true);
+  const btn = perf.querySelector('button.btn');
+  btn.click();
+  const pop = document.querySelector('.popup-backdrop');
+  eq(pop.querySelectorAll('table tbody tr').length, 2);
+  pop.close();
   done();
 });
 
@@ -147,16 +195,20 @@ test('chantier still renders the routines subsection when the infrastructure dat
   done();
 });
 
-test('a flow renders as a plain Step / Device(s) / What happens table', async () => {
+test('a flow renders as a plain Step / Device(s) / What happens table, and a markdown link in it becomes a pill', async () => {
   const withFlow = [INFRA, '', '## Flows', '', '### Receipts to prices',
     '| Step | From | To | What happens |', '|--|--|--|--|',
-    "| 1 | Hugo's Pixel 7a | Google Drive | A photo is added |"].join('\n');
+    "| 1 | Hugo's Pixel 7a | Google Drive | A photo is added to the [inbound receipts](https://example.com/folder) folder |"].join('\n');
   serveInfra(withFlow, ROUTINES);
   const box = document.createElement('div');
   await chantier(box);
   const headers = [...box.querySelectorAll('table thead th')].map(h => h.textContent);
   eq(headers, ['Step', 'Device(s)', 'What happens']);
-  const cells = [...box.querySelectorAll('table tbody tr')[0].children].map(c => c.textContent);
-  eq(cells, ['1', "Hugo's Pixel 7a -> Google Drive", 'A photo is added']);
+  const cells = [...box.querySelectorAll('table tbody tr')[0].children];
+  eq(cells[0].textContent, '1');
+  eq(cells[1].textContent, "Hugo's Pixel 7a -> Google Drive");
+  const link = cells[2].querySelector('a');
+  eq(link.textContent, 'inbound receipts');
+  eq(link.classList.contains('chip'), true);
   done();
 });

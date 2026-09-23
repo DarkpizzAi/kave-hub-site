@@ -68,7 +68,7 @@ export function tailSpace(clientHeight, contentHeight, lastTop, pad) {
 }
 
 export function sideCard(label, ...children) {
-  return el('div', { class: 'side-card' }, el('p', { class: 'side-label' }, label), ...children);
+  return el('div', { class: 'side-card' }, label ? el('p', { class: 'side-label' }, label) : null, ...children);
 }
 
 export function figuresCard(label, items) {
@@ -134,7 +134,7 @@ export function attachToc(sheet, side, win = window) {
 
   const pill = el('div', { class: 'toc-pill', 'aria-hidden': 'true' });
   const rowsWrap = el('div', { class: 'toc-rows' }, pill, ...rows);
-  const cardEl = sideCard('On this page', rowsWrap);
+  const cardEl = sideCard(null, rowsWrap);
   cardEl.classList.add('toc');
   side.prepend(cardEl);
 

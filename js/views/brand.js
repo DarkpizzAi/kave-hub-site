@@ -52,14 +52,36 @@ function colourSamples() {
   return c;
 }
 
-function atAGlance(container) {
-  container.append(typeSamples(), colourSamples());
+// "At a glance" shows the same font/colour samples as before, but as two
+// cards side by side, each carrying a "jump to" button down into the real
+// section further down the page - so the nice-looking preview doesn't also
+// duplicate that section's content (or its sidebar entry: both preview
+// cards opt out of the TOC, the real "Type"/"Colour" sections don't).
+function atAGlance(container, typeId, colourId) {
+  container.append(el('h2', {}, 'At a glance'));
+  const type = typeSamples();
+  type.classList.add('no-toc');
+  if (typeId) type.append(el('a', { class: 'btn', href: '#' + typeId }, 'Jump to fonts'));
+  const colour = colourSamples();
+  colour.classList.add('no-toc');
+  if (colourId) colour.append(el('a', { class: 'btn', href: '#' + colourId }, 'Jump to colours'));
+  container.append(el('div', { class: 'cards2' }, type, colour));
 }
 
 export default async function brand(container) {
   container.append(header('brand', ''));
   const doc = await data.doc('/brand/data/household-look.md');
   if (!doc) { container.append(emptyNote('household-look.md not found.')); return; }
-  atAGlance(container, doc);
-  renderDocCards(container, doc, { skipCode: true });
+
+  // Render the rules first (off-screen) so the real Type/Colour sections
+  // exist with real ids before the at-a-glance jump buttons need them, then
+  // move the whole thing into place after the at-a-glance block.
+  const rules = el('div');
+  rules.append(el('h2', {}, 'Rules'));
+  renderDocCards(rules, doc, { skipCode: true, skipHeadings: [/^history$/i] });
+  const findCard = title => [...rules.querySelectorAll('.tab-section-title')]
+    .find(t => t.textContent === title)?.closest('.tab-section');
+
+  atAGlance(container, findCard('Type')?.id, findCard('Colour')?.id);
+  container.append(...rules.childNodes);
 }

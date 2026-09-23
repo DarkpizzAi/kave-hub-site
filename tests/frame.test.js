@@ -60,6 +60,8 @@ test('attachToc adds one contents card, stays single on repeat, and detachToc re
   eq(attachToc(f.sheet, f.side, { innerHeight: 500 }), true);
   eq(f.side.querySelectorAll('.toc').length, 1);
   eq(f.side.querySelectorAll('.toc-row').length, 2);
+  // no "On this page" (or any) label above the rows
+  eq(f.side.querySelector('.toc .side-label'), null);
   attachToc(f.sheet, f.side, { innerHeight: 500 });
   eq(f.side.querySelectorAll('.toc').length, 1);
   detachToc();
