@@ -8,7 +8,7 @@ export const FILES = [
   'index.html', 'tokens.css', 'css/hub.css',
   'js/app.js', 'js/data.js', 'js/md.js', 'js/ui.js', 'js/icons.js', 'js/gate.js',
   'js/glyphs.js', 'js/prefs.js', 'js/status.js', 'js/guard.js', 'js/switcher.js', 'js/frame.js',
-  'js/routes.js', 'js/countdown.js', 'js/embedded.js',
+  'js/routes.js', 'js/countdown.js', 'js/countdown-view.js', 'js/embedded.js',
   'js/views/index.js', 'js/views/food.js', 'js/views/home.js', 'js/views/our-house.js',
   'js/views/our-house-project.js', 'js/views/calendar.js', 'js/views/generic.js',
   'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js', 'js/views/security.js',
