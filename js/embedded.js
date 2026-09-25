@@ -1,10 +1,12 @@
-// The one place the site writes another app's storage. Spoon shares this
-// browser origin, so its settings sit in localStorage under one key. Only the
-// token, the user and the palette are written; every other field is kept. The
-// token is copied inside this origin: never logged, never sent anywhere.
+// The one place the site writes another app's storage. Spoon and Compass
+// share this browser origin, so each app's settings sit in localStorage under
+// one key. Only the token, the user and the palette are written; every other
+// field is kept. The token is copied inside this origin: never logged, never
+// sent anywhere. `who` names the field each app calls the person by.
 
 export const EMBEDDED = [
-  { name: 'spoon', key: 'foodapp.settings', frameMatch: '/kave-food-app/' },
+  { name: 'spoon', key: 'foodapp.settings', frameMatch: '/kave-food-app/', who: 'who' },
+  { name: 'compass', key: 'compass.settings', frameMatch: '/kave-compass-app/', who: 'me' },
 ];
 
 function parseObject(text) {
@@ -14,8 +16,8 @@ function parseObject(text) {
   } catch (e) { return {}; }
 }
 
-export function mergeSettings(existingText, { token, who, palette }) {
-  return JSON.stringify({ ...parseObject(existingText), token, who, palette });
+export function mergeSettings(existingText, { token, who, palette }, whoField = 'who') {
+  return JSON.stringify({ ...parseObject(existingText), token, [whoField]: who, palette });
 }
 
 export function clearTokenIn(existingText) {
@@ -33,7 +35,7 @@ function reloadFrames(app, doc) {
 function writeAll(transform, { storage = localStorage, doc = document } = {}) {
   return EMBEDDED.map(app => {
     try {
-      storage.setItem(app.key, transform(storage.getItem(app.key)));
+      storage.setItem(app.key, transform(storage.getItem(app.key), app));
       reloadFrames(app, doc);
       return { name: app.name, ok: true };
     } catch (e) {
@@ -43,7 +45,7 @@ function writeAll(transform, { storage = localStorage, doc = document } = {}) {
 }
 
 export function applyToEmbeddedApps(values, deps) {
-  return writeAll(text => mergeSettings(text, values), deps);
+  return writeAll((text, app) => mergeSettings(text, values, app.who), deps);
 }
 
 export function forgetInEmbeddedApps(deps) {

@@ -157,13 +157,13 @@ test('our house interior design shows styles and colour swatches', async () => {
   done();
 });
 
-test('calendar is a blank tablet saying Compass is coming', async () => {
+test('calendar is Compass itself, framed as a tablet like Spoon', async () => {
   const box = document.createElement('div');
   await calendar(box);
   eq(box.classList.contains('tablet-page'), true);
-  eq(box.querySelector('.tablet') !== null, true);
-  eq(box.querySelector('iframe'), null);
-  eq(box.textContent.includes('Compass app coming soon'), true);
+  const frame = box.querySelector('.tablet .screen iframe');
+  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-compass-app/');
+  eq(frame.getAttribute('title'), 'Compass');
 });
 
 test('chantier renders and says infrastructure is missing when it is', async () => {

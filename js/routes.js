@@ -23,8 +23,8 @@ export const PAGES = [
     intro: 'The weekly security scan and the ranked recommendations. Everything here is masked.' },
   { key: 'settings', label: 'settings', href: '#/settings', section: 'pages', glyph: 'settings' },
   { key: 'spoon', label: 'spoon', href: '#/spoon', section: 'apps', glyph: 'spoon' },
-  // Compass will take this slot; a blank tablet says so until it lands.
-  { key: 'calendar', label: 'calendar', href: '#/calendar', section: 'apps', glyph: 'calendar' },
+  // Compass, framed as a tablet like Spoon (the key and address stay calendar).
+  { key: 'calendar', label: 'compass', href: '#/calendar', section: 'apps', glyph: 'calendar' },
 ];
 
 // First segment of an old address -> where it lives now. '' means the home page.
@@ -34,6 +34,7 @@ const MOVED = {
   money: 'finance',
   design: 'brand',
   food: 'spoon',
+  compass: 'calendar',
   isa: '',
   infrastructure: 'chantier',
 };

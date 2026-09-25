@@ -48,12 +48,12 @@ test('the mounted switcher opens, marks the current tile and closes on Escape', 
   sw.setTiles(buildTiles(), 'calendar');
   const chip = bar.querySelector('#chip');
   const menu = bar.querySelector('.switcher');
-  eq(chip.textContent.includes('calendar'), true);
+  eq(chip.textContent.includes('compass'), true);
   eq(menu.hidden, true);
   chip.click();
   eq(menu.hidden, false);
   eq(chip.getAttribute('aria-expanded'), 'true');
-  eq(menu.querySelector('.app-tile.cur').textContent.includes('calendar'), true);
+  eq(menu.querySelector('.app-tile.cur').textContent.includes('compass'), true);
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
   eq(menu.hidden, true);
   eq(chip.getAttribute('aria-expanded'), 'false');

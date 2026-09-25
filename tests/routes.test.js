@@ -5,7 +5,7 @@ import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js'
 test('pages come in the agreed order and sections', () => {
   eq(PAGES.filter(p => p.section === 'pages').map(p => p.label),
     ['home page', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
-  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'calendar']);
+  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'compass']);
   eq(SECTIONS, ['pages', 'apps']);
 });
 
@@ -21,6 +21,7 @@ test('old routes redirect to the new ones', () => {
   eq(redirectFor('#/money'), '#/finance');
   eq(redirectFor('#/design'), '#/brand');
   eq(redirectFor('#/food'), '#/spoon');
+  eq(redirectFor('#/compass'), '#/calendar');
   eq(redirectFor('#/isa'), '#/');
   eq(redirectFor('#/infrastructure'), '#/chantier');
   eq(redirectFor('#/household/infrastructure'), '#/chantier');
