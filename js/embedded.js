@@ -6,7 +6,7 @@
 
 export const EMBEDDED = [
   { name: 'spoon', key: 'foodapp.settings', frameMatch: '/kave-food-app/', who: 'who' },
-  { name: 'compass', key: 'compass.settings', frameMatch: '/kave-compass-app/', who: 'me' },
+  { name: 'compass', key: 'compass.settings', frameMatch: '/kave-calendar-app/', who: 'me' },
 ];
 
 function parseObject(text) {

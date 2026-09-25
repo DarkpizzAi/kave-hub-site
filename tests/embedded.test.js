@@ -15,7 +15,7 @@ function fakeStorage(initial = {}) {
 
 function fakeDoc(reloaded) {
   const frame = (src, name) => ({ src, contentWindow: { location: { reload() { reloaded.push(name); } } } });
-  return { querySelectorAll: () => [frame('https://h.github.io/kave-food-app/', 'spoon'), frame('https://h.github.io/kave-compass-app/', 'compass'),
+  return { querySelectorAll: () => [frame('https://h.github.io/kave-food-app/', 'spoon'), frame('https://h.github.io/kave-calendar-app/', 'compass'),
     frame('https://h.github.io/other/', 'other')] };
 }
 

@@ -162,7 +162,7 @@ test('calendar is Compass itself, framed as a tablet like Spoon', async () => {
   await calendar(box);
   eq(box.classList.contains('tablet-page'), true);
   const frame = box.querySelector('.tablet .screen iframe');
-  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-compass-app/');
+  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-calendar-app/');
   eq(frame.getAttribute('title'), 'Compass');
 });
 

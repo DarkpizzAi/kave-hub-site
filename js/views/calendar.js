@@ -5,7 +5,7 @@
 
 import { el } from '../ui.js';
 
-const COMPASS_URL = 'https://darkpizzai.github.io/kave-compass-app/';
+const COMPASS_URL = 'https://darkpizzai.github.io/kave-calendar-app/';
 
 export default async function calendar(container) {
   container.classList.add('tablet-page');
