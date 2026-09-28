@@ -110,23 +110,6 @@ export async function verifyToken(token) {
 
 function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 
-// Accepts YYYY-MM-DD, DD/MM/YYYY, DD/MM (next occurrence). Returns Date or null.
-export function parseDate(s) {
-  if (!s) return null;
-  let m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-  m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) return new Date(+m[3], +m[2] - 1, +m[1]);
-  m = s.match(/(^|\s)(\d{1,2})\/(\d{1,2})(\s|$)/);
-  if (m) {
-    const now = startOfDay(new Date());
-    let d = new Date(now.getFullYear(), +m[3] - 1, +m[2]);
-    if (d < now) d = new Date(now.getFullYear() + 1, +m[3] - 1, +m[2]);
-    return d;
-  }
-  return null;
-}
-
 export function daysUntil(d) {
   if (!d) return null;
   const now = startOfDay(new Date());
@@ -143,8 +126,4 @@ export function daysUntilDayOfMonth(day) {
 
 export function fmtEur(n) {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
-}
-
-export function fmtDate(d) {
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }

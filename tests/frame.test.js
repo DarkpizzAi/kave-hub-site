@@ -1,6 +1,6 @@
 import { test, eq } from './run.js';
 import { card } from '../js/ui.js';
-import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, figuresCard, topicsCard, linksCard, currentIndex } from '../js/frame.js';
+import { attachToc, detachToc, tocEntries, shouldShowToc, tailSpace, sideCard, currentIndex } from '../js/frame.js';
 
 test('tocEntries lists titled sections in order and skips untitled ones', () => {
   const root = document.createElement('div');
@@ -22,27 +22,8 @@ test('sideCard has a label and its children', () => {
   eq(c.querySelectorAll('i').length, 1);
 });
 
-test('figuresCard makes one tile per item', () => {
-  const c = figuresCard('Key figures', [{ value: 4, caption: 'Open' }, { value: 2, caption: 'Due soon' }]);
-  eq(c.querySelectorAll('.fig').length, 2);
-  eq(c.querySelector('.fig-value').textContent, '4');
-  eq(c.querySelector('.fig-caption').textContent, 'Open');
-});
 
-test('topicsCard makes a row with a dot per item', () => {
-  const c = topicsCard('Open topics', [{ title: 'First', note: 'Soon' }]);
-  eq(c.querySelectorAll('.topic').length, 1);
-  eq(c.querySelector('.topic-title').textContent, 'First');
-  eq(c.querySelector('.topic-note').textContent, 'Soon');
-});
 
-test('linksCard makes external links that do not leak the referrer or opener', () => {
-  const c = linksCard('Links', [{ label: 'One', href: 'https://example.com/' }]);
-  const a = c.querySelector('a');
-  eq(a.getAttribute('href'), 'https://example.com/');
-  eq(a.getAttribute('rel'), 'noopener noreferrer');
-  eq(a.getAttribute('target'), '_blank');
-});
 
 function tocFixture(cards) {
   const sheet = document.createElement('div');

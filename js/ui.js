@@ -9,6 +9,9 @@ export function el(tag, attrs = {}, ...children) {
     if (v == null) continue;
     if (k === 'class') node.className = v;
     else if (k === 'html') node.innerHTML = v;
+    // through the style object: a style *attribute* is inline style, which
+    // the CSP (style-src without 'unsafe-inline') silently refuses
+    else if (k === 'style') node.style.cssText = v;
     else if (k.startsWith('on')) node.addEventListener(k.slice(2), v);
     else node.setAttribute(k, v);
   }

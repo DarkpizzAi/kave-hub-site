@@ -150,10 +150,6 @@ test('clearToken leaves other apps storage alone', async () => {
   sessionStorage.removeItem('other.key');
 });
 
-test('parseDate reads ISO and day-first dates', () => {
-  eq(data.parseDate('2026-09-20').getMonth(), 8);
-  eq(data.parseDate('20/09/2026').getFullYear(), 2026);
-});
 
 test('a missing path is asked for once, with no old-name retry', async () => {
   fresh();
