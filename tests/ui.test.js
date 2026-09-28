@@ -1,5 +1,5 @@
 import { test, eq } from './run.js';
-import { card, header, popup } from '../js/ui.js';
+import { card, header, popup, el } from '../js/ui.js';
 
 test('card renders a titled section with the white card inside', () => {
   const c = card('Care');
@@ -92,4 +92,10 @@ test('Escape closes the popup', () => {
   p.open();
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
   eq(document.body.contains(p), false);
+});
+
+test('el sets style through the style object, which the CSP allows', () => {
+  const n = el('span', { style: 'background:rgb(1, 2, 3)' });
+  eq(n.style.background, 'rgb(1, 2, 3)');
+  eq(n.getAttribute('style') === null || n.getAttribute('style').includes('rgb(1, 2, 3)'), true);
 });

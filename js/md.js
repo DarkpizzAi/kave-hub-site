@@ -139,9 +139,6 @@ export function inline(text, resolveLink) {
 export function findSection(doc, re) {
   return doc.sections.find(s => re.test(s.heading)) || null;
 }
-export function findSections(doc, re) {
-  return doc.sections.filter(s => re.test(s.heading));
-}
 export function firstTable(section) {
   if (!section) return null;
   return section.blocks.find(b => b.kind === 'table') || null;

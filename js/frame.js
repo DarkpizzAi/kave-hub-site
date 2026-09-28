@@ -71,35 +71,6 @@ export function sideCard(label, ...children) {
   return el('div', { class: 'side-card' }, label ? el('p', { class: 'side-label' }, label) : null, ...children);
 }
 
-export function figuresCard(label, items) {
-  const grid = el('div', { class: 'fig-grid' });
-  for (const it of items) {
-    grid.append(el('div', { class: 'fig' },
-      el('div', { class: 'fig-value' }, String(it.value)),
-      el('div', { class: 'fig-caption' }, it.caption)));
-  }
-  return sideCard(label, grid);
-}
-
-export function topicsCard(label, items) {
-  const list = el('div', { class: 'topics' });
-  for (const it of items) {
-    list.append(el('div', { class: 'topic' },
-      el('span', { class: 'topic-dot' }),
-      el('div', {}, el('div', { class: 'topic-title' }, it.title),
-        it.note ? el('div', { class: 'topic-note' }, it.note) : null)));
-  }
-  return sideCard(label, list);
-}
-
-export function linksCard(label, items) {
-  const links = items.map(it => {
-    const a = el('a', { class: 'side-link', href: it.href, target: '_blank', rel: 'noopener noreferrer' }, it.label);
-    return a;
-  });
-  return sideCard(label, ...links);
-}
-
 export function detachToc() {
   if (detach) { detach(); detach = null; }
 }
