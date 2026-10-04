@@ -17,7 +17,7 @@ test('FILES lists the entry files and every module of the site', () => {
   for (const f of ['index.html', 'tokens.css', 'css/hub.css', 'js/app.js', 'js/guard.js',
     'js/switcher.js', 'js/frame.js', 'js/glyphs.js', 'js/prefs.js', 'js/status.js',
     'js/ui.js', 'js/data.js', 'js/md.js', 'js/gate.js', 'js/icons.js', 'js/views/index.js',
-    'js/views/food.js', 'js/views/settings.js']) {
+    'js/views/food.js', 'js/views/stash.js', 'js/views/settings.js']) {
     eq(FILES.includes(f), true, f);
   }
 });

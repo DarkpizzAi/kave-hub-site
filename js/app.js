@@ -57,7 +57,7 @@ async function route() {
 
   const list = await getPlugins();
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  const isTablet = parts[0] === 'spoon' || parts[0] === 'calendar';   // apps drawn as a tablet, not a sheet
+  const isTablet = parts[0] === 'spoon' || parts[0] === 'calendar' || parts[0] === 'stash';   // apps drawn as a tablet, not a sheet
   const frame = isTablet ? null : buildPage();
   const box = isTablet ? el('div', { class: 'view-fade' }) : frame.sheet;
   const intro = isTablet ? null : introLine(currentKey(location.hash));

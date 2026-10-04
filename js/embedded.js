@@ -1,4 +1,4 @@
-// The one place the site writes another app's storage. Spoon and Compass
+// The one place the site writes another app's storage. Spoon, Compass and Stash
 // share this browser origin, so each app's settings sit in localStorage under
 // one key. Only the token, the user and the palette are written; every other
 // field is kept. The token is copied inside this origin: never logged, never
@@ -7,6 +7,7 @@
 export const EMBEDDED = [
   { name: 'spoon', key: 'foodapp.settings', frameMatch: '/kave-food-app/', who: 'who' },
   { name: 'compass', key: 'compass.settings', frameMatch: '/kave-calendar-app/', who: 'me' },
+  { name: 'stash', key: 'stash.settings', frameMatch: '/kave-finance-app/', who: 'me' },
 ];
 
 function parseObject(text) {

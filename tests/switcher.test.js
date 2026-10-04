@@ -16,10 +16,11 @@ test('arrow keys move by one and by a row and stop at the edges', () => {
 test('buildTiles follows the route list, pages then apps', () => {
   const t = buildTiles();
   eq(t.map(x => x.key), ['home', 'our-house', 'finance', 'hugo', 'fun', 'brand',
-    'chantier', 'security', 'settings', 'spoon', 'calendar']);
+    'chantier', 'security', 'settings', 'spoon', 'calendar', 'stash']);
   eq(t[0].href, '#/');
   eq(t[9].section, 'apps');
   eq(t[10].section, 'apps');
+  eq(t[11].section, 'apps');
 });
 
 test('currentKey reads the hash', () => {
@@ -37,7 +38,7 @@ test('the switcher draws one small label per section', () => {
   sw.setTiles(buildTiles(), 'home');
   const labels = [...bar.querySelectorAll('.switcher-label')].map(l => l.textContent);
   eq(labels, ['pages', 'apps']);
-  eq(bar.querySelectorAll('.app-tile').length, 11);
+  eq(bar.querySelectorAll('.app-tile').length, 12);
   bar.remove();
 });
 

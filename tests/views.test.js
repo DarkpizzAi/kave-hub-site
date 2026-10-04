@@ -5,6 +5,7 @@ import ourHouse from '../js/views/our-house.js';
 import chantier from '../js/views/chantier.js';
 import home from '../js/views/home.js';
 import calendar from '../js/views/calendar.js';
+import stash from '../js/views/stash.js';
 import brand from '../js/views/brand.js';
 
 function allMissing() {
@@ -164,6 +165,15 @@ test('calendar is Compass itself, framed as a tablet like Spoon', async () => {
   const frame = box.querySelector('.tablet .screen iframe');
   eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-calendar-app/');
   eq(frame.getAttribute('title'), 'Compass');
+});
+
+test('stash is the finance app itself, framed as a tablet like Spoon', async () => {
+  const box = document.createElement('div');
+  await stash(box);
+  eq(box.classList.contains('tablet-page'), true);
+  const frame = box.querySelector('.tablet .screen iframe');
+  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-finance-app/');
+  eq(frame.getAttribute('title'), 'Stash');
 });
 
 test('chantier renders and says infrastructure is missing when it is', async () => {

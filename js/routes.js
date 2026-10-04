@@ -1,7 +1,7 @@
 // The site's pages: one explicit list, in menu order, so the menu never depends
 // on the private repo's plugin manifest. Labels render lowercase through CSS.
 // An intro is the one line under a page's first card; none for home page,
-// settings, spoon and calendar (the two apps are tablet frames, not sheets).
+// settings, spoon, calendar and stash (the three apps are tablet frames, not sheets).
 
 export const SECTIONS = ['pages', 'apps'];
 
@@ -25,6 +25,7 @@ export const PAGES = [
   { key: 'spoon', label: 'spoon', href: '#/spoon', section: 'apps', glyph: 'spoon' },
   // Compass, framed as a tablet like Spoon (the key and address stay calendar).
   { key: 'calendar', label: 'compass', href: '#/calendar', section: 'apps', glyph: 'calendar' },
+  { key: 'stash', label: 'stash', href: '#/stash', section: 'apps', glyph: 'finance' },
 ];
 
 // First segment of an old address -> where it lives now. '' means the home page.

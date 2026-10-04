@@ -5,8 +5,15 @@ import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js'
 test('pages come in the agreed order and sections', () => {
   eq(PAGES.filter(p => p.section === 'pages').map(p => p.label),
     ['home page', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
-  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'compass']);
+  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'compass', 'stash']);
   eq(SECTIONS, ['pages', 'apps']);
+});
+
+test('stash is an app page at #/stash', () => {
+  const p = PAGES.find(x => x.key === 'stash');
+  eq(p.section, 'apps');
+  eq(p.href, '#/stash');
+  eq(p.label, 'stash');
 });
 
 test('every key is unique and every href matches its key', () => {
@@ -29,7 +36,7 @@ test('old routes redirect to the new ones', () => {
 
 test('new routes and the home page do not redirect', () => {
   for (const h of ['', '#/', '#/calendar', '#/our-house', '#/finance', '#/hugo', '#/fun',
-    '#/brand', '#/chantier', '#/security', '#/settings', '#/spoon']) eq(redirectFor(h), null, h);
+    '#/brand', '#/chantier', '#/security', '#/settings', '#/spoon', '#/stash']) eq(redirectFor(h), null, h);
 });
 
 test('keyFor reads the first segment and defaults to home', () => {
@@ -43,6 +50,7 @@ test('intros: none for home page, settings and spoon, none mention the new flat,
   eq(introFor('settings'), null);
   eq(introFor('spoon'), null);
   eq(introFor('calendar'), null);
+  eq(introFor('stash'), null);
   for (const p of PAGES) {
     if (!p.intro) continue;
     eq(/new flat/i.test(p.intro), false, p.key);
@@ -60,4 +68,5 @@ test('introLine builds a paragraph for a page with an intro and nothing otherwis
   eq(introLine('home'), null);
   eq(introLine('spoon'), null);
   eq(introLine('calendar'), null);
+  eq(introLine('stash'), null);
 });
