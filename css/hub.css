@@ -310,6 +310,8 @@ body:has(.bar){min-width:var(--block)}
   line-height:1;text-transform:lowercase}
 .app-tile:hover .nav-icon{background:var(--surface)}
 .app-icon{width:24px;height:24px;display:block}
+.tile-name .ext{display:inline-flex;vertical-align:-2px;margin-left:6px;opacity:.7}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .app-tile.cur{color:var(--accent-ink)}
 .app-tile.cur .nav-icon,.app-tile.cur:hover .nav-icon{background:var(--accent-soft)}
 

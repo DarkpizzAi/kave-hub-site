@@ -34,6 +34,9 @@ test('an app row opens a new tab and shows the app icon, a page row stays in the
   eq([compass.getAttribute('target'), compass.getAttribute('rel')], ['_blank', 'noopener']);
   eq(compass.querySelector('img.app-icon').getAttribute('src'), 'https://darkpizzai.github.io/kave-calendar-app/icon-192.png');
   eq(tiles[0].hasAttribute('target'), false);
+  eq(!!compass.querySelector('.tile-name .ext svg'), true, 'a new-tab mark after the name');
+  eq(compass.textContent.includes('(opens in a new tab)'), true);
+  eq(!!tiles[0].querySelector('.ext'), false);
   bar.remove();
 });
 

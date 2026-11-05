@@ -95,7 +95,10 @@ export function mountSwitcher(bar) {
         const attrs = { class: 'app-tile' + (t.key === current ? ' cur' : ''), href: t.href, role: 'menuitem' };
         if (t.external) Object.assign(attrs, { target: '_blank', rel: 'noopener' });
         const icon = t.icon ? el('img', { class: 'app-icon', src: t.icon, alt: '', width: '24', height: '24' }) : glyph(t.glyph || t.key, 24);
-        const a = el('a', attrs, el('span', { class: 'nav-icon' }, icon), el('span', { class: 'tile-name' }, t.label));
+        const name = el('span', { class: 'tile-name' }, t.label);
+        /* the new-tab mark after the name, and the words for a screen reader */
+        if (t.external) name.append(el('span', { class: 'ext' }, glyph('external', 14)), el('span', { class: 'sr-only' }, ' (opens in a new tab)'));
+        const a = el('a', attrs, el('span', { class: 'nav-icon' }, icon), name);
         menu.append(a);
       }
     }

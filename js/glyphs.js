@@ -19,6 +19,8 @@ const GLYPHS = {
   generic: ['M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z', 'M14 7l6 0', 'M17 4l0 6'],
   chevron: ['M6 9l6 6l6 -6'],
   arrow: ['M5 12l14 0', 'M13 18l6 -6', 'M13 6l6 6'],
+  // an app row opens a new tab (Tabler external-link)
+  external: ['M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6', 'M11 13l9 -9', 'M15 4h5v5'],
 
   // Plants: generic line-art stand-ins, not real illustrations of the
   // specific varieties (see the "Plants" section note in our-house.js).
