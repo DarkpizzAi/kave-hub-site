@@ -5,21 +5,21 @@ import { PAGES, SECTIONS, redirectFor, keyFor, introFor } from '../js/routes.js'
 test('pages come in the agreed order and sections', () => {
   eq(PAGES.filter(p => p.section === 'pages').map(p => p.label),
     ['home page', 'our house', 'finance', 'hugo', 'fun', 'brand', 'chantier', 'security', 'settings']);
-  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['spoon', 'compass', 'stash']);
+  eq(PAGES.filter(p => p.section === 'apps').map(p => p.label), ['ladle', 'compass', 'stash']);
   eq(SECTIONS, ['pages', 'apps']);
 });
 
-test('stash is an app page at #/stash', () => {
-  const p = PAGES.find(x => x.key === 'stash');
-  eq(p.section, 'apps');
-  eq(p.href, '#/stash');
-  eq(p.label, 'stash');
+test('the apps open themselves in a new tab, with their own icon', () => {
+  const apps = PAGES.filter(p => p.section === 'apps');
+  eq(apps.map(p => p.href), ['https://darkpizzai.github.io/kave-food-app/',
+    'https://darkpizzai.github.io/kave-calendar-app/', 'https://darkpizzai.github.io/kave-finance-app/']);
+  for (const p of apps) { eq(p.external, true, p.key); eq(p.icon, p.href + 'icon-192.png', p.key); }
 });
 
 test('every key is unique and every href matches its key', () => {
   const keys = PAGES.map(p => p.key);
   eq(new Set(keys).size, keys.length);
-  for (const p of PAGES) eq(p.href, p.key === 'home' ? '#/' : '#/' + p.key, p.key);
+  for (const p of PAGES.filter(x => !x.external)) eq(p.href, p.key === 'home' ? '#/' : '#/' + p.key, p.key);
 });
 
 test('old routes redirect to the new ones', () => {
@@ -27,16 +27,20 @@ test('old routes redirect to the new ones', () => {
   eq(redirectFor('#/house'), '#/our-house');
   eq(redirectFor('#/money'), '#/finance');
   eq(redirectFor('#/design'), '#/brand');
-  eq(redirectFor('#/food'), '#/spoon');
-  eq(redirectFor('#/compass'), '#/calendar');
+  eq(redirectFor('#/food'), '#/');
+  eq(redirectFor('#/compass'), '#/');
+  // the old app tabs are gone: their addresses land on the home page
+  eq(redirectFor('#/spoon'), '#/');
+  eq(redirectFor('#/calendar'), '#/');
+  eq(redirectFor('#/stash'), '#/');
   eq(redirectFor('#/isa'), '#/');
   eq(redirectFor('#/infrastructure'), '#/chantier');
   eq(redirectFor('#/household/infrastructure'), '#/chantier');
 });
 
 test('new routes and the home page do not redirect', () => {
-  for (const h of ['', '#/', '#/calendar', '#/our-house', '#/finance', '#/hugo', '#/fun',
-    '#/brand', '#/chantier', '#/security', '#/settings', '#/spoon', '#/stash']) eq(redirectFor(h), null, h);
+  for (const h of ['', '#/', '#/our-house', '#/finance', '#/hugo', '#/fun',
+    '#/brand', '#/chantier', '#/security', '#/settings']) eq(redirectFor(h), null, h);
 });
 
 test('keyFor reads the first segment and defaults to home', () => {

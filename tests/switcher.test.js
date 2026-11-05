@@ -21,6 +21,20 @@ test('buildTiles follows the route list, pages then apps', () => {
   eq(t[9].section, 'apps');
   eq(t[10].section, 'apps');
   eq(t[11].section, 'apps');
+  eq([t[9].external, t[0].external], [true, false]);
+});
+
+test('an app row opens a new tab and shows the app icon, a page row stays in the site', () => {
+  const bar = document.createElement('header');
+  document.body.append(bar);
+  const sw = mountSwitcher(bar);
+  sw.setTiles(buildTiles(), 'home');
+  const tiles = [...bar.querySelectorAll('.app-tile')];
+  const compass = tiles.find(a => a.textContent.includes('compass'));
+  eq([compass.getAttribute('target'), compass.getAttribute('rel')], ['_blank', 'noopener']);
+  eq(compass.querySelector('img.app-icon').getAttribute('src'), 'https://darkpizzai.github.io/kave-calendar-app/icon-192.png');
+  eq(tiles[0].hasAttribute('target'), false);
+  bar.remove();
 });
 
 test('currentKey reads the hash', () => {
@@ -46,15 +60,15 @@ test('the mounted switcher opens, marks the current tile and closes on Escape', 
   const bar = document.createElement('header');
   document.body.append(bar);
   const sw = mountSwitcher(bar);
-  sw.setTiles(buildTiles(), 'calendar');
+  sw.setTiles(buildTiles(), 'finance');
   const chip = bar.querySelector('#chip');
   const menu = bar.querySelector('.switcher');
-  eq(chip.textContent.includes('compass'), true);
+  eq(chip.textContent.includes('finance'), true);
   eq(menu.hidden, true);
   chip.click();
   eq(menu.hidden, false);
   eq(chip.getAttribute('aria-expanded'), 'true');
-  eq(menu.querySelector('.app-tile.cur').textContent.includes('compass'), true);
+  eq(menu.querySelector('.app-tile.cur').textContent.includes('finance'), true);
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
   eq(menu.hidden, true);
   eq(chip.getAttribute('aria-expanded'), 'false');

@@ -1,7 +1,8 @@
 // The site's pages: one explicit list, in menu order, so the menu never depends
 // on the private repo's plugin manifest. Labels render lowercase through CSS.
-// An intro is the one line under a page's first card; none for home page,
-// settings, spoon, calendar and stash (the three apps are tablet frames, not sheets).
+// An intro is the one line under a page's first card; none for home page and
+// settings. The apps are not pages here: their rows open the app itself in a
+// new tab (Isa, 05/11/2026), drawn with the app's own icon.
 
 export const SECTIONS = ['pages', 'apps'];
 
@@ -22,10 +23,12 @@ export const PAGES = [
   { key: 'security', label: 'security', href: '#/security', section: 'pages', glyph: 'security',
     intro: 'The weekly security scan and the ranked recommendations. Everything here is masked.' },
   { key: 'settings', label: 'settings', href: '#/settings', section: 'pages', glyph: 'settings' },
-  { key: 'spoon', label: 'spoon', href: '#/spoon', section: 'apps', glyph: 'spoon' },
-  // Compass, framed as a tablet like Spoon (the key and address stay calendar).
-  { key: 'calendar', label: 'compass', href: '#/calendar', section: 'apps', glyph: 'calendar' },
-  { key: 'stash', label: 'stash', href: '#/stash', section: 'apps', glyph: 'finance' },
+  { key: 'spoon', label: 'ladle', href: 'https://darkpizzai.github.io/kave-food-app/', section: 'apps', external: true,
+    icon: 'https://darkpizzai.github.io/kave-food-app/icon-192.png' },
+  { key: 'calendar', label: 'compass', href: 'https://darkpizzai.github.io/kave-calendar-app/', section: 'apps', external: true,
+    icon: 'https://darkpizzai.github.io/kave-calendar-app/icon-192.png' },
+  { key: 'stash', label: 'stash', href: 'https://darkpizzai.github.io/kave-finance-app/', section: 'apps', external: true,
+    icon: 'https://darkpizzai.github.io/kave-finance-app/icon-192.png' },
 ];
 
 // First segment of an old address -> where it lives now. '' means the home page.
@@ -34,8 +37,11 @@ const MOVED = {
   house: 'our-house',
   money: 'finance',
   design: 'brand',
-  food: 'spoon',
-  compass: 'calendar',
+  food: '',
+  spoon: '',
+  calendar: '',
+  stash: '',
+  compass: '',
   isa: '',
   infrastructure: 'chantier',
 };

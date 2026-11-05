@@ -22,7 +22,8 @@ export function nextIndex(i, key, count, cols = COLS) {
 }
 
 export function buildTiles() {
-  return PAGES.map(p => ({ key: p.key, label: p.label, href: p.href, section: p.section, glyph: p.glyph }));
+  return PAGES.map(p => ({ key: p.key, label: p.label, href: p.href, section: p.section, glyph: p.glyph,
+    external: !!p.external, icon: p.icon || null }));
 }
 
 export function currentKey(hash) {
@@ -90,9 +91,11 @@ export function mountSwitcher(bar) {
       if (!group.length) continue;
       menu.append(el('div', { class: 'switcher-label' }, section));
       for (const t of group) {
-        const a = el('a', { class: 'app-tile' + (t.key === current ? ' cur' : ''), href: t.href, role: 'menuitem' },
-          el('span', { class: 'nav-icon' }, glyph(t.glyph || t.key, 24)),
-          el('span', { class: 'tile-name' }, t.label));
+        /* an app opens itself in a new tab, with its own icon */
+        const attrs = { class: 'app-tile' + (t.key === current ? ' cur' : ''), href: t.href, role: 'menuitem' };
+        if (t.external) Object.assign(attrs, { target: '_blank', rel: 'noopener' });
+        const icon = t.icon ? el('img', { class: 'app-icon', src: t.icon, alt: '', width: '24', height: '24' }) : glyph(t.glyph || t.key, 24);
+        const a = el('a', attrs, el('span', { class: 'nav-icon' }, icon), el('span', { class: 'tile-name' }, t.label));
         menu.append(a);
       }
     }

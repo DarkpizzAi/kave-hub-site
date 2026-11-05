@@ -77,9 +77,8 @@ test('EMBEDDED lists stash with its storage key, frame address and who field', (
     { name: 'stash', key: 'stash.settings', frameMatch: '/kave-finance-app/', who: 'me' });
 });
 
-test("index.html's CSP frame-src allows the frame of every embedded app", async () => {
+test("index.html's CSP frames nothing: the apps open in their own tab", async () => {
   const html = await (await fetch('../index.html', { cache: 'no-store' })).text();
   const csp = html.match(/http-equiv="Content-Security-Policy" content="([^"]*)"/)[1];
-  const frameSrc = csp.split(';').map(d => d.trim()).find(d => d.startsWith('frame-src ')).split(/\s+/).slice(1);
-  for (const app of EMBEDDED) eq(frameSrc.includes('https://darkpizzai.github.io' + app.frameMatch), true, app.name);
+  eq(csp.split(';').map(d => d.trim()).find(d => d.startsWith('frame-src ')), "frame-src 'none'");
 });

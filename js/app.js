@@ -57,10 +57,9 @@ async function route() {
 
   const list = await getPlugins();
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  const isTablet = parts[0] === 'spoon' || parts[0] === 'calendar' || parts[0] === 'stash';   // apps drawn as a tablet, not a sheet
-  const frame = isTablet ? null : buildPage();
-  const box = isTablet ? el('div', { class: 'view-fade' }) : frame.sheet;
-  const intro = isTablet ? null : introLine(currentKey(location.hash));
+  const frame = buildPage();
+  const box = frame.sheet;
+  const intro = introLine(currentKey(location.hash));
   if (intro) box.append(intro);
 
   try {
@@ -90,8 +89,8 @@ async function route() {
   switcher.setTiles(buildTiles(), currentKey(location.hash));
   detachToc();
   view.innerHTML = '';
-  view.append(isTablet ? box : frame.page);
-  if (frame) attachToc(frame.sheet, frame.side);
+  view.append(frame.page);
+  attachToc(frame.sheet, frame.side);
   if (!failed && !status.limited) status.syncedAt = Date.now();
   window.dispatchEvent(new Event('hub:refreshed'));
 }

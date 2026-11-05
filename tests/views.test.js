@@ -4,8 +4,6 @@ import finance from '../js/views/finance.js';
 import ourHouse from '../js/views/our-house.js';
 import chantier from '../js/views/chantier.js';
 import home from '../js/views/home.js';
-import calendar from '../js/views/calendar.js';
-import stash from '../js/views/stash.js';
 import brand from '../js/views/brand.js';
 
 function allMissing() {
@@ -156,24 +154,6 @@ test('our house interior design shows styles and colour swatches', async () => {
   eq(box.textContent.includes('Blue, orange, cream and yellow'), true);
   eq(box.querySelectorAll('.palette-swatch').length, 2);
   done();
-});
-
-test('calendar is Compass itself, framed as a tablet like Spoon', async () => {
-  const box = document.createElement('div');
-  await calendar(box);
-  eq(box.classList.contains('tablet-page'), true);
-  const frame = box.querySelector('.tablet .screen iframe');
-  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-calendar-app/');
-  eq(frame.getAttribute('title'), 'Compass');
-});
-
-test('stash is the finance app itself, framed as a tablet like Spoon', async () => {
-  const box = document.createElement('div');
-  await stash(box);
-  eq(box.classList.contains('tablet-page'), true);
-  const frame = box.querySelector('.tablet .screen iframe');
-  eq(frame.getAttribute('src'), 'https://darkpizzai.github.io/kave-finance-app/');
-  eq(frame.getAttribute('title'), 'Stash');
 });
 
 test('chantier renders and says infrastructure is missing when it is', async () => {

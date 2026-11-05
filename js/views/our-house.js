@@ -1,7 +1,7 @@
 // Our house: plants, the new-flat project, then interior design ideas.
 // Setup (hardware and infrastructure) moved to the infrastructure page's
 // device cards; `hardware.md`/`home-setup.md` stay as plain data files.
-// Calendar, bookings and trips live in views/calendar.js.
+// Calendar, bookings and trips live in Compass, which opens in its own tab.
 
 import * as data from '../data.js';
 import { el, card, chip, renderBlocks } from '../ui.js';
