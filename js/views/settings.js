@@ -19,21 +19,22 @@ function row(lead, title, sub, trail) {
   return node;
 }
 
+// The kit's swatches, laid out exactly as Ladle's Settings.
+const HEX = { cobalt: '#1a73e8', chartreuse: '#d7d63a' };
 function themeCard() {
-  const box = el('div', { class: 'swatches' });
+  const box = el('div', { class: 'set-swatches', role: 'group', 'aria-label': 'Theme colour' });
   const draw = () => {
     box.innerHTML = '';
     for (const p of PALETTES) {
       const on = getPalette() === p;
-      const b = el('button', { type: 'button', class: `swatch swatch-${p}` + (on ? ' is-on' : ''), 'aria-pressed': String(on) },
-        el('i', {}, on ? icon('check') : ''), el('span', { class: 'm3-label-m' }, NAMES[p]));
+      const sw = el('span', { class: 'm3-swatch' + (on ? ' is-selected' : ''), style: `--kave-k:${HEX[p]}` }, el('span', { class: 'm3-swatch__check m3-icon', hidden: on ? null : '' }, 'check'));
+      const b = el('button', { type: 'button', class: 'set-swatch', 'aria-pressed': String(on), 'aria-label': NAMES[p] }, sw, el('span', { class: 'm3-label-m' }, NAMES[p]));
       b.addEventListener('click', () => { setPalette(p); draw(); });
       box.append(b);
     }
   };
   draw();
-  return el('div', { class: 'm3-grouped' }, el('div', { class: 'm3-card set-card' }, box,
-    el('div', { class: 'm3-body-m set-note' }, 'Light or dark follows the computer.')));
+  return el('div', {}, box, el('p', { class: 'm3-body-s m3-variant set-note' }, 'Light or dark follows the computer.'));
 }
 
 function syncRow() {
@@ -51,9 +52,18 @@ function syncRow() {
 }
 
 export default async function settings(container) {
-  const select = el('select', { 'aria-label': 'User' }, ...WHO.map(w => el('option', { value: w }, w[0].toUpperCase() + w.slice(1))));
-  if (getWho()) select.value = getWho();
-  select.addEventListener('change', () => setWho(select.value));
+  // who you are: filter chips, as Compass's Settings
+  const select = el('div', { class: 'm3-chips', role: 'group', 'aria-label': 'User' });
+  const drawWho = () => {
+    select.innerHTML = '';
+    for (const w of WHO) {
+      const on = getWho() === w;
+      const c = el('button', { type: 'button', class: 'm3-chip' + (on ? ' is-selected' : ''), 'aria-pressed': String(on) }, on ? icon('check') : null, w[0].toUpperCase() + w.slice(1));
+      c.addEventListener('click', () => { setWho(w); drawWho(); });
+      select.append(c);
+    }
+  };
+  drawWho();
 
   const apply = el('button', { type: 'button', class: 'm3-btn m3-btn--tonal m3-btn--small' }, 'Apply');
   const applyRow = row('apps', 'Apps', 'Send your user, theme and token to Ladle, Compass and Stash.', apply);

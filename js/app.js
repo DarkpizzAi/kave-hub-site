@@ -30,10 +30,15 @@ const VIEWS = {
   settings: (c) => settings(c),
 };
 
+function menuButton(cls) {
+  const b = el('button', { type: 'button', class: 'm3-icon-btn' + (cls ? ' ' + cls : ''), 'aria-label': 'Menu' }, icon('menu'));
+  b.addEventListener('click', openDrawer);
+  return b;
+}
+
 function rail(active) {
   const nav = el('nav', { class: 'm3-rail site-rail', 'aria-label': 'Pages' });
-  const menu = el('button', { type: 'button', class: 'm3-icon-btn', 'aria-label': 'Menu' }, icon('menu'));
-  menu.addEventListener('click', openDrawer);
+  const menu = menuButton();
   const items = el('div', { class: 'm3-rail__items' });
   for (const p of PAGES.filter(x => x.place === 'rail')) {
     items.append(el('a', { class: 'm3-rail__item' + (p.key === active ? ' is-active' : ''), href: p.key === 'home' ? '#/' : '#/' + p.key, 'aria-current': p.key === active ? 'page' : null },
@@ -92,7 +97,7 @@ async function route() {
   closeDrawer();
   root.innerHTML = '';
   root.append(rail(page ? page.key : ''), el('div', { class: 'site-main' },
-    el('header', { class: 'site-bar' }, el('h1', {}, page ? (page.key === 'home' ? 'Kave hub' : page.label) : 'Kave hub')), body));
+    el('header', { class: 'site-bar' }, menuButton('site-menu-btn'), el('h1', {}, page ? (page.key === 'home' ? 'Kave hub' : page.label) : 'Kave hub')), body));
   document.title = page ? (page.key === 'home' ? 'Kave' : page.label + ' · Kave') : 'Kave';
   if (file) window.scrollTo(0, 0);
   if (!failed && !status.limited) status.syncedAt = Date.now();

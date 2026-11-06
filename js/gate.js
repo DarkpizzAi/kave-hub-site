@@ -6,14 +6,15 @@ import * as data from './data.js';
 import { el, icon } from './ui.js';
 import { WHO, PALETTES } from './prefs.js';
 
+// The kit's basic dialog, as Ladle's and Compass's gates.
 function card(...children) {
-  return el('div', { class: 'gate' },
-    el('span', { class: 'gate-mark' }, icon('hub')), el('div', { class: 'm3-headline-s' }, 'Kave hub'), ...children);
+  return el('div', { class: 'gate m3-dialog m3-dialog--basic', role: 'dialog', 'aria-label': 'Kave hub' },
+    el('h2', { class: 'gate-mark m3-headline-s' }, 'Kave hub'), ...children);
 }
 
 export function showGate(root, onOk) {
   root.innerHTML = '';
-  const input = el('input', { type: 'password', autocomplete: 'off', spellcheck: 'false', 'aria-label': 'GitHub token',
+  const input = el('input', { class: 'm3-field__input', type: 'password', autocomplete: 'off', spellcheck: 'false', 'aria-label': 'GitHub token',
     'data-1p-ignore': '', 'data-lpignore': 'true' });
   const button = el('button', { type: 'button', class: 'm3-btn m3-btn--filled gate-go', 'aria-label': 'Connect' }, icon('arrow_forward'));
 
@@ -25,7 +26,8 @@ export function showGate(root, onOk) {
   }
   button.addEventListener('click', submit);
   input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-  root.append(card(el('div', { class: 'gate-field' }, input, button)));
+  root.append(card(el('div', { class: 'gate-field m3-field' }, el('span', { class: 'm3-field__label' }, 'Access'), input),
+    el('div', { class: 'm3-dialog__actions' }, button)));
   input.focus();
 }
 

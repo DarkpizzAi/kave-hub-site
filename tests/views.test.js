@@ -128,7 +128,7 @@ test('settings offers the two themes, sync and advanced, in one column', async (
   const box = document.createElement('div');
   await settings(box);
   eq([...box.querySelectorAll('.m3-list-header')].map(h => h.textContent), ['Theme', 'Sync', 'Advanced']);
-  eq([...box.querySelectorAll('.swatch .m3-label-m')].map(b => b.textContent), ['Cobalt', 'Chartreuse']);
+  eq([...box.querySelectorAll('.set-swatch .m3-label-m')].map(b => b.textContent), ['Cobalt', 'Chartreuse']);
   done();
 });
 
