@@ -58,37 +58,43 @@ test('finance shows the safe-to-spend figure and a bill from real files', async 
   done();
 });
 
-test('brand renders household-look.md live, themes included', async () => {
-  const look = ['# The household look', '', 'One look, everywhere.', '', '## Type',
-    'Rubik, eight steps.', '', '## Colour', 'Shared neutrals, then themes.',
-    '| Theme | |', '|---|---|', '| Cobalt | the default |', '| Amber | |', '| Chartreuse | |',
-    '', '## History', 'Old news.'].join('\n') + '\n';
-  withFiles({ 'brand/data/household-look.md': look });
+test('brand draws look-recap.md live: three columns, samples, notes', async () => {
+  const recap = ['# The kave look', '', 'Intro line.', '',
+    '## Plain Material 3', '', 'Taken as Material says.', '', '### Type', '', 'The type scale.', '', 'Sample: type', '',
+    '## Changed by kave', '', 'Colours only.', '', '### Two fills only', '', 'Accent and accent fade.', '', 'Sample: fills', '', 'Decided: Isa, 06/11/2026', '',
+    '### Unknown sample', '', 'Drawn without a sample.', '', 'Sample: nothing-like-this', '',
+    '## Added by kave', '', 'Not in Material.', '', '### Widths', '', '720, or 1120.', '', 'Sample: widths', '',
+    '## Out of date', '', 'The spec lags.'].join('\n') + '\n';
+  withFiles({ 'brand/data/look-recap.md': recap });
   const box = document.createElement('div');
   await brand(box);
-  eq(box.textContent.includes('Cobalt, Amber, Chartreuse'), true);
-  eq(box.textContent.includes('Rubik, eight steps'), true);
-  eq(box.textContent.includes('Shared neutrals, then themes'), true);
-  // History is dropped entirely
-  eq(box.textContent.includes('Old news'), false);
-  // "At a glance" then "Rules" - two top-level groups, not one per section
-  eq([...box.querySelectorAll('h2')].map(h => h.textContent), ['At a glance', 'Rules']);
-  // exactly one real "Type" and one real "Colour" section (the at-a-glance
-  // preview cards carry the same title text but opt out of the sidebar)
-  const titledSections = title => [...box.querySelectorAll('.tab-section-title')]
-    .filter(t => t.textContent === title).map(t => t.closest('.tab-section'));
-  const typeSections = titledSections('Type');
-  const colourSections = titledSections('Colour');
-  eq(typeSections.length, 2);
-  eq(colourSections.length, 2);
-  eq(typeSections.filter(s => !s.classList.contains('no-toc')).length, 1);
-  eq(colourSections.filter(s => !s.classList.contains('no-toc')).length, 1);
-  // the at-a-glance cards' jump buttons point at the real sections' ids
-  const realType = typeSections.find(s => !s.classList.contains('no-toc'));
-  const realColour = colourSections.find(s => !s.classList.contains('no-toc'));
-  const jumpLinks = [...box.querySelectorAll('.cards2 a.btn')];
-  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realType.id), true);
-  eq(jumpLinks.some(a => a.getAttribute('href') === '#' + realColour.id), true);
+  const root = box.querySelector('.brand-recap-host').shadowRoot;
+  eq([...root.querySelectorAll('.r-col > header .m3-title-l')].map(h => h.textContent), ['Plain Material 3', 'Changed by kave', 'Added by kave']);
+  eq(root.querySelectorAll('.r-it').length, 4);
+  eq(root.textContent.includes('Accent and accent fade.'), true);
+  eq(root.textContent.includes('Isa, 06/11/2026'), true);
+  eq(root.textContent.includes('Sample:'), false, 'sample lines are drawn, not printed');
+  eq(!!root.querySelector('.m3-btn--filled'), true, 'the fills sample is drawn from the kit');
+  eq(!!root.querySelector('.r-w-696'), true);
+  eq(root.querySelector('.r-note').textContent.includes('The spec lags.'), true);
+  done();
+});
+
+test('brand says so when look-recap.md is missing', async () => {
+  allMissing();
+  const box = document.createElement('div');
+  await brand(box);
+  eq(box.textContent.includes('look-recap.md not found.'), true);
+  done();
+});
+
+test('brand: the file cannot inject markup', async () => {
+  withFiles({ 'brand/data/look-recap.md': ['# T', '', '## Col', '', 'Line', '', '### <img src=x onerror=alert(1)>', '', 'Body <b>x</b>'].join('\n') + '\n' });
+  const box = document.createElement('div');
+  await brand(box);
+  const root = box.querySelector('.brand-recap-host').shadowRoot;
+  eq(root.querySelector('img'), null);
+  eq(root.querySelector('b'), null);
   done();
 });
 

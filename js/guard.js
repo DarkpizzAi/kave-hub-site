@@ -12,7 +12,8 @@ export const FILES = [
   'js/views/index.js', 'js/views/home.js', 'js/views/our-house.js',
   'js/views/our-house-project.js', 'js/views/generic.js',
   'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js', 'js/views/security.js',
-  'js/views/settings.js',
+  'js/views/settings.js', 'js/views/brand.js', 'css/brand-recap.css',
+  'm3/kave-m3-tokens.css', 'm3/kave-m3.css',
 ];
 
 const RECOVERED = 'hubweb:recovered';
