@@ -6,24 +6,24 @@
   background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface);
   font-family: "Google Sans Flex", "Roboto Flex", Roboto, system-ui, sans-serif;
   font-size: 14px; line-height: 20px; letter-spacing: .25px;
-  border-radius: 28px; padding: 24px; display: flex; flex-direction: column; gap: 16px;
+  border-radius: 28px; padding: var(--md-sys-measurement-space300); display: flex; flex-direction: column; gap: var(--md-sys-measurement-space300);
   max-width: 1120px; margin: 0 auto; box-sizing: border-box;
 }
-.r-head { display: flex; flex-direction: column; gap: 4px; }
+.r-head { display: flex; flex-direction: column; gap: var(--md-sys-measurement-space100); }
 .r-intro { color: var(--md-sys-color-on-surface-variant); max-width: 880px; }
-.r-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
-.r-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.r-col > header { border-radius: 24px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;
+.r-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--kave-layout-spacer); align-items: start; }
+.r-col { display: flex; flex-direction: column; gap: var(--md-sys-measurement-space150); min-width: 0; }
+.r-col > header { border-radius: 24px; padding: var(--md-sys-measurement-space250) var(--md-sys-measurement-space300); display: flex; flex-direction: column; gap: var(--md-sys-measurement-space50);
   background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
 .r-col-m3 > header { background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface); }
 /* items are cards, not grouped rows: the accent as text (the link and text
    button samples) never sits on a grouped row */
-.r-it { background: var(--md-sys-color-surface-container-low); border-radius: 16px; padding: 14px 16px;
-  display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.r-it { background: var(--md-sys-color-surface-container-low); border-radius: 16px; padding: var(--md-sys-measurement-space250);
+  display: flex; flex-direction: column; gap: var(--md-sys-measurement-space150); min-width: 0; }
 .r-it code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
-.r-demo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.r-demo { display: flex; flex-wrap: wrap; gap: var(--md-sys-measurement-space100); align-items: center; padding-top: var(--md-sys-measurement-space50); }
 .r-src { color: var(--md-sys-color-on-surface-variant); }
-.r-note { border-radius: 16px; padding: 14px 16px; background: var(--md-sys-color-surface-container-high);
+.r-note { border-radius: 16px; padding: var(--md-sys-measurement-space250); background: var(--md-sys-color-surface-container-high);
   display: flex; flex-direction: column; gap: 4px; }
 
 /* samples */
@@ -36,10 +36,10 @@
 .r-seed { border-radius: 16px; padding: 6px 14px; font-weight: 500; }
 .r-seed-cobalt { background: #1a73e8; color: #ffffff; }
 .r-seed-chartreuse { background: #d7d63a; color: #1b1b06; }
-.r-fade { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 20px; padding: 10px 18px; }
+.r-fade { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 20px; padding: 10px 16px; }
 .r-link { color: var(--md-sys-color-primary); text-decoration: underline; text-underline-offset: 2px; }
 .r-hero { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
-  border-radius: 24px; padding: 14px 18px; display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; }
+  border-radius: 24px; padding: 16px 20px; display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box; }
 .r-acc { color: var(--md-sys-color-primary); }
 .r-tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .r-evs { display: flex; flex-direction: column; gap: 6px; width: 100%; }
