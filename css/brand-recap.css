@@ -34,8 +34,8 @@
 .r-sw-rows { background: var(--kave-grouped-row); }
 .r-sw-highest { background: var(--md-sys-color-surface-container-highest); }
 .r-seed { border-radius: 16px; padding: 6px 14px; font-weight: 500; }
-.r-seed-cobalt { background: #1a73e8; color: #ffffff; }
-.r-seed-chartreuse { background: #d7d63a; color: #1b1b06; }
+.r-seed-cobalt { background: #1a73e8; color: #ffffff; } /* brand-exception: Two themes, not any seed: the seed colour itself */
+.r-seed-chartreuse { background: #d7d63a; color: #1b1b06; } /* brand-exception: Two themes, not any seed: the seed colour itself */
 .r-fade { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 20px; padding: 10px 16px; }
 .r-link { color: var(--md-sys-color-primary); text-decoration: underline; text-underline-offset: 2px; }
 .r-hero { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
@@ -49,7 +49,7 @@
 .r-w i { background: var(--md-sys-color-primary-container); border-radius: 4px; }
 .r-w-720 { flex: 720; } .r-w-696 { flex: 696; } .r-w-24 { flex: 24; } .r-w-400 { flex: 400; }
 .r-grouped { width: 100%; }
-.r-app { width: 44px; height: 44px; border-radius: 12px; background: #1a73e8; color: #ffffff; display: grid; place-items: center; }
+.r-app { width: 44px; height: 44px; border-radius: 12px; background: #1a73e8; color: #ffffff; display: grid; place-items: center; } /* brand-exception: App names and icons: the fixed icon fill */
 .r-app .m3-icon { font-variation-settings: "FILL" 1; }
 
 /* the data colours: a tag's dot and container, and an event's fill */
