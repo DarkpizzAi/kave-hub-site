@@ -7,7 +7,7 @@
 export const FILES = [
   'index.html', 'css/site.css', 'css/brand-recap.css', 'm3/kave-m3-tokens.css', 'm3/kave-m3.css',
   'js/app.js', 'js/data.js', 'js/md.js', 'js/ui.js', 'js/doc.js', 'js/shelf.js', 'js/gate.js',
-  'js/prefs.js', 'js/status.js', 'js/guard.js', 'js/routes.js', 'js/countdown.js', 'js/embedded.js',
+  'js/prefs.js', 'js/status.js', 'js/top-bar.js', 'm3/kave-m3.js', 'js/guard.js', 'js/routes.js', 'js/countdown.js', 'js/embedded.js',
   'js/views/home.js', 'js/views/shelf.js', 'js/views/health.js', 'js/views/security.js',
   'js/views/settings.js', 'js/views/brand.js',
 ];

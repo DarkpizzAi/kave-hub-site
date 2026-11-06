@@ -65,3 +65,9 @@
 .r-ev-travel { background: var(--kave-data-travel-fill); color: var(--kave-data-on-travel-fill); }
 .r-ev-life { background: var(--kave-data-life-fill); color: var(--kave-data-on-life-fill); }
 .r-ev-other { background: var(--kave-data-other-fill); color: var(--kave-data-on-other-fill); }
+
+/* compact windows: one column, as every other page (the three columns are for wide screens) */
+@media (max-width: 839px) {
+  .r-cols { grid-template-columns: minmax(0, 1fr); }
+  .r-page { padding: var(--md-sys-measurement-space200); }
+}

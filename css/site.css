@@ -36,7 +36,8 @@ body { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-sur
 
 /* ---- a rendered md file ---- */
 .doc { display: flex; flex-direction: column; gap: var(--md-sys-measurement-space150); padding: 0 var(--md-sys-measurement-space50); min-width: 0; }
-.doc-meta { display: flex; align-items: center; gap: var(--md-sys-measurement-space100); color: var(--md-sys-color-on-surface-variant); }
+.doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--md-sys-measurement-space100); color: var(--md-sys-color-on-surface-variant); min-width: 0; }
+.doc-meta .m3-chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .doc-meta .m3-spacer { flex: 1; }
 .doc-meta .m3-chip { pointer-events: none; }
 .doc h2 { font-size: 28px; line-height: 36px; font-weight: 400; margin: var(--md-sys-measurement-space50) 0 0; }
@@ -116,7 +117,6 @@ body { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-sur
   .two > .pane { order: -1; position: static; max-height: none; }
   .clock { gap: var(--md-sys-measurement-space200); }
   .clock-num { font-size: 45px; line-height: 52px; }
-  .r-cols { grid-template-columns: minmax(0, 1fr); }
 }
 
 .empty { color: var(--md-sys-color-on-surface-variant); padding: var(--md-sys-measurement-space200); }

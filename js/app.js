@@ -10,6 +10,7 @@ import { applyPalette, getWho, setWho, setPalette } from './prefs.js';
 import { applyToEmbeddedApps } from './embedded.js';
 import { PAGES, APPS, parseHash, pageFor, redirectFor } from './routes.js';
 import { recover } from './guard.js';
+import { initTopBar } from './top-bar.js';
 import { status } from './status.js';
 import home from './views/home.js';
 import { shelf, chantier } from './views/shelf.js';
@@ -97,9 +98,10 @@ async function route() {
   closeDrawer();
   root.innerHTML = '';
   root.append(rail(page ? page.key : ''), el('div', { class: 'site-main' },
-    el('header', { class: 'site-bar' }, menuButton('site-menu-btn'), el('h1', {}, page ? (page.key === 'home' ? 'Kave hub' : page.label) : 'Kave hub')), body));
+    el('header', { class: 'site-bar m3-top-bar', id: 'topBar' }, menuButton('site-menu-btn'), el('h1', {}, page ? (page.key === 'home' ? 'Kave hub' : page.label) : 'Kave hub')), body));
   document.title = page ? (page.key === 'home' ? 'Kave' : page.label + ' · Kave') : 'Kave';
   if (file) window.scrollTo(0, 0);
+  initTopBar();
   if (!failed && !status.limited) status.syncedAt = Date.now();
   window.dispatchEvent(new Event('hub:refreshed'));
 }
