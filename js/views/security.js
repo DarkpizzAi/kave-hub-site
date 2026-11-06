@@ -1,40 +1,33 @@
-// Security: the weekly scan first, then the ranked recommendations. Both files
-// are masked at the source (no name, number or value is ever written in them),
-// and both live in the chantier plugin's data folder.
+// Security: one column. A status hero from the weekly scan's result line,
+// then the scan, the ranked recommendations and the two-zone register, each
+// as written (all three files are masked at the source).
 
 import * as data from '../data.js';
-import { card, emptyNote, renderBlocks, renderDocCards } from '../ui.js';
+import { el, icon, emptyNote } from '../ui.js';
+import { renderDoc, metaRow, ago } from '../doc.js';
 
-export const SECURITY_FILES = ['security-report.md', 'security-recommendations.md'];
+export const SECURITY_FILES = ['chantier/data/security-report.md', 'chantier/data/security-recommendations.md', 'chantier/data/data-locations.md'];
+
+export function resultOf(doc) {
+  const text = doc.sections.flatMap(s => s.blocks).filter(b => b.kind === 'p').map(b => b.text).join(' ');
+  const m = text.match(/Result:\s*\**\s*([\w ]+?)\s*\**(?:[.,]|$|\s{2})/i) || text.match(/Result:\s*\**([A-Z]+)/);
+  return m ? m[1].trim() : null;
+}
 
 export default async function security(container) {
-  for (const f of SECURITY_FILES) {
-    const doc = await data.doc('/chantier/data/' + f);
-    if (!doc) { container.append(emptyNote('chantier/data/' + f + ' is missing.')); continue; }
-
-    // The lines under the title (for the scan, the result) get a card of their own.
-    const intro = doc.sections.find(s => s.level === 0);
-    if (intro && intro.blocks.length) {
-      const c = card(doc.title || f);
-      renderBlocks(c, intro.blocks, { skipCode: true });
-      container.append(c);
-    }
-    const before = container.children.length;
-    renderDocCards(container, doc, { skipCode: true, skipIntro: true });
-    // The numbered recommendation headings are legitimate subtitles but too
-    // many and too repetitive a set to want in the sidebar.
-    if (f === 'security-recommendations.md') {
-      for (let i = before; i < container.children.length; i++) {
-        const sec = container.children[i];
-        if (/^\d+\./.test(sec.querySelector('.tab-section-title')?.textContent || '')) {
-          sec.classList.add('no-toc');
-        }
-      }
-    }
+  const col = el('div', { class: 'one' });
+  const docs = await Promise.all(SECURITY_FILES.map(async p => ({ path: p, doc: await data.doc('/' + p), changed: await data.lastChange(p) })));
+  const report = docs[0];
+  if (report.doc) {
+    const result = resultOf(report.doc);
+    const clean = result && /clean|pass|ok/i.test(result);
+    col.append(el('div', { class: 'hero status-hero' }, icon(clean ? 'verified_user' : 'gpp_maybe', 'acc'),
+      el('div', {}, el('div', { class: 'm3-title-m' }, result ? 'Last scan: ' + result.toLowerCase() : 'Last scan'),
+        el('div', { class: 'm3-body-m' }, report.changed ? 'Written ' + ago(report.changed) + ', from security-report.md' : 'From security-report.md'))));
   }
-
-  // data-locations.md: the two-zone rule and the register, after the scan
-  // and recommendations.
-  const locDoc = await data.doc('/chantier/data/data-locations.md');
-  if (locDoc) renderDocCards(container, locDoc, { skipCode: true });
+  for (const d of docs) {
+    if (!d.doc) { col.append(emptyNote(d.path + ' is missing.')); continue; }
+    col.append(el('article', { class: 'doc' }, metaRow(d.path, d.changed), renderDoc(d.doc, d.path)));
+  }
+  container.append(col);
 }

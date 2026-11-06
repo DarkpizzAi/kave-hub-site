@@ -1,7 +1,6 @@
-/* The Brand page (js/views/brand.js), inside its shadow root, after the kit
-   (m3/kave-m3.css). Every colour is a kit token; layout only otherwise. */
+/* The Brand page (js/views/brand.js), after the kit (m3/kave-m3.css) and
+   css/site.css. Every colour is a kit token; layout only otherwise. */
 
-:host { display: block; }
 .r-page {
   background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface);
   font-family: "Google Sans Flex", "Roboto Flex", Roboto, system-ui, sans-serif;

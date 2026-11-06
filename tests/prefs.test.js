@@ -5,6 +5,7 @@ function clean() {
   localStorage.removeItem('hubweb:palette');
   localStorage.removeItem('hubweb:who');
   delete document.documentElement.dataset.palette;
+  delete document.documentElement.dataset.seed;
 }
 
 test('palette defaults to cobalt and sets no attribute', () => {
@@ -16,9 +17,10 @@ test('palette defaults to cobalt and sets no attribute', () => {
 
 test('setPalette stores a valid palette and applies it', () => {
   clean();
-  eq(setPalette('amber'), true);
-  eq(getPalette(), 'amber');
-  eq(document.documentElement.dataset.palette, 'amber');
+  eq(setPalette('chartreuse'), true);
+  eq(getPalette(), 'chartreuse');
+  eq(document.documentElement.dataset.palette, 'chartreuse');
+  eq(document.documentElement.dataset.seed, 'chartreuse', 'the Material 3 tokens follow');
   clean();
 });
 
@@ -54,6 +56,14 @@ test('who is null until set, then a valid route key', () => {
   clean();
 });
 
-test('the three palettes are the household set', () => {
-  eq(PALETTES, ['cobalt', 'amber', 'chartreuse']);
+test('the two palettes are the household set', () => {
+  eq(PALETTES, ['cobalt', 'chartreuse']);
+});
+
+test('a stored retired palette (amber) reads as cobalt', () => {
+  clean();
+  localStorage.setItem('hubweb:palette', 'amber');
+  eq(getPalette(), 'cobalt');
+  eq(setPalette('amber'), false);
+  clean();
 });

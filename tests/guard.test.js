@@ -14,10 +14,9 @@ function clean() {
 }
 
 test('FILES lists the entry files and every module of the site', () => {
-  for (const f of ['index.html', 'tokens.css', 'css/hub.css', 'js/app.js', 'js/guard.js',
-    'js/switcher.js', 'js/frame.js', 'js/glyphs.js', 'js/prefs.js', 'js/status.js',
-    'js/ui.js', 'js/data.js', 'js/md.js', 'js/gate.js', 'js/icons.js', 'js/views/index.js',
-    'js/views/settings.js']) {
+  for (const f of ['index.html', 'css/site.css', 'm3/kave-m3.css', 'js/app.js', 'js/guard.js', 'js/routes.js',
+    'js/doc.js', 'js/shelf.js', 'js/prefs.js', 'js/status.js', 'js/ui.js', 'js/data.js', 'js/md.js', 'js/gate.js',
+    'js/views/home.js', 'js/views/shelf.js', 'js/views/settings.js']) {
     eq(FILES.includes(f), true, f);
   }
 });

@@ -5,15 +5,11 @@
 // every entry exists, and a reviewer must add new modules here.
 
 export const FILES = [
-  'index.html', 'tokens.css', 'css/hub.css',
-  'js/app.js', 'js/data.js', 'js/md.js', 'js/ui.js', 'js/icons.js', 'js/gate.js',
-  'js/glyphs.js', 'js/prefs.js', 'js/status.js', 'js/guard.js', 'js/switcher.js', 'js/frame.js',
-  'js/routes.js', 'js/countdown.js', 'js/countdown-view.js', 'js/embedded.js',
-  'js/views/index.js', 'js/views/home.js', 'js/views/our-house.js',
-  'js/views/our-house-project.js', 'js/views/generic.js',
-  'js/views/finance.js', 'js/views/fun.js', 'js/views/person.js', 'js/views/chantier.js', 'js/views/security.js',
-  'js/views/settings.js', 'js/views/brand.js', 'css/brand-recap.css',
-  'm3/kave-m3-tokens.css', 'm3/kave-m3.css',
+  'index.html', 'css/site.css', 'css/brand-recap.css', 'm3/kave-m3-tokens.css', 'm3/kave-m3.css',
+  'js/app.js', 'js/data.js', 'js/md.js', 'js/ui.js', 'js/doc.js', 'js/shelf.js', 'js/gate.js',
+  'js/prefs.js', 'js/status.js', 'js/guard.js', 'js/routes.js', 'js/countdown.js', 'js/embedded.js',
+  'js/views/home.js', 'js/views/shelf.js', 'js/views/health.js', 'js/views/security.js',
+  'js/views/settings.js', 'js/views/brand.js',
 ];
 
 const RECOVERED = 'hubweb:recovered';

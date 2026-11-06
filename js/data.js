@@ -42,10 +42,13 @@ export function apiUrl(path) {
 }
 
 async function request(path, accept) {
+  return requestUrl(apiUrl(path), accept, CACHE_PREFIX + accept + ':' + path);
+}
+
+async function requestUrl(url, accept, cacheKey) {
   const token = getToken();
   if (!token) { window.dispatchEvent(new Event('data:auth')); return { status: 401 }; }
 
-  const cacheKey = CACHE_PREFIX + accept + ':' + path;
   let cached = null;
   try { cached = JSON.parse(sessionStorage.getItem(cacheKey)); } catch (e) { /* none */ }
 
@@ -53,7 +56,7 @@ async function request(path, accept) {
   if (cached && cached.etag) headers['If-None-Match'] = cached.etag;
 
   let r;
-  try { r = await fetchImpl(apiUrl(path), { headers }); } catch (e) { return { status: 0 }; }
+  try { r = await fetchImpl(url, { headers }); } catch (e) { return { status: 0 }; }
 
   if (r.status === 304 && cached) return { status: 200, body: cached.body };
   if (r.status === 401) window.dispatchEvent(new Event('data:auth'));
@@ -94,6 +97,29 @@ export async function listDir(dir) {
   try {
     return JSON.parse(r.body).filter(e => e.type === 'file').map(e => e.name);
   } catch (e) { return []; }
+}
+
+// When a file last changed, from git: the newest commit that touched it.
+// Returns a Date, or null when the history cannot be read.
+export function commitsUrl(path) {
+  const clean = path.replace(/^\/+/, '');
+  return `https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/commits?sha=${CONFIG.branch}&per_page=1&path=${encodeURIComponent(clean)}`;
+}
+
+export async function lastChange(path) {
+  const key = 'commit:' + path;
+  if (memory.has(key)) return memory.get(key);
+  const r = await requestUrl(commitsUrl(path), LISTING, CACHE_PREFIX + 'c:' + path);
+  let out = null;
+  if (r.status === 200) {
+    try {
+      const list = JSON.parse(r.body);
+      const d = list[0] && list[0].commit && (list[0].commit.committer || list[0].commit.author);
+      if (d && d.date) out = new Date(d.date);
+    } catch (e) { out = null; }
+  }
+  if (r.status === 200) memory.set(key, out);
+  return out;
 }
 
 // Checks a candidate token against one small file. Stores nothing.

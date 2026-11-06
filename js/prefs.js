@@ -4,7 +4,8 @@
 const PALETTE_KEY = 'hubweb:palette';
 const WHO_KEY = 'hubweb:who';
 
-export const PALETTES = ['cobalt', 'amber', 'chartreuse'];
+// The two household themes (Isa, 05/11/2026). A stored retired one (amber) reads as cobalt.
+export const PALETTES = ['cobalt', 'chartreuse'];
 // Route keys of the two person pages. Structural only; names come from the private repo.
 export const WHO = ['isa', 'hugo'];
 
@@ -22,8 +23,9 @@ export function getPalette() {
 
 export function applyPalette(root = document.documentElement) {
   const p = getPalette();
-  if (p === 'cobalt') delete root.dataset.palette;
-  else root.dataset.palette = p;
+  // data-seed drives the Material 3 tokens; data-palette is kept for the apps' settings
+  if (p === 'cobalt') { delete root.dataset.palette; delete root.dataset.seed; }
+  else { root.dataset.palette = p; root.dataset.seed = p; }
 }
 
 export function setPalette(p) {

@@ -1,0 +1,112 @@
+/* The hub site on Material 3 (06/11/2026), after the kit (m3/kave-m3.css).
+   Layout only: every colour is a kit token, every space on Material's scale.
+   Two layouts, as the apps: one column of 720, or wide + skinny of 1120
+   (696 + 24 + 400), centred beside the rail. Desktop only. */
+
+html, body { margin: 0; }
+body { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+
+/* ---- shell: rail, top bar, drawer ---- */
+.site-rail { position: fixed; left: 0; top: 0; bottom: 0; z-index: 6; }
+.site-rail > .m3-icon-btn { margin: 0 0 var(--md-sys-measurement-space150); }
+.site-rail .m3-rail__item.is-active .m3-rail__pill { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.site-rail .m3-rail__item.is-active .m3-icon { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+.site-main { margin-left: 96px; min-height: 100vh; }
+.site-bar { height: 64px; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 4; background: var(--md-sys-color-surface); }
+.site-bar h1 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 400; }
+.site-page { padding: var(--md-sys-measurement-space100) var(--kave-layout-margin) var(--md-sys-measurement-space600); }
+.m3-drawer { width: 320px; }
+.m3-drawer__item .m3-drawer__trail { color: var(--md-sys-color-on-surface-variant); font-size: 18px; }
+.site-drawer-foot { color: var(--md-sys-color-on-surface-variant); padding: var(--md-sys-measurement-space150) var(--md-sys-measurement-space200); margin-top: auto; }
+
+/* ---- the two layouts ---- */
+.one { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--md-sys-measurement-space100); }
+.two { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: var(--kave-layout-spacer); align-items: start; }
+.wide { max-width: 1120px; margin: 0 auto; }
+
+/* the skinny pane: a card, sticky under the bar */
+.pane { position: sticky; top: 72px; max-height: calc(100vh - 96px); overflow: auto; scrollbar-width: none;
+  background: var(--md-sys-color-surface-container-low); border-radius: 24px;
+  padding: var(--md-sys-measurement-space100) var(--md-sys-measurement-space100) var(--md-sys-measurement-space200);
+  display: flex; flex-direction: column; gap: var(--md-sys-measurement-space50); }
+.pane .m3-list-header { min-height: 40px; }
+.pane a.m3-list-item { border-radius: 16px; text-decoration: none; color: inherit; }
+.pane a.m3-list-item:not(.m3-list-item--selected):hover { background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent); }
+.pane-foot { padding: var(--md-sys-measurement-space150) var(--md-sys-measurement-space200) 0; color: var(--md-sys-color-on-surface-variant); }
+
+/* ---- a rendered md file ---- */
+.doc { display: flex; flex-direction: column; gap: var(--md-sys-measurement-space150); padding: 0 var(--md-sys-measurement-space50); min-width: 0; }
+.doc-meta { display: flex; align-items: center; gap: var(--md-sys-measurement-space100); color: var(--md-sys-color-on-surface-variant); }
+.doc-meta .m3-spacer { flex: 1; }
+.doc-meta .m3-chip { pointer-events: none; }
+.doc h2 { font-size: 28px; line-height: 36px; font-weight: 400; margin: var(--md-sys-measurement-space50) 0 0; }
+.doc h3 { font-size: 22px; line-height: 28px; font-weight: 400; margin: var(--md-sys-measurement-space200) 0 0; }
+.doc h4, .doc h5, .doc h6 { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: .15px; margin: var(--md-sys-measurement-space100) 0 0; }
+.doc p, .doc li { font-size: 16px; line-height: 24px; letter-spacing: .5px; margin: 0; overflow-wrap: anywhere; }
+.doc ul, .doc ol { margin: 0; padding-left: var(--md-sys-measurement-space300); display: flex; flex-direction: column; gap: var(--md-sys-measurement-space50); }
+.doc ul.tasks { list-style: none; padding-left: 0; }
+.doc ul.tasks li { display: flex; gap: var(--md-sys-measurement-space150); align-items: flex-start; }
+.doc ul.tasks .m3-icon { color: var(--md-sys-color-on-surface-variant); }
+.doc ul.tasks li.done { color: var(--md-sys-color-on-surface-variant); text-decoration: line-through; }
+.doc ul.tasks li.done .m3-icon { color: var(--md-sys-color-primary); }
+.doc a { color: var(--md-sys-color-primary); text-decoration: underline; text-underline-offset: 2px; }
+.doc code { font-family: ui-monospace, Consolas, monospace; font-size: 14px; background: var(--md-sys-color-surface-container-high); border-radius: 6px; padding: 2px 6px; }
+.doc pre { margin: 0; padding: var(--md-sys-measurement-space150) var(--md-sys-measurement-space200); border-radius: 16px; background: var(--md-sys-color-surface-container-high);
+  font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 20px; overflow: auto; }
+.doc .tbl { border-radius: 16px; overflow: auto; background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); }
+.doc table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 20px; }
+.doc th { text-align: left; font-weight: 500; color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container); padding: 10px 16px; }
+.doc td { padding: 10px 16px; border-top: 1px solid var(--md-sys-color-outline-variant); vertical-align: top; }
+.doc td a { color: inherit; } /* the accent as text never sits on a table row */
+.doc .ph { color: var(--md-sys-color-on-surface-variant); }
+.doc .older { align-self: flex-start; }
+
+/* ---- heroes: the apps' Insights hero (accent fade) ---- */
+.hero { border-radius: 28px; padding: var(--md-sys-measurement-space300) var(--md-sys-measurement-space400);
+  background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
+  display: flex; flex-direction: column; gap: var(--md-sys-measurement-space150); margin-top: var(--md-sys-measurement-space100); }
+.hero .acc { color: var(--md-sys-color-primary); }
+.hero-kick { display: flex; align-items: center; gap: var(--md-sys-measurement-space100); }
+.clock { display: flex; gap: var(--md-sys-measurement-space400); align-items: baseline; }
+.clock-unit { display: flex; flex-direction: column; }
+.clock-num { font-size: 57px; line-height: 64px; font-weight: 400; letter-spacing: -.25px; font-variant-numeric: tabular-nums; color: var(--md-sys-color-primary); }
+.status-hero { flex-direction: row; align-items: center; gap: var(--md-sys-measurement-space200); }
+.status-hero .m3-icon { font-size: 32px; }
+
+/* ---- lists on the page (home, settings) ---- */
+.day-h { color: var(--md-sys-color-on-surface-variant); padding: var(--md-sys-measurement-space200) var(--md-sys-measurement-space200) var(--md-sys-measurement-space50); }
+.m3-grouped a.m3-list-item { text-decoration: none; color: inherit; }
+.lead-k { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.set-card { padding: var(--md-sys-measurement-space150) 0 var(--md-sys-measurement-space50); gap: 0; }
+.set-card > .m3-body-l, .set-card > .m3-body-m { padding: 0 var(--md-sys-measurement-space200); }
+.set-note { color: var(--md-sys-color-on-surface-variant); padding-bottom: var(--md-sys-measurement-space150); }
+.swatches { display: flex; gap: var(--md-sys-measurement-space200); padding: var(--md-sys-measurement-space100) var(--md-sys-measurement-space200) var(--md-sys-measurement-space150); }
+.swatch { display: flex; flex-direction: column; align-items: center; gap: var(--md-sys-measurement-space75); background: none; border: 0; cursor: pointer; color: inherit; font: inherit; }
+.swatch i { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-style: normal; }
+.swatch-cobalt i { background: #1a73e8; color: #ffffff; } /* brand-exception: Two themes, not any seed: the seed colour itself */
+.swatch-chartreuse i { background: #d7d63a; color: #1b1b06; } /* brand-exception: Two themes, not any seed: the seed colour itself */
+.swatch.is-on i { box-shadow: 0 0 0 3px var(--md-sys-color-surface), 0 0 0 5px var(--md-sys-color-on-surface); }
+.set-row-trail { display: flex; gap: var(--md-sys-measurement-space100); align-items: center; }
+.m3-list-item select { font: inherit; color: inherit; background: var(--md-sys-color-surface-container-high); border: 0; border-radius: 8px; padding: 8px 12px; }
+
+/* ---- routines health (Chantier pane) ---- */
+.health { background: var(--md-sys-color-surface-container-lowest); border-radius: 20px; padding: var(--md-sys-measurement-space150) var(--md-sys-measurement-space200);
+  display: flex; flex-direction: column; gap: var(--md-sys-measurement-space100); margin: 0 0 var(--md-sys-measurement-space50); }
+.health-r { display: flex; align-items: center; gap: var(--md-sys-measurement-space150); }
+.health-r .m3-spacer { flex: 1; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--md-sys-color-primary); }
+.dot.bad { background: var(--md-sys-color-error); }
+.dot.idle { background: var(--md-sys-color-outline); }
+
+/* ---- gate: the only screen without a token. No intro text (Isa, 06/11/2026). ---- */
+.gate { max-width: 440px; margin: 120px auto 0; border-radius: 28px; padding: var(--md-sys-measurement-space400);
+  background: var(--md-sys-color-surface-container-low); display: flex; flex-direction: column; gap: var(--md-sys-measurement-space200); align-items: flex-start; }
+.gate-mark { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+.gate-mark .m3-icon { font-size: 32px; }
+.gate-field { align-self: stretch; display: flex; gap: var(--md-sys-measurement-space100); align-items: center; }
+.gate-field input { flex: 1; height: 56px; box-sizing: border-box; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; padding: 0 16px;
+  background: transparent; color: var(--md-sys-color-on-surface); font: inherit; font-size: 16px; }
+.gate-field input:focus { outline: none; border: 2px solid var(--md-sys-color-primary); padding-left: 15px; } /* off-scale: 16 less the 1px the 2px focus border adds */
+.gate-choices { display: flex; gap: var(--md-sys-measurement-space100); flex-wrap: wrap; }
+
+.empty { color: var(--md-sys-color-on-surface-variant); padding: var(--md-sys-measurement-space200); }

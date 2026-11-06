@@ -1,7 +1,4 @@
-// Shared DOM widgets. Everything builds real elements; markdown text goes
-// through md.inline() for bold/links/placeholder rendering.
-
-import { inline, isTemplateText, isTemplateRow } from './md.js';
+// DOM helpers, drawn with the Material 3 kit's classes.
 
 export function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -22,155 +19,23 @@ export function el(tag, attrs = {}, ...children) {
   return node;
 }
 
-let sectionSeq = 0;
-
-// A section in Spoon's idiom: a title row above a white card. Views written
-// before this design build a card and then append into it, so append and
-// appendChild are delegated to the inner card. The content pass may remove this.
-export function card(title, ...children) {
-  const wrap = el('section', { class: 'tab-section' });
-  if (title) {
-    const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    wrap.id = 'sec-' + (++sectionSeq) + '-' + slug;
-    wrap.append(el('div', { class: 'tab-section-head' },
-      el('span', { class: 'tab-section-title', role: 'heading', 'aria-level': '3' }, title)));
-  }
-  const inner = el('div', { class: 'card' });
-  wrap.append(inner);
-  wrap.append = (...nodes) => inner.append(...nodes);
-  wrap.appendChild = node => inner.appendChild(node);
-  for (const ch of children) if (ch != null) inner.append(ch);
-  return wrap;
-}
-
-export function kpi(label, value, note, cls) {
-  // cls 'hero' or 'focus' styles the whole tile; anything else colours the value.
-  const tileCls = (cls === 'hero' || cls === 'focus') ? ' ' + cls : '';
-  const valCls = cls && !tileCls ? ' ' + cls : '';
-  return el('div', { class: 'kpi' + tileCls },
-    el('div', { class: 'lab' }, label),
-    el('div', { class: 'val' + valCls },
-      value instanceof Node ? value : String(value)),
-    note ? el('div', { class: 'note' }, note) : null);
-}
-
-export function chip(txt, cls) {
-  return el('span', { class: 'chip' + (cls ? ' ' + cls : '') }, txt);
-}
+export const icon = (name, cls = '') => el('span', { class: ('m3-icon ' + cls).trim(), 'aria-hidden': 'true' }, name);
 
 export function emptyNote(msg) {
-  return el('p', { class: 'empty' }, msg || 'Nothing here yet.');
+  return el('div', { class: 'empty m3-body-m' }, msg || 'Nothing here yet.');
 }
 
-export function tableFromBlock(block, opts = {}) {
-  const resolve = opts.resolveLink;
-  const rows = opts.rows || block.rows;
-  const realRows = rows.filter(r => !isTemplateRow(r));
-  const shown = realRows.length ? realRows : rows;
-  const t = el('table');
-  if (block.headers && block.headers.length) {
-    t.append(el('thead', {}, el('tr', {},
-      ...block.headers.map(h => el('th', { html: inline(h, resolve) })))));
-  }
-  const tb = el('tbody');
-  for (const r of shown) {
-    tb.append(el('tr', {}, ...r.map(c => el('td', { html: inline(c, resolve) }))));
-  }
-  t.append(tb);
-  if (!realRows.length && rows.length) {
-    const wrap = el('div');
-    wrap.append(t, el('p', { class: 'empty' }, 'Template values only, nothing filled in yet.'));
-    return wrap;
-  }
-  if (!rows.length) return emptyNote();
-  return t;
+// A Material list item: optional leading icon (in a tonal square), a headline,
+// a supporting line, an optional trailing node. href makes it a link.
+export function listItem({ lead, title, sub, trail, href, selected, cls }) {
+  const tag = href ? 'a' : 'div';
+  const node = el(tag, { class: ['m3-list-item', selected ? 'm3-list-item--selected' : '', cls || ''].join(' ').trim(), href });
+  if (lead) node.append(el('span', { class: 'm3-list-item__lead m3-list-item__lead--square lead-k' }, icon(lead)));
+  node.append(el('div', { class: 'm3-list-item__text' },
+    el('div', { class: 'm3-body-l' }, title),
+    sub ? el('div', { class: 'm3-body-m m3-variant' }, sub) : null));
+  if (trail) node.append(typeof trail === 'string' ? el('span', { class: 'm3-list-item__trail m3-label-m' }, trail) : trail);
+  return node;
 }
 
-export function listFromBlock(block, opts = {}) {
-  const resolve = opts.resolveLink;
-  const hasChecks = block.items.some(it => it.checked !== null);
-  if (hasChecks) {
-    const ul = el('ul', { class: 'checks' });
-    for (const it of block.items) {
-      if (isTemplateText(it.text)) continue;
-      ul.append(el('li', { class: it.checked ? 'done' : '' },
-        el('span', { class: 'box' }, it.checked ? '[x]' : '[ ]'),
-        el('span', { html: (it.date ? `<span class="chip">${it.date}</span> ` : '') + inline(it.text, resolve) })));
-    }
-    if (!ul.children.length) return emptyNote('No tasks yet.');
-    return ul;
-  }
-  const tag = block.ordered ? 'ol' : 'ul';
-  const list = el(tag, { class: 'plain' });
-  for (const it of block.items) {
-    list.append(el('li', { html: inline(it.text, resolve) }));
-  }
-  return list;
-}
-
-export function renderBlocks(container, blocks, opts = {}) {
-  for (const b of blocks) {
-    if (b.kind === 'p') container.append(el('p', { class: 'sub', html: inline(b.text, opts.resolveLink) }));
-    else if (b.kind === 'table') container.append(tableFromBlock(b, opts));
-    else if (b.kind === 'list') container.append(listFromBlock(b, opts));
-    else if (b.kind === 'code' && !opts.skipCode) container.append(el('pre', {}, b.text));
-  }
-}
-
-// One card per section; the intro (level 0) section becomes a lead paragraph.
-export function renderDocCards(container, doc, opts = {}) {
-  for (const s of doc.sections) {
-    if (opts.skipHeadings && opts.skipHeadings.some(re => re.test(s.heading))) continue;
-    if (s.level === 0) {
-      if (!opts.skipIntro) renderBlocks(container, s.blocks, opts);
-      continue;
-    }
-    const c = card(s.heading);
-    if (!s.blocks.length) c.append(emptyNote());
-    else renderBlocks(c, s.blocks, opts);
-    container.append(c);
-  }
-}
-
-// The design has no page title: the header chip names the page. Kept so the
-// views that call it need no change.
-export function header() {
-  return document.createDocumentFragment();
-}
-
-// A fixed-position overlay: backdrop plus a panel with a header (title + close)
-// and a scrollable body. Not appended or shown by itself - call .open() when
-// wanted, .close() (or Esc, or a backdrop click, or the close button) to hide
-// it again. Built once per call; safe to keep around and re-open.
-export function popup(title, ...children) {
-  const body = el('div', { class: 'popup-body' }, ...children);
-  const closeBtn = el('button', { type: 'button', class: 'popup-close', 'aria-label': 'Close' }, '✕');
-  const panel = el('div', { class: 'popup-panel', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
-    el('div', { class: 'popup-head' }, el('span', { class: 'popup-title' }, title), closeBtn),
-    body);
-  const backdrop = el('div', { class: 'popup-backdrop', hidden: '' }, panel);
-
-  const onKey = e => { if (e.key === 'Escape') close(); };
-  function open() {
-    document.body.append(backdrop);
-    backdrop.hidden = false;
-    document.addEventListener('keydown', onKey);
-  }
-  function close() {
-    backdrop.hidden = true;
-    document.removeEventListener('keydown', onKey);
-    backdrop.remove();
-  }
-  closeBtn.addEventListener('click', close);
-  backdrop.addEventListener('click', e => { if (e.target === backdrop) close(); });
-
-  backdrop.open = open;
-  backdrop.close = close;
-  return backdrop;
-}
-
-export function selectBox(labelTxt, options, onchange) {
-  const sel = el('select', { onchange: e => onchange(e.target.value) },
-    ...options.map(o => el('option', { value: o.value }, o.label)));
-  return el('label', {}, labelTxt + ' ', sel);
-}
+export const header = (text) => el('div', { class: 'm3-list-header m3-title-s' }, text);

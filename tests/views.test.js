@@ -1,15 +1,33 @@
 import { test, eq } from './run.js';
 import * as data from '../js/data.js';
-import finance from '../js/views/finance.js';
-import ourHouse from '../js/views/our-house.js';
-import chantier from '../js/views/chantier.js';
 import home from '../js/views/home.js';
+import { shelf, chantier } from '../js/views/shelf.js';
+import security from '../js/views/security.js';
+import settings from '../js/views/settings.js';
 import brand from '../js/views/brand.js';
+import { renderDoc, ago, resolver } from '../js/doc.js';
+import { parse } from '../js/md.js';
+import { pageFor } from '../js/routes.js';
 
-function allMissing() {
+// A fake repo: files by path, commit dates by path. Folder listings are
+// built from the file paths, as the Contents API answers them.
+function repo(files, dates = {}) {
   localStorage.setItem('ak', 't');
   data.resetMemory();
-  data.setFetch(async () => ({ status: 404, headers: { get: () => null }, text: async () => '' }));
+  data.dropCache();
+  const reply = (status, body) => ({ status, headers: { get: () => null }, text: async () => body });
+  data.setFetch(async url => {
+    const u = new URL(url);
+    if (u.pathname.endsWith('/commits')) {
+      const p = u.searchParams.get('path');
+      return dates[p] ? reply(200, JSON.stringify([{ commit: { committer: { date: dates[p] } } }])) : reply(200, '[]');
+    }
+    const path = decodeURIComponent(u.pathname.replace(/^.*\/contents\//, '')).replace(/^\/+/, '');
+    if (Object.prototype.hasOwnProperty.call(files, path)) return reply(200, files[path]);
+    const kids = Object.keys(files).filter(f => f.startsWith(path + '/') && !f.slice(path.length + 1).includes('/'));
+    if (kids.length) return reply(200, JSON.stringify(kids.map(f => ({ type: 'file', name: f.split('/').pop() }))));
+    return reply(404, '');
+  });
 }
 function done() {
   localStorage.removeItem('ak');
@@ -17,45 +35,116 @@ function done() {
   data.setFetch((...a) => fetch(...a));
 }
 
-test('finance renders without its files', async () => {
-  allMissing();
+const now = new Date();
+const daysAgo = n => new Date(now.getTime() - n * 86400000).toISOString();
+
+test('a shelf lists the folder (pins first, new files by themselves) and shows the picked file', async () => {
+  repo({
+    'our-house/data/plan.md': '# The plan\n\n## Key facts\n\n- Rooms: three\n',
+    'our-house/data/todo.md': '# To do\n\n- [ ] Measure\n- [x] Ask\n',
+    'our-house/data/zz-new.md': '# A brand new file\n',
+    'our-house/data/_draft.md': '# Hidden\n',
+  }, { 'our-house/data/todo.md': daysAgo(2) });
   const box = document.createElement('div');
-  await finance(box, []);
-  eq(box instanceof HTMLElement, true);
+  await shelf(box, pageFor('our-house'), 'our-house/data/todo.md');
+  const rows = [...box.querySelectorAll('.pane .m3-list-item')];
+  eq(rows.map(r => r.querySelector('.m3-body-l').textContent), ['The plan', 'To do', 'A brand new file'], 'pins, then the rest; _ files hidden');
+  eq(box.querySelector('.pane .m3-list-item--selected .m3-body-l').textContent, 'To do');
+  eq(rows[1].querySelector('.m3-variant').textContent, 'todo.md · 2 days ago');
+  eq(box.querySelector('.doc h2').textContent, 'To do');
+  eq(box.querySelectorAll('.doc ul.tasks li.done').length, 1);
+  eq(!!box.querySelector('.two'), true, 'wide + skinny');
   done();
 });
 
-test('our house renders without its files', async () => {
-  allMissing();
+test('a shelf opens its first file when none is picked, and says so when empty', async () => {
+  repo({ 'fun/data/board-games.md': '# Board games\n' });
   const box = document.createElement('div');
-  await ourHouse(box);
-  eq(box instanceof HTMLElement, true);
+  await shelf(box, pageFor('fun'), null);
+  eq(box.querySelector('.doc h2').textContent, 'Board games');
+  repo({});
+  const empty = document.createElement('div');
+  await shelf(empty, pageFor('fun'), null);
+  eq(empty.textContent.includes('No files'), true);
   done();
 });
 
-function withFiles(files) {
-  localStorage.setItem('ak', 't');
-  data.resetMemory();
-  data.setFetch(async url => {
-    for (const [needle, text] of Object.entries(files)) {
-      if (url.includes(needle)) return { status: 200, headers: { get: () => null }, text: async () => text };
-    }
-    return { status: 404, headers: { get: () => null }, text: async () => '' };
+test('chantier groups the files, shows the routines first and pages the log', async () => {
+  const log = ['# Delivery log', '', ...Array.from({ length: 10 }, (_, i) => `## 2026-11-0${i} - entry ${i}\n\nText ${i}.\n`)].join('\n');
+  repo({
+    'chantier/data/log.md': log,
+    'calendar/data/roadmap.md': '# calendar roadmap\n',
+    'calendar/data/compass-handoff-x-2026-10-25.md': '# Handoff X\n',
+    'calendar/data/bookings.md': '# Bookings\n',
+    'docs/superpowers/specs/2026-11-05-a.md': '# Design A\n',
+    'chantier/data/last-run.json': JSON.stringify({ routine: 'daily-inbound-sweep', status: 'partial', finished_at: now.toISOString(),
+      stages: [{ name: 'food:receipt-processing', result: 'nothing-to-do', note: 'secret detail' }, { name: 'finance:bank', result: 'failed' }] }),
   });
-}
-
-test('finance shows the safe-to-spend figure and a bill from real files', async () => {
-  const budget = ['# Budget', '', '## Monthly targets',
-    '| Line | EUR |', '|---|---|', '| Income | 3000 |', '| Savings | 500 |', '| Rent | 1200 |'].join('\n') + '\n';
-  const bills = ['# Recurring bills', '', '## Bills',
-    '| Name | Day | Amount | Notes |', '|---|---|---|---|', '| Internet | 5 | 40 | fibre |'].join('\n') + '\n';
-  withFiles({ 'finance/data/budget.md': budget, 'finance/data/recurring-bills.md': bills });
   const box = document.createElement('div');
-  await finance(box);
-  eq(box.textContent.includes('Safe to spend'), true);
-  eq(box.textContent.includes('Internet'), true);
-  eq(box.textContent.includes('Compass (finance app): coming soon'), true);
+  await chantier(box, pageFor('chantier'), null);
+  eq([...box.querySelectorAll('.pane .m3-list-header')].map(h => h.textContent), ['Routines', 'Roadmaps', 'Designs', 'Handoffs', 'How it runs']);
+  eq(box.textContent.includes('Bookings'), false, 'handoffs only');
+  eq(box.querySelectorAll('.health .dot.bad').length, 2, 'the run and the failed stage');
+  eq(box.textContent.includes('secret detail'), false, 'stage notes stay in the file');
+  eq(box.querySelector('.doc h2').textContent, 'Delivery log', 'opens on the log');
+  eq(box.querySelectorAll('.doc .doc-body > h3').length, 8, 'eight entries, then Show older');
+  box.querySelector('.older').click();
+  eq(box.querySelector('.doc-older').hidden, false);
   done();
+});
+
+test('home counts down to move-in and lists what changed most recently', async () => {
+  repo({
+    'our-house/data/plan.md': '# Plan\n\n## Key facts\n\n- Move-in date: 30/09/2099 09:00 (Madrid time).\n',
+    'food/data/grocery-staples.md': '# Grocery staples\n',
+    'fun/data/board-games.md': '# Board games\n',
+  }, { 'food/data/grocery-staples.md': now.toISOString(), 'fun/data/board-games.md': daysAgo(30) });
+  const box = document.createElement('div');
+  await home(box);
+  eq(!!box.querySelector('.hero .clock'), true);
+  eq(Number(box.querySelector('.clock-num').textContent) > 1000, true);
+  eq([...box.querySelectorAll('.day-h')].map(h => h.textContent), ['Today', 'Older']);
+  eq(box.querySelector('.m3-grouped .m3-body-l').textContent, 'Grocery staples', 'newest first');
+  eq(box.querySelector('.m3-grouped a').getAttribute('href'), '#/food/food/data/grocery-staples.md');
+  eq(!!box.querySelector('.one'), true);
+  done();
+});
+
+test('security: a status hero from the result line, then the three files', async () => {
+  repo({
+    'chantier/data/security-report.md': '# Security report\n\n**Result: CLEAN**\n\n## Zone 2\n\nAll quiet.\n',
+    'chantier/data/security-recommendations.md': '# Recommendations\n\n### 1. Rotate\n\nSoon.\n',
+    'chantier/data/data-locations.md': '# Data locations\n',
+  });
+  const box = document.createElement('div');
+  await security(box);
+  eq(box.querySelector('.hero .m3-title-m').textContent, 'Last scan: clean');
+  eq(box.querySelectorAll('article.doc').length, 3);
+  done();
+});
+
+test('settings offers the two themes, sync and advanced, in one column', async () => {
+  repo({});
+  const box = document.createElement('div');
+  await settings(box);
+  eq([...box.querySelectorAll('.m3-list-header')].map(h => h.textContent), ['Theme', 'Sync', 'Advanced']);
+  eq([...box.querySelectorAll('.swatch .m3-label-m')].map(b => b.textContent), ['Cobalt', 'Chartreuse']);
+  done();
+});
+
+test('a file cannot inject markup, and repo links stay on the site', () => {
+  const doc = parse('# <img src=x onerror=alert(1)>\n\nSee [the plan](plan.md) and [web](https://example.com).\n\n| a |\n|---|\n| <b>x</b> |\n');
+  const box = document.createElement('div');
+  box.append(renderDoc(doc, 'our-house/data/todo.md'));
+  eq(box.querySelector('img'), null);
+  eq(box.querySelector('b'), null);
+  eq([...box.querySelectorAll('a')].map(a => a.getAttribute('href')), ['#/our-house/our-house/data/plan.md', 'https://example.com']);
+  eq(resolver('chantier/data/log.md')('../../brand/data/look-recap.md').startsWith('https://github.com/'), true, 'unshelved files open on GitHub');
+});
+
+test('ago reads like a person', () => {
+  const d = n => new Date(now.getTime() - n * 86400000);
+  eq(ago(d(0)), 'today'); eq(ago(d(1)), 'yesterday'); eq(ago(d(3)), '3 days ago'); eq(ago(d(14)), '2 weeks ago'); eq(ago(d(90)), '3 months ago');
 });
 
 test('brand draws look-recap.md live: three columns, samples, notes', async () => {
@@ -65,150 +154,22 @@ test('brand draws look-recap.md live: three columns, samples, notes', async () =
     '### Unknown sample', '', 'Drawn without a sample.', '', 'Sample: nothing-like-this', '',
     '## Added by kave', '', 'Not in Material.', '', '### Widths', '', '720, or 1120.', '', 'Sample: widths', '',
     '## Out of date', '', 'The spec lags.'].join('\n') + '\n';
-  withFiles({ 'brand/data/look-recap.md': recap });
+  repo({ 'brand/data/look-recap.md': recap });
   const box = document.createElement('div');
   await brand(box);
-  const root = box.querySelector('.brand-recap-host').shadowRoot;
-  eq([...root.querySelectorAll('.r-col > header .m3-title-l')].map(h => h.textContent), ['Plain Material 3', 'Changed by kave', 'Added by kave']);
-  eq(root.querySelectorAll('.r-it').length, 4);
-  eq(root.textContent.includes('Accent and accent fade.'), true);
-  eq(root.textContent.includes('Isa, 06/11/2026'), true);
-  eq(root.textContent.includes('Sample:'), false, 'sample lines are drawn, not printed');
-  eq(!!root.querySelector('.m3-btn--filled'), true, 'the fills sample is drawn from the kit');
-  eq(!!root.querySelector('.r-w-696'), true);
-  eq(root.querySelector('.r-note').textContent.includes('The spec lags.'), true);
+  eq([...box.querySelectorAll('.r-col > header .m3-title-l')].map(h => h.textContent), ['Plain Material 3', 'Changed by kave', 'Added by kave']);
+  eq(box.querySelectorAll('.r-it').length, 4);
+  eq(box.textContent.includes('Isa, 06/11/2026'), true);
+  eq(box.textContent.includes('Sample:'), false, 'sample lines are drawn, not printed');
+  eq(!!box.querySelector('.m3-btn--filled'), true);
+  eq(box.querySelector('.r-note').textContent.includes('The spec lags.'), true);
   done();
 });
 
 test('brand says so when look-recap.md is missing', async () => {
-  allMissing();
+  repo({});
   const box = document.createElement('div');
   await brand(box);
   eq(box.textContent.includes('look-recap.md not found.'), true);
-  done();
-});
-
-test('brand: the file cannot inject markup', async () => {
-  withFiles({ 'brand/data/look-recap.md': ['# T', '', '## Col', '', 'Line', '', '### <img src=x onerror=alert(1)>', '', 'Body <b>x</b>'].join('\n') + '\n' });
-  const box = document.createElement('div');
-  await brand(box);
-  const root = box.querySelector('.brand-recap-host').shadowRoot;
-  eq(root.querySelector('img'), null);
-  eq(root.querySelector('b'), null);
-  done();
-});
-
-test('our house shows plant cards in a dense grid, and no setup section', async () => {
-  const plants = ['# Plants', '', '| Plant | Where | Count |', '|---|---|---|',
-    '| Cactus | Indoor | 2 |', '| Olive tree | Outside | 1 |'].join('\n') + '\n';
-  const setup = ['# Home setup', '', '## Router', 'Lives in the hallway.'].join('\n') + '\n';
-  withFiles({ 'our-house/data/plants.md': plants, 'our-house/data/home-setup.md': setup });
-  const box = document.createElement('div');
-  await ourHouse(box);
-  eq(box.textContent.includes('Cactus'), true);
-  eq(box.textContent.includes('Olive tree'), true);
-  eq(box.querySelector('.plant-grid') !== null, true);
-  // home-setup.md is left as a data file, not rendered here any more
-  eq(box.textContent.includes('Router'), false);
-  eq([...box.querySelectorAll('h2')].some(h => h.textContent === 'Setup'), false);
-  // no "no real photos" intro line, every plant gets the same house glyph,
-  // and a plant card is not sidebar-worthy on its own
-  eq(box.textContent.includes('No real photos'), false);
-  const plantCards = [...box.querySelectorAll('.plant-grid .tab-section')];
-  eq(plantCards.length, 2);
-  eq(plantCards.every(c => c.classList.contains('no-toc')), true);
-  eq(plantCards.every(c => c.querySelector('.glyph')), true);
-  done();
-});
-
-test('our house new-flat section links to the move-in budget and lists to-dos', async () => {
-  const plan = ['# House plan', '', '## Key facts', '- Delivery date: 27/09/2027.',
-    '- Move-in date: 30/09/2027 09:00 (Madrid time).', '', '## Envelope', '- Overall envelope: 20000 EUR',
-    '', '## Totals (kept up to date by the skills)', '| List | Budgets (EUR) | Estimates (EUR) |',
-    '|--|--|--|', '| Equipment | 0 | 0 |'].join('\n') + '\n';
-  const todo = ['# Our house to-do', '', '## Before', '- [ ] 2026-01-01 added: make the budget',
-    '', '## Upon move-in', '- [ ] 2026-01-01 added: hire an inspector'].join('\n') + '\n';
-  withFiles({ 'our-house/data/plan.md': plan, 'our-house/data/todo.md': todo });
-  const box = document.createElement('div');
-  await ourHouse(box);
-  eq(box.textContent.includes('until we move in'), true);
-  eq(box.textContent.includes('Move-in budget'), true);
-  eq(box.textContent.includes('make the budget'), true);
-  eq(box.textContent.includes('hire an inspector'), true);
-  eq(box.textContent.includes('Compass (finance app): coming soon'), true);
-  eq(box.textContent.includes('20000 EUR'), true);
-  // the all-zeros Totals table is never shown
-  eq(box.textContent.includes('Totals'), false);
-  // Upon move-in comes after the budget, not before it
-  const titles = [...box.querySelectorAll('.tab-section-title')].map(t => t.textContent);
-  eq(titles.indexOf('Move-in budget') < titles.findIndex(t => t.startsWith('Upon move-in')), true);
-  // none of these subtitle-level cards are sidebar-worthy on their own
-  eq([...box.querySelectorAll('.tab-section')].filter(s => s.querySelector('.tab-section-title'))
-    .every(s => s.classList.contains('no-toc')), true);
-  done();
-});
-
-test('our house interior design shows styles and colour swatches', async () => {
-  const interior = ['# Interior design ideas', '', '## Styles', '- Mid-century', '- Art pop',
-    '', '## Palettes', '', '### Blue, orange, cream and yellow', '- #2f5d8a', '- #e8792f'].join('\n') + '\n';
-  withFiles({ 'our-house/data/interior-design.md': interior });
-  const box = document.createElement('div');
-  await ourHouse(box);
-  eq(box.textContent.includes('Mid-century'), true);
-  eq(box.textContent.includes('Art pop'), true);
-  eq(box.textContent.includes('mood board coming soon'), true);
-  eq(box.textContent.includes('Blue, orange, cream and yellow'), true);
-  eq(box.querySelectorAll('.palette-swatch').length, 2);
-  done();
-});
-
-test('chantier renders and says infrastructure is missing when it is', async () => {
-  allMissing();
-  const box = document.createElement('div');
-  await chantier(box);
-  eq(box.textContent.includes('infrastructure.md is missing'), true);
-  done();
-});
-
-function withPlan(keyFactsLine) {
-  localStorage.setItem('ak', 't');
-  data.resetMemory();
-  const md = ['# House plan', '', '## Key facts', '- Delivery date: 27/09/2027 (under construction).',
-    keyFactsLine].join('\n') + '\n';
-  data.setFetch(async url => (url.includes('our-house/data/plan.md')
-    ? { status: 200, headers: { get: () => null }, text: async () => md }
-    : { status: 404, headers: { get: () => null }, text: async () => '' }));
-}
-
-test('home shows the four clock units and the date when the plan has a move-in line', async () => {
-  withPlan('- Move-in date: 30/09/2027 09:00 (Madrid time).');
-  const box = document.createElement('div');
-  await home(box);
-  eq(box.querySelectorAll('.clock-num').length, 4);
-  eq(box.querySelector('.clock-when'), null);
-  eq(box.querySelector('.tab-section-title').textContent, 'Countdown until we move in');
-  eq(/^\d+$/.test(box.querySelector('.clock-num').textContent), true);
-  eq(/^\d\d$/.test(box.querySelectorAll('.clock-num')[3].textContent), true);
-  eq(box.querySelector('.clock').hidden, false);
-  eq(box.querySelector('.clock-done').hidden, true);
-  done();
-});
-
-test('home says so when the plan has no move-in line', async () => {
-  withPlan('');
-  const box = document.createElement('div');
-  await home(box);
-  eq(box.querySelectorAll('.clock-num').length, 0);
-  eq(box.textContent.includes('No move-in date set yet'), true);
-  done();
-});
-
-test('home switches to the finished state once the date has passed', async () => {
-  withPlan('- Move-in date: 01/01/2020 09:00');
-  const box = document.createElement('div');
-  await home(box);
-  eq(box.querySelector('.clock').hidden, true);
-  eq(box.querySelector('.clock-done').hidden, false);
-  eq(box.querySelector('.clock-done').textContent, "We're in.");
   done();
 });

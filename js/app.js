@@ -1,96 +1,100 @@
-// Boot, shell layout and router. The plugin list comes from the marketplace
-// manifest in the private repo at runtime; a plugin without a dedicated view
-// falls back to the generic renderer.
+// Boot, shell and router, on Material 3 (06/11/2026): a navigation rail with
+// the menu button at its top (as the apps on wide screens), a menu drawer for
+// everything else and the apps, a centred top bar, then the page in one of
+// the two layouts. Every page reads the private repo live.
 
 import * as data from './data.js';
-import { el, emptyNote } from './ui.js';
+import { el, icon, emptyNote } from './ui.js';
 import { showGate, showSetup } from './gate.js';
 import { applyPalette, getWho, setWho, setPalette } from './prefs.js';
 import { applyToEmbeddedApps } from './embedded.js';
-import { buildTiles, currentKey, mountSwitcher } from './switcher.js';
-import { attachToc, detachToc, introLine } from './frame.js';
-import { redirectFor } from './routes.js';
+import { PAGES, APPS, parseHash, pageFor, redirectFor } from './routes.js';
 import { recover } from './guard.js';
 import { status } from './status.js';
+import home from './views/home.js';
+import { shelf, chantier } from './views/shelf.js';
+import security from './views/security.js';
+import settings from './views/settings.js';
+import brand from './views/brand.js';
 
 applyPalette();
 
-const registry = {};   // name -> (container, restOfPath) => Promise; filled by imports below
 const root = document.getElementById('root');
-
-let plugins = null;
 let seq = 0;
-let switcher = null;
 
-async function getPlugins() {
-  if (plugins) return plugins;
-  const manifest = await data.json('/.claude-plugin/marketplace.json');
-  plugins = ((manifest && manifest.plugins) || []).filter(p => p.name !== 'hub');
-  return plugins;
+const VIEWS = {
+  home: (c) => home(c),
+  brand: (c) => brand(c),
+  chantier: (c, page, file) => chantier(c, page, file),
+  security: (c) => security(c),
+  settings: (c) => settings(c),
+};
+
+function rail(active) {
+  const nav = el('nav', { class: 'm3-rail site-rail', 'aria-label': 'Pages' });
+  const menu = el('button', { type: 'button', class: 'm3-icon-btn', 'aria-label': 'Menu' }, icon('menu'));
+  menu.addEventListener('click', openDrawer);
+  const items = el('div', { class: 'm3-rail__items' });
+  for (const p of PAGES.filter(x => x.place === 'rail')) {
+    items.append(el('a', { class: 'm3-rail__item' + (p.key === active ? ' is-active' : ''), href: p.key === 'home' ? '#/' : '#/' + p.key, 'aria-current': p.key === active ? 'page' : null },
+      el('span', { class: 'm3-rail__pill' }, icon(p.icon)), el('span', { class: 'm3-label-m' }, p.label)));
+  }
+  nav.append(menu, items);
+  return nav;
 }
 
-function buildShell() {
-  root.innerHTML = '';
-  const bar = el('header', { class: 'bar' }, el('a', { class: 'wordmark', href: '#/' }, 'KAVE'));
-  const view = el('main', { id: 'view' });
-  root.append(bar, view);
-  document.title = 'Hub';
-  switcher = mountSwitcher(bar);
+function closeDrawer() {
+  document.querySelectorAll('.m3-scrim, .m3-drawer').forEach(n => n.remove());
 }
 
-// The centred column with its reserved sidebar. Food does not use it.
-function buildPage() {
-  const sheet = el('div', { class: 'sheet view-fade' });
-  const side = el('aside', { class: 'side' });
-  const page = el('div', { class: 'page' }, el('div', { class: 'col' }, sheet), side);
-  return { page, sheet, side };
+function openDrawer() {
+  closeDrawer();
+  const active = parseHash(location.hash).key;
+  const item = (p) => el('a', { class: 'm3-drawer__item' + (p.key === active ? ' is-active' : ''), href: p.key === 'home' ? '#/' : '#/' + p.key },
+    icon(p.icon), el('span', { class: 'm3-drawer__label' }, p.label));
+  const drawer = el('nav', { class: 'm3-drawer', 'aria-label': 'Menu' },
+    el('div', { class: 'm3-drawer__head' }, el('span', { class: 'm3-title-l' }, 'Kave hub')),
+    el('div', { class: 'm3-drawer__section m3-title-s' }, 'Pages'), ...PAGES.filter(p => p.place === 'rail').map(item),
+    el('div', { class: 'm3-drawer__section m3-title-s' }, 'Behind the scenes'), ...PAGES.filter(p => p.place === 'more').map(item),
+    el('div', { class: 'm3-drawer__section m3-title-s' }, 'Apps'),
+    ...APPS.map(a => el('a', { class: 'm3-drawer__item', href: a.href, target: '_blank', rel: 'noopener' },
+      icon(a.icon), el('span', { class: 'm3-drawer__label' }, a.label), icon('open_in_new', 'm3-drawer__trail'))),
+    el('div', { class: 'site-drawer-foot m3-body-s' }, 'Reads kave-hub, branch main'));
+  const scrim = el('div', { class: 'm3-scrim' });
+  scrim.addEventListener('click', closeDrawer);
+  drawer.addEventListener('click', e => { if (e.target.closest('a')) closeDrawer(); });
+  document.body.append(scrim, drawer);
+  drawer.querySelector('a')?.focus();
 }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
 async function route() {
   const mySeq = ++seq;
   const moved = redirectFor(location.hash);
   if (moved) { location.replace(moved); return; }
   status.limited = false;
+  const { key, file } = parseHash(location.hash);
+  const page = pageFor(key);
+  const body = el('div', { class: 'site-page' });
   let failed = false;
-  const view = document.getElementById('view');
-  if (!view) return;
-
-  const list = await getPlugins();
-  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
-  const frame = buildPage();
-  const box = frame.sheet;
-  const intro = introLine(currentKey(location.hash));
-  if (intro) box.append(intro);
-
   try {
-    if (!parts.length) {
-      const home = registry.__home;
-      if (home) await home(box, list);
-    } else {
-      const name = parts[0];
-      const fn = registry[name];
-      const plug = list.find(p => p.name === name);
-      if (fn) await fn(box, parts.slice(1));
-      else if (plug && registry.__generic) await registry.__generic(box, name, plug.description);
-      else {
-        // A stale module can hide a route that should exist: refresh and reload once.
-        // A hash that names nothing just shows the note. Stale renders never spend the attempt.
-        if ((plug || name === 'settings') && mySeq === seq && await recover()) return;
-        box.append(emptyNote('Page not found. '), el('a', { href: '#/' }, 'Back home'));
-      }
-    }
+    if (!page) {
+      if (mySeq === seq && await recover()) return;
+      body.append(el('div', { class: 'one' }, emptyNote('Page not found.'), el('a', { href: '#/', class: 'm3-btn m3-btn--text' }, 'Back home')));
+    } else if (VIEWS[key]) await VIEWS[key](body, page, file);
+    else await shelf(body, page, file);
   } catch (e) {
     failed = true;
-    box.append(emptyNote('Something went wrong rendering this page: ' + e.message));
+    body.append(el('div', { class: 'one' }, emptyNote('Something went wrong drawing this page: ' + e.message)));
   }
-
   if (mySeq !== seq) return;
-  if (document.getElementById('view') !== view) return;
-  switcher.setTiles(buildTiles(), currentKey(location.hash));
-  detachToc();
-  view.innerHTML = '';
-  view.append(frame.page);
-  attachToc(frame.sheet, frame.side);
+  closeDrawer();
+  root.innerHTML = '';
+  root.append(rail(page ? page.key : ''), el('div', { class: 'site-main' },
+    el('header', { class: 'site-bar' }, el('h1', {}, page ? (page.key === 'home' ? 'Kave hub' : page.label) : 'Kave hub')), body));
+  document.title = page ? (page.key === 'home' ? 'Kave' : page.label + ' · Kave') : 'Kave';
+  if (file) window.scrollTo(0, 0);
   if (!failed && !status.limited) status.syncedAt = Date.now();
   window.dispatchEvent(new Event('hub:refreshed'));
 }
@@ -98,18 +102,13 @@ async function route() {
 window.addEventListener('data:limit', () => { status.limited = true; });
 window.addEventListener('data:auth', () => { data.clearToken(); start(); });
 window.addEventListener('hub:forget', () => start());
-window.addEventListener('hub:refresh', () => { plugins = null; if (document.getElementById('view')) route(); });
-window.addEventListener('hashchange', () => { if (document.getElementById('view')) route(); });
+window.addEventListener('hub:refresh', () => { if (data.getToken()) route(); });
+window.addEventListener('hashchange', () => { if (data.getToken() && getWho()) route(); });
 
 function start() {
-  plugins = null;
-  if (!data.getToken()) {
-    document.title = '-';
-    showGate(root, start);
-    return;
-  }
+  closeDrawer();
+  if (!data.getToken()) { document.title = '-'; showGate(root, start); return; }
   if (!getWho()) {
-    // First time on this browser: who, then theme, then the same to Spoon.
     document.title = '-';
     showSetup(root, ({ who, palette }) => {
       setWho(who);
@@ -119,11 +118,7 @@ function start() {
     });
     return;
   }
-  buildShell();
   route();
 }
 
-export { registry };
-import('./views/index.js')
-  .then(m => { m.register(); start(); })
-  .catch(async e => { console.error(e); if (!(await recover())) root.textContent = ''; });
+start();

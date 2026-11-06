@@ -1,137 +1,86 @@
-// Settings, modelled on Spoon's Settings tab: theme, sync, then an Advanced
-// disclosure with the user, the GitHub token and the update check.
+// Settings, laid out like the apps' Settings: Theme, Sync, Advanced. One column.
 
 import * as data from '../data.js';
-import { card, el } from '../ui.js';
+import { el, icon, header } from '../ui.js';
 import { PALETTES, WHO, getPalette, setPalette, getWho, setWho } from '../prefs.js';
 import { applyToEmbeddedApps, forgetInEmbeddedApps } from '../embedded.js';
 import { status, describeStatus } from '../status.js';
 import { checkForUpdate } from '../guard.js';
-import { glyph } from '../glyphs.js';
 
-const CONFIRM_MS = 1500;   // keep equal to --confirm-ms in the tokens
-const ADV_KEY = 'hubweb:adv';
+const NAMES = { cobalt: 'Cobalt', chartreuse: 'Chartreuse' };
 
-function flash(btn, text) {
-  const was = btn.textContent;
-  btn.textContent = text;
-  setTimeout(() => { btn.textContent = was; }, CONFIRM_MS);
+function row(lead, title, sub, trail) {
+  const subNode = el('div', { class: 'm3-body-m m3-variant' }, sub);
+  const node = el('div', { class: 'm3-list-item' },
+    el('span', { class: 'm3-list-item__lead m3-list-item__lead--plain' }, icon(lead)),
+    el('div', { class: 'm3-list-item__text' }, el('div', { class: 'm3-body-l' }, title), subNode),
+    trail ? el('div', { class: 'set-row-trail' }, trail) : null);
+  node.sub = subNode;
+  return node;
 }
 
-function row(label, hint, control) {
-  return el('div', { class: 'set-row' },
-    el('div', { class: 'grow' }, label, hint ? el('div', { class: 'tab-section-sub' }, hint) : null),
-    control);
-}
-
-// Same conic-gradient swatch as Spoon's Settings tab (Home > Settings > Themes).
-const PALETTE_SWATCH = {
-  cobalt: 'conic-gradient(#0f1013 0 90deg, #1a73e8 90deg 180deg, #dbe3f2 180deg 270deg, #ffffff 270deg 360deg)',
-  amber: 'conic-gradient(#100f0c 0 90deg, #f4b400 90deg 180deg, #e6e2d4 180deg 270deg, #ffffff 270deg 360deg)',
-  chartreuse: 'conic-gradient(#0f1012 0 90deg, #d7d63a 90deg 180deg, #dde0ea 180deg 270deg, #ffffff 270deg 360deg)',
-};
-
-function themeSection() {
-  const pills = el('div', { class: 'who-buttons' });
-  const buttons = PALETTES.map(p => {
-    const b = el('button', { type: 'button', class: 'pill' + (p === getPalette() ? ' on' : '') },
-      el('span', { class: 'pal-swatch', style: `background:${PALETTE_SWATCH[p]}` }),
-      el('span', {}, p.charAt(0).toUpperCase() + p.slice(1)));
-    b.addEventListener('click', () => {
-      setPalette(p);
-      buttons.forEach((x, i) => x.classList.toggle('on', PALETTES[i] === p));
-    });
-    return b;
-  });
-  pills.append(...buttons);
-  return card('Theme', row('Accent colour', 'Light and dark follow your system.', pills));
-}
-
-function syncSection() {
-  const lines = el('div', { class: 'grow' });
-  function paint() {
-    lines.innerHTML = '';
-    for (const [kind, text] of describeStatus(status)) {
-      lines.append(el('div', { class: kind === 'muted' ? 'tab-section-sub' : 'sl ' + kind }, text));
+function themeCard() {
+  const box = el('div', { class: 'swatches' });
+  const draw = () => {
+    box.innerHTML = '';
+    for (const p of PALETTES) {
+      const on = getPalette() === p;
+      const b = el('button', { type: 'button', class: `swatch swatch-${p}` + (on ? ' is-on' : ''), 'aria-pressed': String(on) },
+        el('i', {}, on ? icon('check') : ''), el('span', { class: 'm3-label-m' }, NAMES[p]));
+      b.addEventListener('click', () => { setPalette(p); draw(); });
+      box.append(b);
     }
-  }
+  };
+  draw();
+  return el('div', { class: 'm3-grouped' }, el('div', { class: 'm3-card set-card' }, box,
+    el('div', { class: 'm3-body-m set-note' }, 'Light or dark follows the computer.')));
+}
+
+function syncRow() {
+  const btn = el('button', { type: 'button', class: 'm3-btn m3-btn--tonal m3-btn--small' }, 'Sync now');
+  const r = row('sync', 'Sync', '', btn);
+  const paint = () => { r.sub.textContent = describeStatus(status).map(x => x[1]).join(' · '); };
   paint();
-  const btn = el('button', { type: 'button', class: 'btn' }, 'Sync now');
   btn.addEventListener('click', () => {
     data.dropCache();
     status.limited = false;
-    // status.syncedAt is stamped by route() once the refresh it triggers has
-    // actually finished rendering, not here - otherwise "synced" would be a
-    // lie for however long the refresh takes.
-    window.addEventListener('hub:refreshed', () => { paint(); flash(btn, 'Synced'); }, { once: true });
+    window.addEventListener('hub:refreshed', paint, { once: true });
     window.dispatchEvent(new Event('hub:refresh'));
   });
-  return card('Sync', el('div', { class: 'set-row' }, lines, btn));
-}
-
-function advancedSection() {
-  let open = false;
-  try { open = sessionStorage.getItem(ADV_KEY) === '1'; } catch (e) { /* storage blocked */ }
-
-  const toggle = el('button', { type: 'button', class: 'adv-toggle', 'aria-expanded': String(open) },
-    glyph('chevron', 16), 'Advanced settings');
-  const body = el('div', {});
-  body.hidden = !open;
-  toggle.addEventListener('click', () => {
-    open = !open;
-    body.hidden = !open;
-    toggle.setAttribute('aria-expanded', String(open));
-    try { sessionStorage.setItem(ADV_KEY, open ? '1' : '0'); } catch (e) { /* storage blocked */ }
-  });
-
-  // User: names come from the private repo at runtime; the route key is the fallback.
-  const select = el('select', {}, ...WHO.map(w => el('option', { value: w }, w)));
-  if (getWho()) select.value = getWho();
-  select.addEventListener('change', () => setWho(select.value));
-  WHO.forEach(async (w, i) => {
-    const admin = await data.doc(`/${w}/data/admin.md`);
-    if (admin && admin.title) select.options[i].textContent = admin.title;
-  });
-
-  const forget = el('button', { type: 'button', class: 'btn' }, 'Forget token');
-  forget.addEventListener('click', () => {
-    data.clearToken();
-    forgetInEmbeddedApps();
-    window.dispatchEvent(new Event('hub:forget'));
-  });
-
-  const note = el('div', { class: 'tab-section-sub' }, 'Not checked yet');
-  const update = el('button', { type: 'button', class: 'btn' }, 'Check for updates');
-  update.addEventListener('click', async () => {
-    update.disabled = true;
-    note.textContent = 'Checking...';
-    try {
-      const r = await checkForUpdate();
-      note.textContent = r.changed ? 'Updating...' : 'Version ' + r.version + ', up to date';
-    } catch (e) {
-      note.textContent = 'Check failed. Try again.';
-    }
-    update.disabled = false;
-  });
-
-  const apply = el('button', { type: 'button', class: 'btn' }, 'Apply settings to all embedded apps');
-  const applyRow = row('Embedded apps', 'Send your user, theme and token to the apps inside the hub.', apply);
-  apply.addEventListener('click', () => {
-    const done = applyToEmbeddedApps({ token: data.getToken(), who: getWho() || '', palette: getPalette() });
-    applyRow.querySelector('.tab-section-sub').textContent = done.every(d => d.ok)
-      ? 'Applied to ' + done.map(d => d.name).join(', ') + '.'
-      : 'Could not write every app. Try again.';
-  });
-
-  body.append(
-    row('User', 'Who you are. Shared with Spoon.', select),
-    applyRow,
-    row('GitHub token', 'Never shown. Forgetting it returns you to the gate.', forget),
-    el('div', { class: 'set-row' }, el('div', { class: 'grow' }, 'Update', note), update));
-
-  return card('Advanced', toggle, body);
+  return r;
 }
 
 export default async function settings(container) {
-  container.append(themeSection(), syncSection(), advancedSection());
+  const select = el('select', { 'aria-label': 'User' }, ...WHO.map(w => el('option', { value: w }, w[0].toUpperCase() + w.slice(1))));
+  if (getWho()) select.value = getWho();
+  select.addEventListener('change', () => setWho(select.value));
+
+  const apply = el('button', { type: 'button', class: 'm3-btn m3-btn--tonal m3-btn--small' }, 'Apply');
+  const applyRow = row('apps', 'Apps', 'Send your user, theme and token to Ladle, Compass and Stash.', apply);
+  apply.addEventListener('click', () => {
+    const done = applyToEmbeddedApps({ token: data.getToken(), who: getWho() || '', palette: getPalette() });
+    applyRow.sub.textContent = done.every(d => d.ok) ? 'Applied to ' + done.map(d => d.name).join(', ') + '.' : 'Could not write every app. Try again.';
+  });
+
+  const forget = el('button', { type: 'button', class: 'm3-btn m3-btn--tonal m3-btn--small' }, 'Forget');
+  forget.addEventListener('click', () => { data.clearToken(); forgetInEmbeddedApps(); window.dispatchEvent(new Event('hub:forget')); });
+
+  const update = el('button', { type: 'button', class: 'm3-btn m3-btn--tonal m3-btn--small' }, 'Check');
+  const updateRow = row('system_update', 'Updates', 'Not checked yet', update);
+  update.addEventListener('click', async () => {
+    update.disabled = true;
+    updateRow.sub.textContent = 'Checking...';
+    try {
+      const r = await checkForUpdate();
+      updateRow.sub.textContent = r.changed ? 'Updating...' : 'Version ' + r.version + ', up to date';
+    } catch (e) { updateRow.sub.textContent = 'Check failed. Try again.'; }
+    update.disabled = false;
+  });
+
+  container.append(el('div', { class: 'one' },
+    header('Theme'), themeCard(),
+    header('Sync'), el('div', { class: 'm3-grouped' }, syncRow(), row('folder_open', 'Reads from', 'kave-hub, branch main')),
+    header('Advanced'), el('div', { class: 'm3-grouped' },
+      row('person', 'User', 'Who you are on this computer.', select), applyRow,
+      row('key', 'GitHub token', 'Read-only, kept in this browser only.', forget), updateRow)));
 }

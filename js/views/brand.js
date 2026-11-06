@@ -3,10 +3,8 @@
 // from the real kit (m3/, synced from the hub). The page holds no content of
 // its own: a change to the file shows here on the next load (Isa, 06/11/2026).
 //
-// The kit is a Material 3 stylesheet and the rest of the site is not, yet, so
-// the page draws inside a shadow root: the kit and this page's own sheet style
-// only what is in it. The colour tokens sit on :root (index.html links them)
-// and reach inside through inheritance.
+// The whole site is on the kit since 06/11/2026; css/brand-recap.css adds this
+// page's three columns (Isa asked for the recap's own look here).
 //
 // How the file is read: a ## heading with ### items under it is a column (its
 // first paragraph is the column's line), a ### heading is a card, "Sample: key"
@@ -19,12 +17,6 @@ import { el, emptyNote } from '../ui.js';
 
 export const RECAP_PATH = '/brand/data/look-recap.md';
 
-// The site's palette picks the kit's theme: Chartreuse, else Cobalt (the kit
-// has no Amber).
-function applySeed(root = document.documentElement) {
-  if (root.dataset.palette === 'chartreuse') root.dataset.seed = 'chartreuse';
-  else delete root.dataset.seed;
-}
 
 const GROUPS = [['food', 'Food and drink', '🍽️'], ['nights', 'Nights out', '🎵'], ['culture', 'Culture and fun', '🎬'],
   ['outdoors', 'Outdoors', '🏖️'], ['travel', 'Travel', '✈️'], ['life', 'Life', '🩺'], ['other', 'Other', '📌']];
@@ -100,14 +92,10 @@ function itemCard(item) {
 }
 
 export default async function brand(container) {
-  applySeed();
   const doc = await data.doc(RECAP_PATH);
   if (!doc) { container.append(emptyNote('look-recap.md not found.')); return; }
   const r = readRecap(doc);
 
-  const host = el('div', { class: 'brand-recap-host' });
-  const shadow = host.attachShadow({ mode: 'open' });
-  shadow.append(el('link', { rel: 'stylesheet', href: 'm3/kave-m3.css' }), el('link', { rel: 'stylesheet', href: 'css/brand-recap.css' }));
   const page = el('div', { class: 'r-page' },
     el('div', { class: 'r-head' }, el('div', { class: 'm3-headline-m' }, r.title || 'The kave look'),
       r.intro ? el('div', { class: 'm3-body-l r-intro', html: inline(r.intro) }) : null));
@@ -119,6 +107,5 @@ export default async function brand(container) {
   });
   page.append(cols);
   for (const n of r.notes) page.append(el('div', { class: 'r-note m3-body-m' }, el('div', { class: 'm3-title-s' }, n.title), el('div', { html: inline(n.line) })));
-  shadow.append(page);
-  container.append(host);
+  container.append(el('div', { class: 'wide brand-recap' }, page));
 }
