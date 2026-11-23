@@ -82,7 +82,7 @@ async function route() {
   status.limited = false;
   const { key, file } = parseHash(location.hash);
   const page = pageFor(key);
-  const body = el('div', { class: 'site-page' });
+  const body = el('div', { class: 'site-page m3-panel' });
   let failed = false;
   try {
     if (!page) {

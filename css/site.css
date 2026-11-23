@@ -11,10 +11,10 @@ body { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-sur
 .site-rail > .m3-icon-btn { margin: 0 0 var(--md-sys-measurement-space150); }
 .site-rail .m3-rail__item.is-active .m3-rail__pill { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
 .site-rail .m3-rail__item.is-active .m3-icon { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
-.site-main { margin-left: 96px; min-height: 100vh; }
+.site-main { margin-left: 96px; min-height: 100vh; --kave-panel-left: 6px; } /* the rail is outside the panel's margin here: 96 + 6 = the kit's 102 */
 .site-bar { height: 64px; display: flex; align-items: center; justify-content: center; position: sticky; top: 0; z-index: 4; background: var(--md-sys-color-surface); }
 .site-bar h1 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 400; }
-.site-page { padding: var(--md-sys-measurement-space100) var(--kave-layout-margin) var(--md-sys-measurement-space600); }
+.site-page { padding: var(--md-sys-measurement-space200) var(--kave-layout-margin) var(--md-sys-measurement-space600); min-height: calc(100vh - 64px); box-sizing: border-box; } /* the page panel: 16 under the bar, filling the room under it */
 .m3-drawer { width: 320px; }
 .m3-drawer__item .m3-drawer__trail { color: var(--md-sys-color-on-surface-variant); font-size: 18px; }
 .site-drawer-foot { color: var(--md-sys-color-on-surface-variant); padding: var(--md-sys-measurement-space150) var(--md-sys-measurement-space200); margin-top: auto; }
